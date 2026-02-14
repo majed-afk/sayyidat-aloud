@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم — صيدات العود</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/buttons.css">
+<link rel="stylesheet" href="css/forms.css">
+<link rel="stylesheet" href="css/badges.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- MOBILE TOGGLE -->
+<button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">☰</button>
+
+<div class="dashboard-layout">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-brand">
+      <img src="logo.svg" alt="صيدات العود">
+      <span class="sidebar-brand-text">صيدات العود</span>
+    </a>
+
+    <div class="sidebar-user" id="sidebarUser">
+      <div class="sidebar-avatar" id="sidebarAvatar">م</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarName">ماجد الخضير</div>
+        <div class="sidebar-user-role">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-1.25 17.47l-4.82-4.82 1.41-1.41 3.41 3.41 7.2-7.2 1.41 1.42-8.61 8.6z"/></svg>
+          تاجر موثق
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">القائمة الرئيسية</div>
+
+      <button class="nav-item active" data-section="overview" onclick="switchSection('overview')">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        نظرة عامة
+      </button>
+
+      <button class="nav-item" data-section="products" onclick="switchSection('products')">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>
+        المنتجات
+      </button>
+
+      <button class="nav-item" data-section="orders" onclick="switchSection('orders')">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        الطلبات
+        <span class="badge-count" id="newOrdersCount">2</span>
+      </button>
+
+      <button class="nav-item" data-section="finance" onclick="switchSection('finance')">
+        <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+        المالية
+      </button>
+
+      <div class="nav-section-label" style="margin-top: 12px">الإعدادات</div>
+
+      <button class="nav-item" data-section="profile" onclick="switchSection('profile')">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        الملف الشخصي
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="nav-item logout-item" onclick="AUTH.logout()">
+        <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        تسجيل الخروج
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-content">
+    <div class="content-header">
+      <h1 id="pageTitle">نظرة عامة</h1>
+      <div class="header-actions-bar">
+        <a href="index.html" class="btn-back">
+          <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          العودة للموقع
+        </a>
+      </div>
+    </div>
+
+    <div class="content-body">
+
+      <!-- ============================== -->
+      <!-- OVERVIEW SECTION               -->
+      <!-- ============================== -->
+      <div class="section-panel active" id="section-overview">
+        <div class="stats-grid" id="statsGrid">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">المبيعات الشهرية</div>
+          <div class="bar-chart" id="barChart">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">آخر الطلبات</span>
+            <button class="btn btn-outline btn-sm" onclick="switchSection('orders')">عرض الكل</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th>
+                  <th>المنتج</th>
+                  <th>المشتري</th>
+                  <th>المبلغ</th>
+                  <th>الحالة</th>
+                  <th>التاريخ</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersBody">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- PRODUCTS SECTION               -->
+      <!-- ============================== -->
+      <div class="section-panel" id="section-products">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">إدارة المنتجات</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddChooser()">
+              <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              إضافة منتج
+            </button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>المنتج</th>
+                  <th>النوع</th>
+                  <th>التصنيف</th>
+                  <th>المنشأ</th>
+                  <th>السعر</th>
+                  <th>المخزون</th>
+                  <th>الحالة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="productsBody">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- ORDERS SECTION                 -->
+      <!-- ============================== -->
+      <div class="section-panel" id="section-orders">
+        <div class="tabs" id="orderTabs">
+          <button class="tab-btn active" data-tab="all" onclick="filterOrders('all')">الكل <span class="count" id="countAll">0</span></button>
+          <button class="tab-btn" data-tab="new" onclick="filterOrders('new')">جديدة <span class="count" id="countNew">0</span></button>
+          <button class="tab-btn" data-tab="processing" onclick="filterOrders('processing')">قيد المعالجة <span class="count" id="countProcessing">0</span></button>
+          <button class="tab-btn" data-tab="completed" onclick="filterOrders('completed')">مكتملة <span class="count" id="countCompleted">0</span></button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th>
+                  <th>المنتج</th>
+                  <th>المشتري</th>
+                  <th>الكمية</th>
+                  <th>المبلغ</th>
+                  <th>الشحن</th>
+                  <th>الحالة</th>
+                  <th>التاريخ</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- FINANCE SECTION                -->
+      <!-- ============================== -->
+      <div class="section-panel" id="section-finance">
+        <div class="balance-card">
+          <div class="balance-label">الرصيد المتاح</div>
+          <div class="balance-amount" id="balanceAmount">0 <span>ر.س</span></div>
+          <div class="balance-actions">
+            <button class="btn-withdraw" onclick="openWithdrawModal()">طلب سحب</button>
+          </div>
+        </div>
+
+        <div class="finance-stats" id="financeStats">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">سجل المعاملات</span>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>التاريخ</th>
+                  <th>النوع</th>
+                  <th>الوصف</th>
+                  <th>المبلغ</th>
+                  <th>المرجع</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsBody">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- PROFILE SECTION                -->
+      <!-- ============================== -->
+      <div class="section-panel" id="section-profile">
+        <div class="profile-section">
+          <div class="profile-section-title">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            المعلومات الشخصية
+          </div>
+          <div class="profile-avatar-row">
+            <div class="profile-avatar-lg" id="profileAvatar">م</div>
+            <div class="profile-avatar-info">
+              <h3 id="profileFullName">ماجد الخضير</h3>
+              <p>عضو منذ يناير 2026</p>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">الاسم الأول</label>
+              <input type="text" class="form-input" id="profFirstName" value="">
+            </div>
+            <div class="form-group">
+              <label class="form-label">الاسم الأخير</label>
+              <input type="text" class="form-input" id="profLastName" value="">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">البريد الإلكتروني</label>
+              <input type="email" class="form-input" id="profEmail" value="">
+            </div>
+            <div class="form-group">
+              <label class="form-label">رقم الجوال</label>
+              <input type="tel" class="form-input" id="profPhone" value="">
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <div class="profile-section-title">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
+            معلومات المتجر
+          </div>
+          <div class="form-group">
+            <label class="form-label">اسم المتجر</label>
+            <input type="text" class="form-input" id="profStoreName" value="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">وصف المتجر</label>
+            <textarea class="form-textarea" id="profStoreDesc"></textarea>
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <div class="profile-section-title">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+            المعلومات البنكية
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">البنك</label>
+              <select class="form-select" id="profBankName">
+                <option value="">اختر البنك</option>
+                <option value="بنك الراجحي">بنك الراجحي</option>
+                <option value="البنك الأهلي">البنك الأهلي</option>
+                <option value="بنك الرياض">بنك الرياض</option>
+                <option value="بنك الإنماء">بنك الإنماء</option>
+                <option value="البنك السعودي الفرنسي">البنك السعودي الفرنسي</option>
+                <option value="بنك البلاد">بنك البلاد</option>
+                <option value="بنك الجزيرة">بنك الجزيرة</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">اسم المستفيد</label>
+              <input type="text" class="form-input" id="profBankHolder" value="">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الآيبان (IBAN)</label>
+            <input type="text" class="form-input" id="profIban" value="" placeholder="SA0000000000000000000000" style="direction: ltr; text-align: left;">
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <div class="profile-section-title">
+            <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            تغيير كلمة المرور
+          </div>
+          <div class="form-group">
+            <label class="form-label">كلمة المرور الحالية</label>
+            <input type="password" class="form-input" id="profCurrentPass">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">كلمة المرور الجديدة</label>
+              <input type="password" class="form-input" id="profNewPass">
+            </div>
+            <div class="form-group">
+              <label class="form-label">تأكيد كلمة المرور</label>
+              <input type="password" class="form-input" id="profConfirmPass">
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-start;">
+          <button class="btn btn-primary" onclick="saveProfile()">حفظ التغييرات</button>
+          <button class="btn btn-outline" onclick="loadProfile()">إلغاء</button>
+        </div>
+      </div>
+
+    </div><!-- content-body -->
+  </main>
+</div><!-- dashboard-layout -->
+
+<!-- ===== ADD CHOOSER MODAL ===== -->
+<div class="modal-overlay" id="addChooserModal">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-header">
+      <h2>إضافة منتج</h2>
+      <button class="modal-close" onclick="closeAddChooser()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size: 0.88rem; margin-bottom: 20px; opacity: 0.7;">اختر طريقة طرح المنتج:</p>
+      <div class="listing-chooser">
+        <div class="chooser-card" onclick="chooseListingType('market')">
+          <div class="chooser-icon market-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
+          </div>
+          <div class="chooser-title">طرح في السوق</div>
+          <div class="chooser-desc">بيع مباشر بسعر ثابت</div>
+        </div>
+        <div class="chooser-card" onclick="chooseListingType('auction')">
+          <div class="chooser-icon auction-icon">
+            <svg viewBox="0 0 24 24"><path d="M17.65 6.35a7.95 7.95 0 0 0-11.3 0L12 12l5.65-5.65zM12 22c5.52 0 10-4.48 10-10h-4c0 3.31-2.69 6-6 6s-6-2.69-6-6H2c0 5.52 4.48 10 10 10z"/></svg>
+          </div>
+          <div class="chooser-title">مزاد</div>
+          <div class="chooser-desc">مزاد بين المشترين على المنتج</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PRODUCT MODAL ===== -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="productModalTitle">إضافة منتج جديد</h2>
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editProductId" value="">
+      <input type="hidden" id="pmListingType" value="market">
+
+      <!-- AUCTION FIELDS (shown only for auction) -->
+      <div class="auction-fields" id="auctionFields">
+        <div class="auction-fields-title">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35a7.95 7.95 0 0 0-11.3 0L12 12l5.65-5.65zM12 22c5.52 0 10-4.48 10-10h-4c0 3.31-2.69 6-6 6s-6-2.69-6-6H2c0 5.52 4.48 10 10 10z"/></svg>
+          إعدادات المزاد
+        </div>
+
+        <div class="auction-type-toggle">
+          <button type="button" class="auction-type-btn selected" data-atype="timed" onclick="selectAuctionType('timed')">
+            محدد بوقت
+            <small>ينتهي بعد مدة معينة</small>
+          </button>
+          <button type="button" class="auction-type-btn" data-atype="until_sold" onclick="selectAuctionType('until_sold')">
+            منتهي بالبيع
+            <small>يستمر حتى يقبل التاجر عرضاً</small>
+          </button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">السعر الافتتاحي (ر.س)</label>
+            <input type="number" class="form-input" id="pmStartPrice" placeholder="100" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">الحد الأدنى للمزايدة (ر.س)</label>
+            <input type="number" class="form-input" id="pmMinBid" placeholder="10" min="1">
+          </div>
+        </div>
+
+        <div class="form-group" id="auctionDurationGroup">
+          <label class="form-label">مدة المزاد</label>
+          <select class="form-select" id="pmAuctionDuration">
+            <option value="1">يوم واحد</option>
+            <option value="3" selected>3 أيام</option>
+            <option value="5">5 أيام</option>
+            <option value="7">7 أيام</option>
+            <option value="14">14 يوم</option>
+            <option value="30">30 يوم</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">سعر الشراء الفوري (اختياري)</label>
+          <input type="number" class="form-input" id="pmBuyNow" placeholder="السعر الذي يُنهي المزاد فوراً" min="0">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">اسم المنتج</label>
+          <input type="text" class="form-input" id="pmName" placeholder="مثال: عود كمبودي فاخر">
+        </div>
+        <div class="form-group">
+          <label class="form-label">التصنيف</label>
+          <select class="form-select" id="pmCategory">
+            <option value="بخور">بخور</option>
+            <option value="دهن عود">دهن عود</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">النوع</label>
+          <select class="form-select" id="pmType">
+            <option value="طبيعي">طبيعي</option>
+            <option value="محسن">محسن</option>
+            <option value="بيور">بيور</option>
+            <option value="مخلط">مخلط</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">المنشأ</label>
+          <select class="form-select" id="pmOrigin">
+            <option value="كمبودي">كمبودي</option>
+            <option value="هندي">هندي</option>
+            <option value="لاوسي">لاوسي</option>
+            <option value="فيتنامي">فيتنامي</option>
+            <option value="ماليزي">ماليزي</option>
+            <option value="إندونيسي">إندونيسي</option>
+            <option value="بورمي">بورمي</option>
+            <option value="تايلندي">تايلندي</option>
+            <option value="سريلانكي">سريلانكي</option>
+            <option value="بابوازي">بابوازي</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">الوزن</label>
+          <input type="number" class="form-input" id="pmWeight" placeholder="50" step="0.25" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الوحدة</label>
+          <select class="form-select" id="pmUnit">
+            <option value="جرام">جرام</option>
+            <option value="تولة">تولة</option>
+            <option value="أوقية">أوقية</option>
+            <option value="كيلو">كيلو</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" id="priceStockRow">
+        <div class="form-group" id="priceGroup">
+          <label class="form-label" id="priceLabelText">السعر (ر.س)</label>
+          <input type="number" class="form-input" id="pmPrice" placeholder="285" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">المخزون</label>
+          <input type="number" class="form-input" id="pmStock" placeholder="10" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رابط الصورة</label>
+        <input type="url" class="form-input" id="pmImage" placeholder="https://..." style="direction: ltr; text-align: left;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الوصف</label>
+        <textarea class="form-textarea" id="pmDesc" placeholder="وصف مفصل للمنتج..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">حفظ المنتج</button>
+      <button class="btn btn-outline" onclick="closeProductModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WITHDRAW MODAL ===== -->
+<div class="modal-overlay" id="withdrawModal">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-header">
+      <h2>طلب سحب</h2>
+      <button class="modal-close" onclick="closeWithdrawModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">المبلغ (ر.س)</label>
+        <input type="number" class="form-input" id="withdrawAmount" placeholder="0" min="100">
+      </div>
+      <div class="form-group">
+        <label class="form-label">البنك</label>
+        <input type="text" class="form-input" id="withdrawBank" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم الآيبان</label>
+        <input type="text" class="form-input" id="withdrawIban" readonly style="direction: ltr; text-align: left;">
+      </div>
+      <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 8px;">* يتم تحويل المبلغ خلال 1-3 أيام عمل</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="submitWithdraw()">تأكيد السحب</button>
+      <button class="btn btn-outline" onclick="closeWithdrawModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ORDER DETAIL MODAL ===== -->
+<div class="modal-overlay" id="orderDetailModal">
+  <div class="modal" style="max-width: 580px;">
+    <div class="modal-header">
+      <h2 id="orderDetailTitle">تفاصيل الطلب</h2>
+      <button class="modal-close" onclick="closeOrderDetail()">✕</button>
+    </div>
+    <div class="modal-body" id="orderDetailBody">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="auth.js"></script>
+<script>
+// ===== DASHBOARD APP =====
+var currentUser = null;
+var currentOrderFilter = 'all';
+
+// ===== INIT =====
+function initDashboard() {
+  currentUser = AUTH.getCurrentUser();
+  if (!currentUser) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  updateSidebar();
+  renderOverview();
+  renderProducts();
+  renderOrders();
+  renderFinance();
+  loadProfile();
+
+  // Handle hash navigation
+  var hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById('section-' + hash)) {
+    switchSection(hash);
+  }
+}
+
+// ===== SIDEBAR =====
+function updateSidebar() {
+  var initial = currentUser.firstName.charAt(0);
+  document.getElementById('sidebarAvatar').textContent = initial;
+  document.getElementById('sidebarName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+// ===== SECTION SWITCHING =====
+function switchSection(section) {
+  // Update nav
+  document.querySelectorAll('.nav-item[data-section]').forEach(function(item) {
+    item.classList.remove('active');
+    if (item.dataset.section === section) item.classList.add('active');
+  });
+
+  // Update panels
+  document.querySelectorAll('.section-panel').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  var panel = document.getElementById('section-' + section);
+  if (panel) panel.classList.add('active');
+
+  // Update title
+  var titles = {
+    overview: 'نظرة عامة',
+    products: 'المنتجات',
+    orders: 'الطلبات',
+    finance: 'المالية',
+    profile: 'الملف الشخصي'
+  };
+  document.getElementById('pageTitle').textContent = titles[section] || '';
+
+  // Update hash
+  window.location.hash = section === 'overview' ? '' : section;
+
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ===== FORMAT HELPERS =====
+function formatNumber(n) {
+  return Number(n).toLocaleString('ar-SA');
+}
+
+function formatCurrency(n) {
+  return formatNumber(n) + ' ر.س';
+}
+
+function statusLabel(status) {
+  var map = {
+    new: 'جديد',
+    processing: 'قيد المعالجة',
+    completed: 'مكتمل',
+    cancelled: 'ملغي'
+  };
+  return '<span class="status status-' + status + '"><span class="status-dot"></span>' + (map[status] || status) + '</span>';
+}
+
+function typeLabel(type) {
+  var map = {
+    sale: 'بيع',
+    commission: 'عمولة',
+    withdrawal: 'سحب'
+  };
+  return '<span class="status status-' + type + '">' + (map[type] || type) + '</span>';
+}
+
+// ===== OVERVIEW =====
+function renderOverview() {
+  var user = currentUser;
+  var activeProducts = user.products.filter(function(p) { return p.active; }).length;
+
+  var statsHTML =
+    '<div class="stat-card">' +
+      '<div class="stat-icon sales"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg></div>' +
+      '<div class="stat-info"><div class="stat-label">إجمالي المبيعات</div><div class="stat-value">' + formatNumber(user.totalSales) + '</div><div class="stat-change up">↑ 12%</div></div>' +
+    '</div>' +
+    '<div class="stat-card">' +
+      '<div class="stat-icon revenue"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>' +
+      '<div class="stat-info"><div class="stat-label">إجمالي الإيرادات</div><div class="stat-value">' + formatCurrency(user.totalRevenue) + '</div><div class="stat-change up">↑ 8%</div></div>' +
+    '</div>' +
+    '<div class="stat-card">' +
+      '<div class="stat-icon balance"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></div>' +
+      '<div class="stat-info"><div class="stat-label">الرصيد المتاح</div><div class="stat-value">' + formatCurrency(user.balance) + '</div><div class="stat-change up">متاح للسحب</div></div>' +
+    '</div>' +
+    '<div class="stat-card">' +
+      '<div class="stat-icon products"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg></div>' +
+      '<div class="stat-info"><div class="stat-label">المنتجات النشطة</div><div class="stat-value">' + activeProducts + '</div><div class="stat-change up">من ' + user.products.length + ' منتج</div></div>' +
+    '</div>';
+
+  document.getElementById('statsGrid').innerHTML = statsHTML;
+
+  // Chart
+  var maxSales = Math.max.apply(null, user.monthlySales.map(function(m) { return m.amount; }));
+  var chartHTML = '';
+  user.monthlySales.forEach(function(m) {
+    var height = maxSales > 0 ? Math.round((m.amount / maxSales) * 160) : 0;
+    chartHTML +=
+      '<div class="bar-group">' +
+        '<div class="bar" style="height: ' + height + 'px">' +
+          '<span class="bar-value">' + formatNumber(m.amount) + ' ر.س</span>' +
+        '</div>' +
+        '<span class="bar-label">' + m.month + '</span>' +
+      '</div>';
+  });
+  document.getElementById('barChart').innerHTML = chartHTML;
+
+  // Recent orders
+  var recent = user.orders.slice(0, 5);
+  var ordersHTML = '';
+  recent.forEach(function(o) {
+    ordersHTML +=
+      '<tr>' +
+        '<td style="font-weight:600; font-size:0.82rem; direction:ltr; text-align:right;">' + o.id + '</td>' +
+        '<td>' + o.productName + '</td>' +
+        '<td>' + o.buyer + '</td>' +
+        '<td style="font-weight:600;">' + formatCurrency(o.total) + '</td>' +
+        '<td>' + statusLabel(o.status) + '</td>' +
+        '<td style="font-size:0.82rem; opacity:0.7;">' + o.date + '</td>' +
+      '</tr>';
+  });
+  document.getElementById('recentOrdersBody').innerHTML = ordersHTML;
+}
+
+// ===== PRODUCTS =====
+function renderProducts() {
+  var user = currentUser;
+  var html = '';
+
+  if (user.products.length === 0) {
+    document.getElementById('productsBody').innerHTML = '<tr><td colspan="8"><div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 14H9v-2h6v2zm3-4H7v-2h10v2zm0-4H7V6h10v2z"/></svg><h3>لا توجد منتجات</h3><p>أضف منتجك الأول الآن</p></div></td></tr>';
+    return;
+  }
+
+  user.products.forEach(function(p) {
+    var listingHTML = '';
+    var priceHTML = '';
+    if (p.listingType === 'auction') {
+      var auctionTypeLabel = p.auctionType === 'until_sold' ? 'منتهي بالبيع' : 'محدد بوقت';
+      var isLive = p.auctionStatus === 'live';
+      var badgeClass = isLive ? 'badge-auction-live' : 'badge-auction';
+      listingHTML = '<span class="listing-badge ' + badgeClass + '"><svg viewBox="0 0 24 24"><path d="M17.65 6.35a7.95 7.95 0 0 0-11.3 0L12 12l5.65-5.65zM12 22c5.52 0 10-4.48 10-10h-4c0 3.31-2.69 6-6 6s-6-2.69-6-6H2c0 5.52 4.48 10 10 10z"/></svg>' + (isLive ? 'مزاد جارٍ' : 'مزاد') + '</span>' +
+        '<div class="auction-info-sm">' + auctionTypeLabel + '</div>';
+      var currentBid = (p.bids && p.bids.length > 0) ? p.bids[p.bids.length - 1].amount : p.startPrice;
+      priceHTML = '<div style="font-weight:600;">' + formatCurrency(currentBid) + '</div><div class="auction-info-sm">افتتاحي: ' + formatCurrency(p.startPrice) + '</div>';
+      if (p.buyNow) priceHTML += '<div class="auction-info-sm">فوري: ' + formatCurrency(p.buyNow) + '</div>';
+    } else {
+      listingHTML = '<span class="listing-badge badge-market"><svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg> سوق</span>';
+      priceHTML = formatCurrency(p.price);
+    }
+
+    html +=
+      '<tr>' +
+        '<td><div class="product-name-cell"><img class="product-thumb" src="' + p.image + '" alt="' + p.name + '" onerror="this.style.background=\'linear-gradient(135deg,#4A2C1A,#C19A6B)\';this.src=\'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==\'"><span>' + p.name + '</span></div></td>' +
+        '<td>' + listingHTML + '</td>' +
+        '<td>' + p.category + ' / ' + p.type + '</td>' +
+        '<td>' + p.origin + '</td>' +
+        '<td style="font-weight:600;">' + priceHTML + '</td>' +
+        '<td>' + p.stock + '</td>' +
+        '<td>' + (p.active ? '<span class="status status-active"><span class="status-dot"></span>نشط</span>' : '<span class="status status-inactive"><span class="status-dot"></span>متوقف</span>') + '</td>' +
+        '<td><div class="action-btns">' +
+          '<button class="btn btn-sm btn-outline" onclick="editProduct(\'' + p.id + '\')">تعديل</button>' +
+          '<button class="btn btn-sm ' + (p.active ? 'btn-warning' : 'btn-success') + '" onclick="toggleProduct(\'' + p.id + '\')">' + (p.active ? 'إيقاف' : 'تفعيل') + '</button>' +
+          '<button class="btn btn-sm btn-danger" onclick="deleteProduct(\'' + p.id + '\')">حذف</button>' +
+        '</div></td>' +
+      '</tr>';
+  });
+
+  document.getElementById('productsBody').innerHTML = html;
+}
+
+// ===== ADD CHOOSER =====
+function openAddChooser() {
+  document.getElementById('addChooserModal').classList.add('open');
+  // Reset selection
+  document.querySelectorAll('#addChooserModal .chooser-card').forEach(function(c) { c.classList.remove('selected'); });
+}
+
+function closeAddChooser() {
+  document.getElementById('addChooserModal').classList.remove('open');
+}
+
+function chooseListingType(type) {
+  closeAddChooser();
+  openProductModal(null, type);
+}
+
+function selectAuctionType(type) {
+  document.querySelectorAll('.auction-type-btn').forEach(function(btn) {
+    btn.classList.toggle('selected', btn.dataset.atype === type);
+  });
+  // Show/hide duration field
+  var durationGroup = document.getElementById('auctionDurationGroup');
+  if (type === 'until_sold') {
+    durationGroup.style.display = 'none';
+  } else {
+    durationGroup.style.display = 'block';
+  }
+}
+
+function updateFormForListingType(type) {
+  var auctionFields = document.getElementById('auctionFields');
+  var priceGroup = document.getElementById('priceGroup');
+  var priceLabelText = document.getElementById('priceLabelText');
+  var saveBtn = document.getElementById('saveProductBtn');
+
+  if (type === 'auction') {
+    auctionFields.classList.add('visible');
+    priceGroup.style.display = 'none';
+    priceLabelText.textContent = 'السعر (ر.س)';
+    saveBtn.textContent = 'طرح المزاد';
+    document.getElementById('productModalTitle').textContent = document.getElementById('editProductId').value ? 'تعديل المزاد' : 'طرح مزاد جديد';
+  } else {
+    auctionFields.classList.remove('visible');
+    priceGroup.style.display = 'block';
+    priceLabelText.textContent = 'السعر (ر.س)';
+    saveBtn.textContent = 'حفظ المنتج';
+    document.getElementById('productModalTitle').textContent = document.getElementById('editProductId').value ? 'تعديل المنتج' : 'طرح في السوق';
+  }
+}
+
+function openProductModal(editId, listingType) {
+  document.getElementById('editProductId').value = editId || '';
+  var type = listingType || 'market';
+
+  if (editId) {
+    var p = currentUser.products.find(function(pr) { return pr.id === editId; });
+    if (p) {
+      type = p.listingType || 'market';
+      document.getElementById('pmName').value = p.name;
+      document.getElementById('pmCategory').value = p.category;
+      document.getElementById('pmType').value = p.type;
+      document.getElementById('pmOrigin').value = p.origin;
+      document.getElementById('pmWeight').value = p.weight;
+      document.getElementById('pmUnit').value = p.unit;
+      document.getElementById('pmPrice').value = p.price;
+      document.getElementById('pmStock').value = p.stock;
+      document.getElementById('pmImage').value = p.image;
+      document.getElementById('pmDesc').value = p.description;
+
+      // Auction fields
+      if (type === 'auction') {
+        document.getElementById('pmStartPrice').value = p.startPrice || '';
+        document.getElementById('pmMinBid').value = p.minBid || '';
+        document.getElementById('pmAuctionDuration').value = p.auctionDuration || '3';
+        document.getElementById('pmBuyNow').value = p.buyNow || '';
+        selectAuctionType(p.auctionType || 'timed');
+      }
+    }
+  } else {
+    // Clear form
+    ['pmName','pmWeight','pmPrice','pmStock','pmImage','pmDesc','pmStartPrice','pmMinBid','pmBuyNow'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('pmCategory').value = 'بخور';
+    document.getElementById('pmType').value = 'طبيعي';
+    document.getElementById('pmOrigin').value = 'كمبودي';
+    document.getElementById('pmUnit').value = 'جرام';
+    document.getElementById('pmAuctionDuration').value = '3';
+    selectAuctionType('timed');
+  }
+
+  document.getElementById('pmListingType').value = type;
+  updateFormForListingType(type);
+  document.getElementById('productModal').classList.add('open');
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+}
+
+function saveProduct() {
+  var name = document.getElementById('pmName').value.trim();
+  var stock = parseInt(document.getElementById('pmStock').value);
+  var weight = parseFloat(document.getElementById('pmWeight').value);
+  var listingType = document.getElementById('pmListingType').value;
+
+  if (!name) { showToast('الرجاء إدخال اسم المنتج', 'error'); return; }
+  if (isNaN(stock) || stock < 0) { showToast('الرجاء إدخال كمية مخزون صحيحة', 'error'); return; }
+
+  var editId = document.getElementById('editProductId').value;
+  var product = {
+    id: editId || 'p_' + Date.now(),
+    name: name,
+    listingType: listingType,
+    category: document.getElementById('pmCategory').value,
+    type: document.getElementById('pmType').value,
+    origin: document.getElementById('pmOrigin').value,
+    weight: weight || 0,
+    unit: document.getElementById('pmUnit').value,
+    price: 0,
+    stock: stock,
+    active: true,
+    image: document.getElementById('pmImage').value.trim() || 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=400&h=300&fit=crop&q=80',
+    description: document.getElementById('pmDesc').value.trim(),
+    createdAt: new Date().toISOString().split('T')[0]
+  };
+
+  if (listingType === 'auction') {
+    var startPrice = parseFloat(document.getElementById('pmStartPrice').value);
+    var minBid = parseFloat(document.getElementById('pmMinBid').value);
+    if (!startPrice || startPrice <= 0) { showToast('الرجاء إدخال السعر الافتتاحي', 'error'); return; }
+    if (!minBid || minBid <= 0) { showToast('الرجاء إدخال الحد الأدنى للمزايدة', 'error'); return; }
+
+    var selectedAuctionType = document.querySelector('.auction-type-btn.selected');
+    var auctionType = selectedAuctionType ? selectedAuctionType.dataset.atype : 'timed';
+
+    product.startPrice = startPrice;
+    product.minBid = minBid;
+    product.auctionType = auctionType;
+    product.auctionDuration = parseInt(document.getElementById('pmAuctionDuration').value) || 3;
+    product.buyNow = parseFloat(document.getElementById('pmBuyNow').value) || 0;
+    product.price = startPrice;
+    product.auctionStatus = 'live';
+    product.auctionStartDate = new Date().toISOString().split('T')[0];
+
+    // Calculate end date for timed auctions
+    if (auctionType === 'timed') {
+      var endDate = new Date();
+      endDate.setDate(endDate.getDate() + product.auctionDuration);
+      product.auctionEndDate = endDate.toISOString().split('T')[0];
+    } else {
+      product.auctionEndDate = null;
+    }
+
+    // Keep existing bids on edit, initialize empty on new
+    if (editId) {
+      var existing = currentUser.products.find(function(p) { return p.id === editId; });
+      product.bids = (existing && existing.bids) ? existing.bids : [];
+    } else {
+      product.bids = [];
+      // Add mock bids for demo
+      product.bids.push(
+        { bidder: 'عبدالرحمن السالم', amount: startPrice, date: new Date().toISOString() },
+        { bidder: 'فيصل العمري', amount: startPrice + minBid, date: new Date().toISOString() },
+        { bidder: 'سعود الدوسري', amount: startPrice + (minBid * 2), date: new Date().toISOString() }
+      );
+    }
+  } else {
+    var price = parseFloat(document.getElementById('pmPrice').value);
+    if (!price || price <= 0) { showToast('الرجاء إدخال سعر صحيح', 'error'); return; }
+    product.price = price;
+    product.listingType = 'market';
+  }
+
+  if (editId) {
+    var idx = currentUser.products.findIndex(function(p) { return p.id === editId; });
+    if (idx !== -1) {
+      product.createdAt = currentUser.products[idx].createdAt;
+      product.active = currentUser.products[idx].active;
+      if (listingType === 'auction' && currentUser.products[idx].auctionStartDate) {
+        product.auctionStartDate = currentUser.products[idx].auctionStartDate;
+      }
+      currentUser.products[idx] = product;
+    }
+    showToast(listingType === 'auction' ? 'تم تحديث المزاد بنجاح' : 'تم تحديث المنتج بنجاح', 'success');
+  } else {
+    currentUser.products.push(product);
+    showToast(listingType === 'auction' ? 'تم طرح المزاد بنجاح' : 'تم إضافة المنتج بنجاح', 'success');
+  }
+
+  AUTH.updateUser(currentUser);
+  renderProducts();
+  renderOverview();
+  closeProductModal();
+}
+
+function editProduct(id) {
+  var p = currentUser.products.find(function(pr) { return pr.id === id; });
+  openProductModal(id, p ? p.listingType : 'market');
+}
+
+function toggleProduct(id) {
+  var p = currentUser.products.find(function(pr) { return pr.id === id; });
+  if (p) {
+    p.active = !p.active;
+    AUTH.updateUser(currentUser);
+    renderProducts();
+    renderOverview();
+    showToast(p.active ? 'تم تفعيل المنتج' : 'تم إيقاف المنتج', 'success');
+  }
+}
+
+function deleteProduct(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+  currentUser.products = currentUser.products.filter(function(p) { return p.id !== id; });
+  AUTH.updateUser(currentUser);
+  renderProducts();
+  renderOverview();
+  showToast('تم حذف المنتج', 'success');
+}
+
+// ===== ORDERS =====
+function renderOrders() {
+  var user = currentUser;
+  var orders = user.orders;
+
+  // Counts
+  var countNew = orders.filter(function(o) { return o.status === 'new'; }).length;
+  var countProcessing = orders.filter(function(o) { return o.status === 'processing'; }).length;
+  var countCompleted = orders.filter(function(o) { return o.status === 'completed'; }).length;
+
+  document.getElementById('countAll').textContent = orders.length;
+  document.getElementById('countNew').textContent = countNew;
+  document.getElementById('countProcessing').textContent = countProcessing;
+  document.getElementById('countCompleted').textContent = countCompleted;
+  document.getElementById('newOrdersCount').textContent = countNew;
+
+  // Filter
+  var filtered = orders;
+  if (currentOrderFilter !== 'all') {
+    filtered = orders.filter(function(o) { return o.status === currentOrderFilter; });
+  }
+
+  if (filtered.length === 0) {
+    document.getElementById('ordersBody').innerHTML = '<tr><td colspan="9"><div class="empty-state"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><h3>لا توجد طلبات</h3></div></td></tr>';
+    return;
+  }
+
+  var html = '';
+  filtered.forEach(function(o) {
+    var actions = '';
+    if (o.status === 'new') {
+      actions = '<button class="btn btn-sm btn-success" onclick="updateOrderStatus(\'' + o.id + '\',\'processing\')">قبول</button>' +
+                '<button class="btn btn-sm btn-danger" onclick="updateOrderStatus(\'' + o.id + '\',\'cancelled\')">رفض</button>';
+    } else if (o.status === 'processing') {
+      actions = '<button class="btn btn-sm btn-success" onclick="updateOrderStatus(\'' + o.id + '\',\'completed\')">تم الشحن</button>';
+    }
+    actions += '<button class="btn btn-sm btn-outline" onclick="showOrderDetail(\'' + o.id + '\')">تفاصيل</button>';
+
+    html +=
+      '<tr>' +
+        '<td style="font-weight:600; font-size:0.82rem; direction:ltr; text-align:right;">' + o.id + '</td>' +
+        '<td>' + o.productName + '</td>' +
+        '<td>' + o.buyer + '</td>' +
+        '<td>' + o.qty + '</td>' +
+        '<td style="font-weight:600;">' + formatCurrency(o.total) + '</td>' +
+        '<td>' + o.shippingMethod + ' (' + formatCurrency(o.shipping) + ')</td>' +
+        '<td>' + statusLabel(o.status) + '</td>' +
+        '<td style="font-size:0.82rem; opacity:0.7;">' + o.date + '</td>' +
+        '<td><div class="action-btns">' + actions + '</div></td>' +
+      '</tr>';
+  });
+
+  document.getElementById('ordersBody').innerHTML = html;
+}
+
+function filterOrders(tab) {
+  currentOrderFilter = tab;
+  document.querySelectorAll('#orderTabs .tab-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  renderOrders();
+}
+
+function updateOrderStatus(orderId, newStatus) {
+  var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+  if (!order) return;
+
+  order.status = newStatus;
+
+  // If completed, add transaction
+  if (newStatus === 'completed') {
+    var commission = order.total * 0.05;
+    currentUser.transactions.unshift(
+      { id: 't_' + Date.now(), type: 'sale', amount: order.total, date: new Date().toISOString().split('T')[0], ref: order.id, status: 'completed', description: 'بيع: ' + order.productName + ' × ' + order.qty },
+      { id: 't_' + (Date.now() + 1), type: 'commission', amount: -commission, date: new Date().toISOString().split('T')[0], ref: order.id, status: 'completed', description: 'عمولة المنصة 5%' }
+    );
+    currentUser.balance += (order.total - commission);
+    currentUser.totalSales += order.qty;
+    currentUser.totalRevenue += order.total;
+  }
+
+  AUTH.updateUser(currentUser);
+  renderOrders();
+  renderOverview();
+  renderFinance();
+
+  var msgs = { processing: 'تم قبول الطلب', completed: 'تم شحن الطلب', cancelled: 'تم رفض الطلب' };
+  showToast(msgs[newStatus] || 'تم التحديث', 'success');
+}
+
+function showOrderDetail(orderId) {
+  var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+  if (!order) return;
+
+  document.getElementById('orderDetailTitle').textContent = 'تفاصيل الطلب ' + order.id;
+  document.getElementById('orderDetailBody').innerHTML =
+    '<div class="detail-grid">' +
+      '<div class="detail-item"><label>المشتري</label><span>' + order.buyer + '</span></div>' +
+      '<div class="detail-item"><label>الجوال</label><span style="direction:ltr;display:inline-block;">' + order.buyerPhone + '</span></div>' +
+      '<div class="detail-item"><label>المدينة</label><span>' + order.buyerCity + '</span></div>' +
+      '<div class="detail-item"><label>الحي</label><span>' + order.buyerDistrict + '</span></div>' +
+      '<div class="detail-item"><label>العنوان</label><span>' + order.buyerStreet + '</span></div>' +
+      '<div class="detail-item"><label>طريقة الشحن</label><span>' + order.shippingMethod + '</span></div>' +
+      '<div class="detail-item"><label>المنتج</label><span>' + order.productName + '</span></div>' +
+      '<div class="detail-item"><label>الكمية × السعر</label><span>' + order.qty + ' × ' + formatCurrency(order.price) + '</span></div>' +
+      '<div class="detail-item"><label>الإجمالي + الشحن</label><span style="font-weight:700;color:var(--accent-amber);">' + formatCurrency(order.total + order.shipping) + '</span></div>' +
+    '</div>';
+
+  document.getElementById('orderDetailModal').classList.add('open');
+}
+
+function closeOrderDetail() {
+  document.getElementById('orderDetailModal').classList.remove('open');
+}
+
+// ===== FINANCE =====
+function renderFinance() {
+  var user = currentUser;
+
+  document.getElementById('balanceAmount').innerHTML = formatNumber(user.balance) + ' <span>ر.س</span>';
+
+  // Calculate stats
+  var thisMonthSales = user.transactions.filter(function(t) {
+    return t.type === 'sale' && t.date.startsWith('2026-02');
+  }).reduce(function(sum, t) { return sum + t.amount; }, 0);
+
+  var totalCommission = user.transactions.filter(function(t) {
+    return t.type === 'commission';
+  }).reduce(function(sum, t) { return sum + Math.abs(t.amount); }, 0);
+
+  var netProfit = user.totalRevenue - totalCommission;
+
+  document.getElementById('financeStats').innerHTML =
+    '<div class="finance-stat"><div class="finance-stat-value">' + formatCurrency(thisMonthSales) + '</div><div class="finance-stat-label">مبيعات هذا الشهر</div></div>' +
+    '<div class="finance-stat"><div class="finance-stat-value" style="color:#F39C12;">' + formatCurrency(totalCommission) + '</div><div class="finance-stat-label">العمولة المستقطعة (5%)</div></div>' +
+    '<div class="finance-stat"><div class="finance-stat-value" style="color:#27AE60;">' + formatCurrency(netProfit) + '</div><div class="finance-stat-label">صافي الأرباح</div></div>';
+
+  // Transactions table
+  var html = '';
+  user.transactions.forEach(function(t) {
+    var amountClass = t.amount >= 0 ? 'color:#27AE60;' : 'color:#E74C3C;';
+    var amountPrefix = t.amount >= 0 ? '+' : '';
+    html +=
+      '<tr>' +
+        '<td style="font-size:0.82rem; opacity:0.7;">' + t.date + '</td>' +
+        '<td>' + typeLabel(t.type) + '</td>' +
+        '<td>' + t.description + '</td>' +
+        '<td style="font-weight:700;' + amountClass + '">' + amountPrefix + formatCurrency(t.amount) + '</td>' +
+        '<td style="font-size:0.82rem; direction:ltr; text-align:right;">' + t.ref + '</td>' +
+        '<td>' + statusLabel(t.status) + '</td>' +
+      '</tr>';
+  });
+  document.getElementById('transactionsBody').innerHTML = html;
+}
+
+function openWithdrawModal() {
+  document.getElementById('withdrawAmount').value = '';
+  document.getElementById('withdrawBank').value = currentUser.bankName || 'لم يتم تحديد البنك';
+  document.getElementById('withdrawIban').value = currentUser.iban || 'لم يتم تحديد الآيبان';
+  document.getElementById('withdrawModal').classList.add('open');
+}
+
+function closeWithdrawModal() {
+  document.getElementById('withdrawModal').classList.remove('open');
+}
+
+function submitWithdraw() {
+  var amount = parseFloat(document.getElementById('withdrawAmount').value);
+  if (!amount || amount < 100) {
+    showToast('الحد الأدنى للسحب 100 ر.س', 'error');
+    return;
+  }
+  if (amount > currentUser.balance) {
+    showToast('المبلغ أكبر من الرصيد المتاح', 'error');
+    return;
+  }
+  if (!currentUser.iban) {
+    showToast('الرجاء إضافة معلوماتك البنكية أولاً', 'error');
+    return;
+  }
+
+  currentUser.balance -= amount;
+  currentUser.transactions.unshift({
+    id: 't_' + Date.now(),
+    type: 'withdrawal',
+    amount: -amount,
+    date: new Date().toISOString().split('T')[0],
+    ref: 'W-' + Math.floor(Math.random() * 999 + 1).toString().padStart(3, '0'),
+    status: 'completed',
+    description: 'سحب إلى ' + currentUser.bankName
+  });
+
+  AUTH.updateUser(currentUser);
+  renderFinance();
+  renderOverview();
+  closeWithdrawModal();
+  showToast('تم طلب السحب بنجاح - سيتم التحويل خلال 1-3 أيام عمل', 'success');
+}
+
+// ===== PROFILE =====
+function loadProfile() {
+  var user = currentUser;
+  document.getElementById('profileAvatar').textContent = user.firstName.charAt(0);
+  document.getElementById('profileFullName').textContent = user.firstName + ' ' + user.lastName;
+  document.getElementById('profFirstName').value = user.firstName;
+  document.getElementById('profLastName').value = user.lastName;
+  document.getElementById('profEmail').value = user.email;
+  document.getElementById('profPhone').value = user.phone;
+  document.getElementById('profStoreName').value = user.storeName || '';
+  document.getElementById('profStoreDesc').value = user.storeDesc || '';
+  document.getElementById('profBankName').value = user.bankName || '';
+  document.getElementById('profBankHolder').value = user.bankHolder || '';
+  document.getElementById('profIban').value = user.iban || '';
+  document.getElementById('profCurrentPass').value = '';
+  document.getElementById('profNewPass').value = '';
+  document.getElementById('profConfirmPass').value = '';
+}
+
+function saveProfile() {
+  var firstName = document.getElementById('profFirstName').value.trim();
+  var lastName = document.getElementById('profLastName').value.trim();
+  if (!firstName || !lastName) { showToast('الاسم مطلوب', 'error'); return; }
+
+  currentUser.firstName = firstName;
+  currentUser.lastName = lastName;
+  currentUser.email = document.getElementById('profEmail').value.trim();
+  currentUser.phone = document.getElementById('profPhone').value.trim();
+  currentUser.storeName = document.getElementById('profStoreName').value.trim();
+  currentUser.storeDesc = document.getElementById('profStoreDesc').value.trim();
+  currentUser.bankName = document.getElementById('profBankName').value;
+  currentUser.bankHolder = document.getElementById('profBankHolder').value.trim();
+  currentUser.iban = document.getElementById('profIban').value.trim();
+
+  // Password change
+  var currentPass = document.getElementById('profCurrentPass').value;
+  var newPass = document.getElementById('profNewPass').value;
+  var confirmPass = document.getElementById('profConfirmPass').value;
+
+  if (currentPass || newPass || confirmPass) {
+    if (btoa(currentPass) !== currentUser.password) {
+      showToast('كلمة المرور الحالية غير صحيحة', 'error');
+      return;
+    }
+    if (newPass.length < 6) {
+      showToast('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل', 'error');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      showToast('كلمات المرور غير متطابقة', 'error');
+      return;
+    }
+    currentUser.password = btoa(newPass);
+  }
+
+  AUTH.updateUser(currentUser);
+  updateSidebar();
+  loadProfile();
+  showToast('تم حفظ التغييرات بنجاح', 'success');
+}
+
+// ===== TOAST =====
+function showToast(msg, type) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + (type || '') + ' show';
+  setTimeout(function() {
+    toast.className = 'toast';
+  }, 3000);
+}
+
+// ===== INIT =====
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDashboard);
+} else {
+  initDashboard();
+}
+
+// Listen for hash changes
+window.addEventListener('hashchange', function() {
+  var hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById('section-' + hash)) {
+    switchSection(hash);
+  }
+});
+</script>
+</body>
+</html>

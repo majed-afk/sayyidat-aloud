@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>صيدات العود</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/header.css">
+<link rel="stylesheet" href="css/buttons.css">
+<link rel="stylesheet" href="css/footer.css">
+<link rel="stylesheet" href="css/badges.css">
+<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <span class="logo-text">صيدات العود</span>
+    </a>
+
+    <nav class="nav-desktop">
+      <a href="index.html" class="nav-link">الرئيسية</a>
+      <a href="#auctions" class="nav-link">المزادات</a>
+      <a href="market.html" class="nav-link">السوق</a>
+      <a href="#services" class="nav-link">الخدمات</a>
+      <a href="#about" class="nav-link">من نحن</a>
+    </nav>
+
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
+      <a href="sell.html" class="btn btn-filled">ابدأ البيع الآن</a>
+    </div>
+
+    <button class="mobile-toggle" id="mobileToggle" aria-label="القائمة">☰</button>
+  </div>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" class="nav-link">الرئيسية</a>
+    <a href="#auctions" class="nav-link">المزادات</a>
+    <a href="market.html" class="nav-link">السوق</a>
+    <a href="#services" class="nav-link">الخدمات</a>
+    <a href="#about" class="nav-link">من نحن</a>
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
+      <a href="sell.html" class="btn btn-filled">ابدأ البيع الآن</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="container">
+    <h1>البنية التحتية الجديدة لتجارة العود</h1>
+    <p class="hero-sub">منصة متكاملة مصممة خصيصاً لتجار العود والبخور. مزادات احترافية، ضمان مالي، وأدوات تجارية متقدمة في مكان واحد.</p>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-number">3 مليار</div>
+        <div class="stat-label">حجم السوق</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">1%</div>
+        <div class="stat-label">عمولة عادلة</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">ضمان مالي</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features" id="features">
+  <div class="container">
+    <h2 class="section-title">كل ما يحتاجه تاجر العود</h2>
+    <p class="section-subtitle">أدوات احترافية صُممت لتلبية احتياجات سوق العود والبخور</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🏛️</span>
+        <h3>سوق متخصص 100%</h3>
+        <p>سوق مخصص بالكامل للعود والبخور والدهن. جمهور مستهدف ومهتم يبحث عن أجود المنتجات.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔨</span>
+        <h3>نظام مزادات احترافي</h3>
+        <p>مزادات حية بنظام المزايدة التصاعدية مع ضمان الشفافية والعدالة لجميع الأطراف.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🛡️</span>
+        <h3>ضمان مالي Escrow</h3>
+        <p>نظام حماية مالية متكامل. أموالك محفوظة حتى استلام المنتج والتأكد من جودته.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <h3>لوحة تحكم شاملة</h3>
+        <p>تابع مبيعاتك ومزاداتك وتقييماتك من لوحة تحكم واحدة سهلة الاستخدام.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📦</span>
+        <h3>شحن مدمج</h3>
+        <p>تكامل مع شركات الشحن الرئيسية. طباعة بوليصة الشحن مباشرة من لوحة التحكم.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💳</span>
+        <h3>دفع وتقسيط</h3>
+        <p>خيارات دفع متعددة تشمل Apple Pay والدفع الفوري والتقسيط لتسهيل عمليات الشراء.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== AUCTION TYPES ===== -->
+<section class="auctions-section" id="auctions">
+  <div class="container">
+    <h2 class="section-title">أنواع المزادات</h2>
+    <p class="section-subtitle">اختر نوع المزاد المناسب لمنتجك</p>
+
+    <div class="auction-cards">
+      <div class="auction-card">
+        <span class="auction-badge">الأكثر شيوعاً</span>
+        <h3>مزاد منتهي بالبيع</h3>
+        <ul class="auction-features">
+          <li>مزايدة تصاعدية بوقت محدد</li>
+          <li>البيع لأعلى مزايد تلقائياً</li>
+          <li>ضمان مالي Escrow مُفعّل</li>
+          <li>دفع عبر Apple Pay و Mada</li>
+          <li>إشعارات فورية للمزايدين</li>
+          <li>تمديد تلقائي عند المزايدة الأخيرة</li>
+        </ul>
+        <span class="auction-price">1% فقط</span>
+      </div>
+
+      <div class="auction-card">
+        <span class="auction-badge">للقطع النادرة</span>
+        <h3>مزاد مفتوح (عروض)</h3>
+        <ul class="auction-features">
+          <li>استقبال عروض من المشترين</li>
+          <li>حرية قبول أو رفض العروض</li>
+          <li>مفاوضة مباشرة مع المشتري</li>
+          <li>مناسب للقطع عالية القيمة</li>
+          <li>بدون حد زمني للعرض</li>
+        </ul>
+        <span class="auction-price">50-200 ر.س</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DASHBOARD PREVIEW ===== -->
+<section class="dashboard-section" id="services">
+  <div class="container">
+    <h2 class="section-title">لوحة تحكم التاجر</h2>
+    <p class="section-subtitle">إدارة كاملة لتجارتك من مكان واحد</p>
+
+    <div class="dashboard-mockup">
+      <div class="dash-header">
+        <span class="dash-greeting">مرحباً، محمد 👋</span>
+        <a href="sell.html#auction-form" class="dash-add-btn" style="text-decoration:none;">+ إضافة مزاد جديد</a>
+      </div>
+
+      <div class="dash-body">
+        <div class="dash-stats">
+          <div class="dash-stat">
+            <div class="dash-stat-icon">📈</div>
+            <div class="dash-stat-value">47,850</div>
+            <div class="dash-stat-label">إجمالي المبيعات</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-icon">🔨</div>
+            <div class="dash-stat-value">7/10</div>
+            <div class="dash-stat-label">مزادات نشطة</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-icon">⭐</div>
+            <div class="dash-stat-value">4.8</div>
+            <div class="dash-stat-label">التقييم</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-icon">💰</div>
+            <div class="dash-stat-value">12,340</div>
+            <div class="dash-stat-label">رصيد متاح</div>
+          </div>
+        </div>
+
+        <div class="dash-auctions-title">المزادات النشطة</div>
+        <div class="dash-auction-list">
+          <div class="dash-auction-item">
+            <div class="dash-auction-info">
+              <span class="dash-auction-name">عود كمبودي سوبر - 50 جرام</span>
+              <span class="dash-auction-time">متبقي 2 ساعة و 15 دقيقة</span>
+            </div>
+            <div class="dash-auction-meta">
+              <span class="badge badge-green">نشط</span>
+              <span class="dash-bids">23 مزايدة</span>
+            </div>
+          </div>
+
+          <div class="dash-auction-item">
+            <div class="dash-auction-info">
+              <span class="dash-auction-name">دهن عود هندي معتق - 12 مل</span>
+              <span class="dash-auction-time">متبقي 35 دقيقة</span>
+            </div>
+            <div class="dash-auction-meta">
+              <span class="badge badge-orange">ينتهي قريباً</span>
+              <span class="dash-bids">41 مزايدة</span>
+            </div>
+          </div>
+
+          <div class="dash-auction-item">
+            <div class="dash-auction-info">
+              <span class="dash-auction-name">بخور عود ماليزي فاخر - 100 جرام</span>
+              <span class="dash-auction-time">متبقي 1 يوم و 8 ساعات</span>
+            </div>
+            <div class="dash-auction-meta">
+              <span class="badge badge-green">نشط</span>
+              <span class="dash-bids">12 مزايدة</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer" id="about">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>عن المنصة</h4>
+        <p>منصة صيدات العود، الوجهة الرقمية الأولى لتجارة العود في المنطقة. نضمن لك تعاملات محمية بالكامل عبر نظام الضمان المالي، مع بيئة تجارية موثوقة تحفظ حقوق البائع والمشتري في كل صفقة.</p>
+      </div>
+      <div class="footer-col">
+        <h4>روابط سريعة</h4>
+        <ul class="footer-links">
+          <li><a href="#">الرئيسية</a></li>
+          <li><a href="#">المزادات</a></li>
+          <li><a href="market.html">السوق</a></li>
+          <li><a href="#">الأسعار</a></li>
+          <li><a href="#">الأسئلة الشائعة</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>للتجار</h4>
+        <ul class="footer-links">
+          <li><a href="#">ابدأ البيع</a></li>
+          <li><a href="#">دليل التاجر</a></li>
+          <li><a href="#">الاشتراكات</a></li>
+          <li><a href="#">سياسة العمولة</a></li>
+          <li><a href="#">الدعم الفني</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>تواصل معنا</h4>
+        <ul class="footer-links">
+          <li><a href="#">info@sayyidat.com</a></li>
+          <li><a href="#">+966 50 000 0000</a></li>
+          <li><a href="#">تويتر</a></li>
+          <li><a href="#">انستقرام</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-payments">
+      <span class="footer-payments-label">طرق الدفع المعتمدة:</span>
+      <span class="payment-badge"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.72 5.011H8.026c-2.228 0-4.037 1.81-4.037 4.037v5.904c0 2.228 1.81 4.037 4.037 4.037h9.694c2.228 0 4.037-1.81 4.037-4.037V9.048c0-2.228-1.81-4.037-4.037-4.037zm-5.44 10.28c-.683.633-1.572.95-2.462.95-.89 0-1.78-.317-2.462-.95a3.233 3.233 0 010-4.582c.683-.633 1.572-.95 2.462-.95.89 0 1.78.317 2.462.95a3.233 3.233 0 010 4.582zm5.44-.77a2.467 2.467 0 01-2.463 2.463A2.467 2.467 0 0112.794 14.52a2.467 2.467 0 012.463-2.463 2.467 2.467 0 012.463 2.463z"/></svg> Apple Pay</span>
+      <span class="payment-badge"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM4 0h16v2H4zm0 22h16v2H4z"/></svg> Visa</span>
+      <span class="payment-badge"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="12" r="5" opacity=".6"/><circle cx="15" cy="12" r="5" opacity=".6"/></svg> Mastercard</span>
+      <span class="payment-badge"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12z"/><path d="M12 8l-4 8h2.5l.7-1.5h2.6l.7 1.5H17L12 8zm-.5 5l1-2 1 2h-2z"/></svg> Mada</span>
+      <span class="payment-badge"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg> تحويل بنكي</span>
+    </div>
+    <div class="footer-bottom">
+      © 2026 صيدات العود. جميع الحقوق محفوظة.
+    </div>
+  </div>
+</footer>
+
+<script>
+// Mobile menu toggle
+const mobileToggle = document.getElementById('mobileToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+
+mobileToggle.addEventListener('click', () => {
+  mobileMenu.classList.toggle('show');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      mobileMenu.classList.toggle('active');
+    });
+  });
+  mobileToggle.textContent = mobileMenu.classList.contains('show') ? '✕' : '☰';
+});
+
+// Close mobile menu on link click
+mobileMenu.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenu.classList.remove('show', 'active');
+    mobileToggle.textContent = '☰';
+  });
+});
+
+// Intersection Observer for fade-in animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -40px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.feature-card, .auction-card, .stat-box, .dash-stat').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(el);
+});
+</script>
+<script src="auth.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>السوق | صيدات العود</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/header.css">
+<link rel="stylesheet" href="css/buttons.css">
+<link rel="stylesheet" href="css/footer.css">
+<link rel="stylesheet" href="css/badges.css">
+<link rel="stylesheet" href="css/market.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container">
+      <a href="index.html" class="logo"><span class="logo-text">صيدات العود</span></a>
+      <nav class="nav-desktop">
+        <a href="index.html" class="nav-link">الرئيسية</a>
+        <a href="index.html#auctions" class="nav-link">المزادات</a>
+        <a href="market.html" class="nav-link active">السوق</a>
+        <a href="index.html#services" class="nav-link">الخدمات</a>
+        <a href="index.html#about" class="nav-link">من نحن</a>
+      </nav>
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
+        <a href="sell.html" class="btn btn-filled">ابدأ البيع الآن</a>
+      </div>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="القائمة">&#9776;</button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html" class="nav-link">الرئيسية</a>
+      <a href="index.html#auctions" class="nav-link">المزادات</a>
+      <a href="market.html" class="nav-link active">السوق</a>
+      <a href="index.html#services" class="nav-link">الخدمات</a>
+      <a href="index.html#about" class="nav-link">من نحن</a>
+      <div class="header-actions" style="display:flex;">
+        <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
+        <a href="sell.html" class="btn btn-filled">ابدأ البيع الآن</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MARKET HERO -->
+  <section class="market-hero">
+    <div class="container">
+      <h1>سوق العود والبخور</h1>
+      <p class="subtitle">تسوّق أجود أنواع العود والبخور من تجار موثوقين</p>
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن عود، دهن، بخور...">
+        <span class="search-icon">&#128269;</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="container">
+      <div class="filter-row">
+        <span class="filter-label">التصنيف</span>
+        <button class="chip active" data-filter="category" data-value="الكل">الكل</button>
+        <button class="chip" data-filter="category" data-value="بخور">بخور</button>
+        <button class="chip" data-filter="category" data-value="دهن عود">دهن عود</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">المنشأ</span>
+        <button class="chip active" data-filter="origin" data-value="الكل">الكل</button>
+        <button class="chip" data-filter="origin" data-value="كمبودي">كمبودي</button>
+        <button class="chip" data-filter="origin" data-value="هندي">هندي</button>
+        <button class="chip" data-filter="origin" data-value="لاوسي">لاوسي</button>
+        <button class="chip" data-filter="origin" data-value="ماليزي">ماليزي</button>
+        <button class="chip" data-filter="origin" data-value="إندونيسي">إندونيسي</button>
+        <button class="chip" data-filter="origin" data-value="فيتنامي">فيتنامي</button>
+        <button class="chip" data-filter="origin" data-value="بورمي">بورمي</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">التاجر</span>
+        <button class="chip active" data-filter="verified" data-value="الكل">الكل</button>
+        <button class="chip" data-filter="verified" data-value="موثق">✓ تاجر موثق</button>
+      </div>
+      <div class="filter-bottom">
+        <div class="sort-wrapper">
+          <label for="sortSelect">الترتيب</label>
+          <select class="sort-select" id="sortSelect">
+            <option value="newest">الأحدث</option>
+            <option value="price-asc">الأقل سعراً</option>
+            <option value="price-desc">الأعلى سعراً</option>
+          </select>
+        </div>
+        <span class="results-count" id="resultsCount">عرض 12 منتج</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS GRID -->
+  <section class="products-section">
+    <div class="container">
+      <div class="products-grid" id="productsGrid"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>عن المنصة</h4>
+          <p>صيدات العود هي منصة سعودية متخصصة في بيع وشراء العود والبخور والدهن بأعلى معايير الجودة والثقة.</p>
+        </div>
+        <div class="footer-col">
+          <h4>روابط سريعة</h4>
+          <a href="index.html">الرئيسية</a>
+          <a href="market.html">السوق</a>
+          <a href="index.html#auctions">المزادات</a>
+          <a href="index.html#services">الخدمات</a>
+          <a href="index.html#about">من نحن</a>
+        </div>
+        <div class="footer-col">
+          <h4>للتجار</h4>
+          <a href="sell.html">ابدأ البيع</a>
+          <a href="#">إدارة المتجر</a>
+          <a href="#">الأسعار والباقات</a>
+          <a href="#">الشروط والأحكام</a>
+        </div>
+        <div class="footer-col">
+          <h4>تواصل معنا</h4>
+          <a href="mailto:info@saidat-aloud.com">info@saidat-aloud.com</a>
+          <a href="tel:+966500000000">+966 50 000 0000</a>
+          <a href="#">تويتر</a>
+          <a href="#">انستقرام</a>
+        </div>
+      </div>
+      <div class="footer-payments">
+        <span class="payment-badge"> Apple Pay</span>
+        <span class="payment-badge">Visa</span>
+        <span class="payment-badge">Mastercard</span>
+        <span class="payment-badge">مدى</span>
+        <span class="payment-badge">تحويل بنكي</span>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 صيدات العود. جميع الحقوق محفوظة.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== PRODUCT DATA =====
+    const products = [
+      { id: 1, name: 'عود كمبودي بورسات فاخر', category: 'بخور', type: 'طبيعي', origin: 'كمبودي', weight: 50, unit: 'جرام', price: 285, rating: 4.8, seller: 'محمد العتيبي', verified: true, badge: 'مميز', image: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=400&h=300&fit=crop&q=80' },
+      { id: 2, name: 'دهن عود هندي أسامي', category: 'دهن عود', type: 'بيور', origin: 'هندي', weight: 1, unit: 'تولة', price: 650, rating: 4.9, seller: 'عبدالله الشمري', verified: true, badge: 'جديد', image: 'https://images.unsplash.com/photo-1594035910387-fea081d36b4c?w=400&h=300&fit=crop&q=80' },
+      { id: 3, name: 'بخور لاوسي جبلي', category: 'بخور', type: 'طبيعي', origin: 'لاوسي', weight: 30, unit: 'جرام', price: 195, rating: 4.7, seller: 'خالد الدوسري', verified: false, badge: '', image: 'https://images.unsplash.com/photo-1595535373192-fc8935bacd89?w=400&h=300&fit=crop&q=80' },
+      { id: 4, name: 'دهن عود كمبودي ترابي', category: 'دهن عود', type: 'مخلط', origin: 'كمبودي', weight: 0.5, unit: 'تولة', price: 320, rating: 4.6, seller: 'فهد القحطاني', verified: false, badge: '', image: 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?w=400&h=300&fit=crop&q=80' },
+      { id: 5, name: 'عود ماليزي سوبر', category: 'بخور', type: 'محسن', origin: 'ماليزي', weight: 100, unit: 'جرام', price: 150, rating: 4.5, seller: 'سعد المطيري', verified: false, badge: '', image: 'https://images.unsplash.com/photo-1602836831852-ef75b5311391?w=400&h=300&fit=crop&q=80' },
+      { id: 6, name: 'دهن عود فيتنامي خاص', category: 'دهن عود', type: 'بيور', origin: 'فيتنامي', weight: 1, unit: 'تولة', price: 890, rating: 5.0, seller: 'ناصر الحربي', verified: true, badge: 'مميز', image: 'https://images.unsplash.com/photo-1616949755610-8c9c1e378a56?w=400&h=300&fit=crop&q=80' },
+      { id: 7, name: 'بخور إندونيسي كلمنتان', category: 'بخور', type: 'طبيعي', origin: 'إندونيسي', weight: 50, unit: 'جرام', price: 220, rating: 4.4, seller: 'تركي العنزي', verified: false, badge: 'جديد', image: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&h=300&fit=crop&q=80' },
+      { id: 8, name: 'دهن عود بورمي ملكي', category: 'دهن عود', type: 'بيور', origin: 'بورمي', weight: 0.25, unit: 'تولة', price: 1200, rating: 4.9, seller: 'عمر السبيعي', verified: true, badge: 'مميز', image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=300&fit=crop&q=80' },
+      { id: 9, name: 'عود تايلندي ترات', category: 'بخور', type: 'محسن', origin: 'تايلندي', weight: 75, unit: 'جرام', price: 175, rating: 4.3, seller: 'بندر الزهراني', verified: false, badge: '', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80' },
+      { id: 10, name: 'دهن عود لاوسي مميز', category: 'دهن عود', type: 'مخلط', origin: 'لاوسي', weight: 1, unit: 'تولة', price: 480, rating: 4.7, seller: 'ماجد الغامدي', verified: true, badge: '', image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=300&fit=crop&q=80' },
+      { id: 11, name: 'بخور سريلانكي سيلاني', category: 'بخور', type: 'طبيعي', origin: 'سريلانكي', weight: 25, unit: 'جرام', price: 340, rating: 4.8, seller: 'يزيد الراشد', verified: true, badge: 'جديد', image: 'https://images.unsplash.com/photo-1603204077167-2fa0397ffc8a?w=400&h=300&fit=crop&q=80' },
+      { id: 12, name: 'دهن عود هندي كلاكاسي', category: 'دهن عود', type: 'بيور', origin: 'هندي', weight: 0.25, unit: 'تولة', price: 2100, rating: 5.0, seller: 'سلطان العمري', verified: true, badge: 'مميز', image: 'https://images.unsplash.com/photo-1617500603321-a3ee9e934eee?w=400&h=300&fit=crop&q=80' }
+    ];
+
+    // ===== STATE =====
+    let activeCategory = 'الكل';
+    let activeOrigin = 'الكل';
+    let activeVerified = 'الكل';
+    let searchQuery = '';
+    let sortOrder = 'newest';
+
+    // ===== DOM REFS =====
+    const productsGrid = document.getElementById('productsGrid');
+    const resultsCount = document.getElementById('resultsCount');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    // ===== MOBILE MENU =====
+    let menuOpen = false;
+    mobileToggle.addEventListener('click', function() {
+      menuOpen = !menuOpen;
+      mobileMenu.classList.toggle('open', menuOpen);
+      mobileToggle.innerHTML = menuOpen ? '&#10005;' : '&#9776;';
+    });
+
+    // ===== FILTER CHIPS =====
+    document.querySelectorAll('.chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var filterType = this.dataset.filter;
+        var value = this.dataset.value;
+
+        // Update active state for this filter group
+        document.querySelectorAll('.chip[data-filter="' + filterType + '"]').forEach(function(c) {
+          c.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        if (filterType === 'category') {
+          activeCategory = value;
+        } else if (filterType === 'origin') {
+          activeOrigin = value;
+        } else if (filterType === 'verified') {
+          activeVerified = value;
+        }
+
+        renderProducts();
+      });
+    });
+
+    // ===== SEARCH =====
+    searchInput.addEventListener('input', function() {
+      searchQuery = this.value.trim();
+      renderProducts();
+    });
+
+    // ===== SORT =====
+    sortSelect.addEventListener('change', function() {
+      sortOrder = this.value;
+      renderProducts();
+    });
+
+    // ===== VERIFIED SVG =====
+    var verifiedSVG = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>';
+
+    // ===== RENDER =====
+    function renderProducts() {
+      var filtered = products.filter(function(p) {
+        var matchCategory = activeCategory === 'الكل' || p.category === activeCategory;
+        var matchOrigin = activeOrigin === 'الكل' || p.origin === activeOrigin;
+        var matchVerified = activeVerified === 'الكل' || (activeVerified === 'موثق' && p.verified);
+        var matchSearch = true;
+        if (searchQuery) {
+          var q = searchQuery.toLowerCase();
+          matchSearch = p.name.toLowerCase().includes(q) ||
+                        p.origin.toLowerCase().includes(q) ||
+                        p.type.toLowerCase().includes(q) ||
+                        p.category.toLowerCase().includes(q) ||
+                        p.seller.toLowerCase().includes(q);
+        }
+        return matchCategory && matchOrigin && matchVerified && matchSearch;
+      });
+
+      // Sort
+      if (sortOrder === 'price-asc') {
+        filtered.sort(function(a, b) { return a.price - b.price; });
+      } else if (sortOrder === 'price-desc') {
+        filtered.sort(function(a, b) { return b.price - a.price; });
+      } else {
+        filtered.sort(function(a, b) { return b.id - a.id; });
+      }
+
+      // Update results count
+      resultsCount.textContent = 'عرض ' + filtered.length + ' منتج';
+
+      // Render
+      if (filtered.length === 0) {
+        productsGrid.innerHTML = '<div class="empty-state"><span class="empty-icon">\uD83D\uDD0D</span><h3>لا توجد نتائج مطابقة</h3><p>جرّب تغيير معايير البحث أو الفلاتر</p></div>';
+        return;
+      }
+
+      var html = '';
+      filtered.forEach(function(p) {
+        var badgeHTML = '';
+        if (p.badge === 'جديد') {
+          badgeHTML = '<span class="badge badge-new">جديد</span>';
+        } else if (p.badge === 'مميز') {
+          badgeHTML = '<span class="badge badge-featured">مميز</span>';
+        }
+        if (p.verified && !badgeHTML) {
+          badgeHTML = '<span class="badge badge-verified">' + verifiedSVG + ' موثق</span>';
+        }
+
+        var stars = '';
+        var fullStars = Math.floor(p.rating);
+        for (var i = 0; i < fullStars; i++) {
+          stars += '\u2605';
+        }
+        if (p.rating % 1 !== 0) {
+          stars += '\u2606';
+        }
+
+        var verifiedHTML = '';
+        if (p.verified) {
+          verifiedHTML = '<span class="verified-icon"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-1.25 17.47l-4.82-4.82 1.41-1.41 3.41 3.41 7.2-7.2 1.41 1.42-8.61 8.6z"/></svg></span>';
+        }
+
+        html += '<a href="product.html?id=' + p.id + '" class="product-card" data-id="' + p.id + '">' +
+          '<div class="card-image">' +
+            '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.style.background=\'linear-gradient(135deg,#4A2C1A,#C19A6B)\'">' +
+            '<span class="badge badge-category">' + p.category + '</span>' +
+            badgeHTML +
+          '</div>' +
+          '<div class="card-body">' +
+            '<div class="card-name">' + p.name + '</div>' +
+            '<div class="card-meta">' +
+              '<span>' + p.origin + '</span>' +
+              '<span class="separator">&middot;</span>' +
+              '<span>' + p.type + '</span>' +
+            '</div>' +
+            '<div class="card-weight">' + p.weight + ' ' + p.unit + '</div>' +
+            '<div class="card-price">' + p.price.toLocaleString('ar-SA') + ' ر.س</div>' +
+            '<div class="card-seller">' +
+              '<span class="star">' + stars + '</span>' +
+              '<span>' + p.rating + '</span>' +
+              '<span class="separator">&middot;</span>' +
+              '<span>' + p.seller + '</span>' +
+              verifiedHTML +
+            '</div>' +
+            '<button class="card-btn">اشترِ الآن</button>' +
+          '</div>' +
+        '</a>';
+      });
+
+      productsGrid.innerHTML = html;
+
+      // Animate cards with IntersectionObserver
+      observeCards();
+    }
+
+    // ===== INTERSECTION OBSERVER =====
+    function observeCards() {
+      var cards = document.querySelectorAll('.product-card');
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry, index) {
+            if (entry.isIntersecting) {
+              // Stagger the animation
+              var card = entry.target;
+              var cardIndex = Array.from(cards).indexOf(card);
+              setTimeout(function() {
+                card.classList.add('visible');
+              }, cardIndex * 60);
+              observer.unobserve(card);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        cards.forEach(function(card) {
+          observer.observe(card);
+        });
+      } else {
+        // Fallback: show all cards immediately
+        cards.forEach(function(card) {
+          card.classList.add('visible');
+        });
+      }
+    }
+
+    // ===== INITIAL RENDER =====
+    renderProducts();
+  </script>
+
+<script src="auth.js"></script>
+</body>
+</html>

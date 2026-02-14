@@ -1,0 +1,28 @@
+/* ===== Layout Utilities ===== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== Section Titles (shared across pages) ===== */
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: var(--text-medium);
+  font-weight: 300;
+  margin-bottom: 48px;
+  font-size: 1.05rem;
+}
+
+/* ===== Divider ===== */
+.divider {
+  height: 1px;
+  background: var(--border-taupe);
+  margin: 20px 0;
+}

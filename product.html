@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شراء المنتج | صيدات العود</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/header.css">
+<link rel="stylesheet" href="css/buttons.css">
+<link rel="stylesheet" href="css/footer.css">
+<link rel="stylesheet" href="css/forms.css">
+<link rel="stylesheet" href="css/product.css">
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="container">
+    <a href="index.html" class="logo"><span class="logo-text">صيدات العود</span></a>
+    <nav class="nav-desktop">
+      <a href="index.html" class="nav-link">الرئيسية</a>
+      <a href="index.html#auctions" class="nav-link">المزادات</a>
+      <a href="market.html" class="nav-link">السوق</a>
+      <a href="index.html#services" class="nav-link">الخدمات</a>
+      <a href="index.html#about" class="nav-link">من نحن</a>
+    </nav>
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
+      <a href="sell.html" class="btn btn-filled">ابدأ البيع الآن</a>
+    </div>
+    <button class="mobile-toggle" id="mobileToggle">&#9776;</button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" class="nav-link">الرئيسية</a>
+    <a href="index.html#auctions" class="nav-link">المزادات</a>
+    <a href="market.html" class="nav-link">السوق</a>
+    <a href="index.html#services" class="nav-link">الخدمات</a>
+    <a href="index.html#about" class="nav-link">من نحن</a>
+    <div class="header-actions">
+      <a href="login.html" class="btn btn-outline">تسجيل الدخول</a>
+      <a href="sell.html" class="btn btn-filled">ابدأ البيع الآن</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== PROGRESS STEPPER ===== -->
+<section class="stepper-section">
+  <div class="container">
+    <div class="stepper">
+      <div class="step-item active" data-step="1">
+        <div class="step-circle">&#1633;</div>
+        <span class="step-label">المنتج</span>
+      </div>
+      <div class="step-connector" data-connector="1"></div>
+      <div class="step-item" data-step="2">
+        <div class="step-circle">&#1634;</div>
+        <span class="step-label">العنوان</span>
+      </div>
+      <div class="step-connector" data-connector="2"></div>
+      <div class="step-item" data-step="3">
+        <div class="step-circle">&#1635;</div>
+        <span class="step-label">الشروط</span>
+      </div>
+      <div class="step-connector" data-connector="3"></div>
+      <div class="step-item" data-step="4">
+        <div class="step-circle">&#1636;</div>
+        <span class="step-label">الدفع</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="product-page">
+  <div class="container">
+
+    <!-- STEP 1: Product Details -->
+    <div class="step-content active" id="step1">
+      <div class="product-layout">
+        <div class="product-image-wrapper">
+          <span class="product-category-badge" id="productBadge"></span>
+          <img id="productImage" src="" alt="صورة المنتج">
+        </div>
+        <div class="product-details-card">
+          <h1 class="product-name" id="productName"></h1>
+          <div class="product-meta">
+            <span class="meta-tag">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span id="metaType"></span>
+            </span>
+            <span class="meta-tag">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <span id="metaOrigin"></span>
+            </span>
+            <span class="meta-tag">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+              <span id="metaWeight"></span>
+            </span>
+          </div>
+
+          <div class="product-rating" id="ratingSection">
+            <span class="stars" id="productStars"></span>
+            <span class="rating-number" id="productRating"></span>
+          </div>
+
+          <div class="product-price">
+            <span id="productPrice"></span>
+            <span class="currency">ر.س</span>
+          </div>
+          <div class="product-vat-note">السعر شامل ضريبة القيمة المضافة</div>
+
+          <div class="divider"></div>
+
+          <div class="seller-info">
+            <div class="seller-avatar" id="sellerAvatar"></div>
+            <div class="seller-details">
+              <div class="seller-name">
+                <span id="sellerName"></span>
+                <span class="verified-badge" id="verifiedBadge" style="display:none;">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                </span>
+              </div>
+              <div class="seller-label">البائع</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <p class="product-description" id="productDescription"></p>
+
+          <div class="quantity-section">
+            <div class="quantity-label">الكمية</div>
+            <div class="quantity-control">
+              <button class="qty-btn" id="qtyMinus">-</button>
+              <div class="qty-value" id="qtyValue">1</div>
+              <button class="qty-btn" id="qtyPlus">+</button>
+            </div>
+          </div>
+
+          <div class="step-actions" style="justify-content: flex-end;">
+            <button class="btn-next" onclick="goToStep(2)">
+              التالي
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Address & Shipping -->
+    <div class="step-content" id="step2">
+      <div class="form-card">
+        <h2>العنوان والشحن</h2>
+        <p class="form-subtitle">أدخل بيانات التوصيل لإتمام الطلب</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label><span class="required">*</span> الاسم الكامل</label>
+            <input type="text" class="form-input" id="fullName" placeholder="مثال: محمد أحمد العتيبي">
+            <span class="error-msg" id="fullNameError">يرجى إدخال الاسم الكامل</span>
+          </div>
+          <div class="form-group">
+            <label><span class="required">*</span> رقم الجوال</label>
+            <input type="tel" class="form-input" id="phone" placeholder="+966 5X XXX XXXX" dir="ltr" style="text-align:left;">
+            <span class="error-msg" id="phoneError">يرجى إدخال رقم جوال صحيح</span>
+          </div>
+          <div class="form-group">
+            <label><span class="required">*</span> المدينة</label>
+            <select class="form-select" id="city">
+              <option value="">اختر المدينة</option>
+              <option value="الرياض">الرياض</option>
+              <option value="جدة">جدة</option>
+              <option value="الدمام">الدمام</option>
+              <option value="مكة">مكة</option>
+              <option value="المدينة">المدينة</option>
+              <option value="أبها">أبها</option>
+              <option value="تبوك">تبوك</option>
+              <option value="حائل">حائل</option>
+              <option value="بريدة">بريدة</option>
+              <option value="الطائف">الطائف</option>
+              <option value="نجران">نجران</option>
+              <option value="جازان">جازان</option>
+              <option value="ينبع">ينبع</option>
+              <option value="الخبر">الخبر</option>
+              <option value="الظهران">الظهران</option>
+            </select>
+            <span class="error-msg" id="cityError">يرجى اختيار المدينة</span>
+          </div>
+          <div class="form-group">
+            <label><span class="required">*</span> الحي</label>
+            <input type="text" class="form-input" id="district" placeholder="مثال: حي النزهة">
+            <span class="error-msg" id="districtError">يرجى إدخال اسم الحي</span>
+          </div>
+          <div class="form-group full-width">
+            <label><span class="required">*</span> عنوان الشارع</label>
+            <input type="text" class="form-input" id="street" placeholder="مثال: شارع الملك فهد، مبنى 15، شقة 3">
+            <span class="error-msg" id="streetError">يرجى إدخال عنوان الشارع</span>
+          </div>
+        </div>
+
+        <div class="shipping-section">
+          <h3>
+            <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+            طريقة الشحن
+          </h3>
+          <div class="shipping-options">
+            <label class="shipping-option selected" onclick="selectShipping(this, 25)">
+              <input type="radio" name="shipping" value="25" checked>
+              <div class="radio-custom"></div>
+              <div class="shipping-info">
+                <div class="shipping-name">شحن عادي</div>
+                <div class="shipping-time">5-7 أيام عمل</div>
+              </div>
+              <div class="shipping-price">25 ر.س</div>
+            </label>
+            <label class="shipping-option" onclick="selectShipping(this, 45)">
+              <input type="radio" name="shipping" value="45">
+              <div class="radio-custom"></div>
+              <div class="shipping-info">
+                <div class="shipping-name">شحن سريع</div>
+                <div class="shipping-time">2-3 أيام عمل</div>
+              </div>
+              <div class="shipping-price">45 ر.س</div>
+            </label>
+            <label class="shipping-option" onclick="selectShipping(this, 75)">
+              <input type="radio" name="shipping" value="75">
+              <div class="radio-custom"></div>
+              <div class="shipping-info">
+                <div class="shipping-name">شحن يوم واحد</div>
+                <div class="shipping-time">خلال 24 ساعة</div>
+              </div>
+              <div class="shipping-price">75 ر.س</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-prev" onclick="goToStep(1)">
+            <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+            السابق
+          </button>
+          <button class="btn-next" onclick="validateStep2()">
+            التالي
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Terms & Conditions -->
+    <div class="step-content" id="step3">
+      <div class="form-card">
+        <h2>الشروط والأحكام</h2>
+        <p class="form-subtitle">يرجى قراءة الشروط والأحكام قبل المتابعة</p>
+
+        <div class="terms-box">
+          <h3>
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            شروط وأحكام منصة صيدات العود
+          </h3>
+          <ul class="terms-list">
+            <li>سياسة الإرجاع: يحق للمشتري إرجاع المنتج خلال 3 أيام من الاستلام بشرط عدم فتح المنتج</li>
+            <li>المنتجات المعروضة من تجار مستقلين وصيدات العود وسيط بين البائع والمشتري</li>
+            <li>الأسعار شاملة ضريبة القيمة المضافة 15%</li>
+            <li>يتم تأكيد الطلب بعد إتمام عملية الدفع</li>
+            <li>المنصة غير مسؤولة عن تأخر الشحن الناتج عن شركة الشحن</li>
+            <li>جميع المعاملات المالية مشفرة ومحمية</li>
+          </ul>
+        </div>
+
+        <label class="terms-checkbox" id="termsCheckbox" onclick="toggleTerms()">
+          <input type="checkbox" id="termsCheck">
+          <div class="check-custom">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+          </div>
+          <span class="terms-checkbox-label">أوافق على الشروط والأحكام</span>
+        </label>
+
+        <div class="step-actions">
+          <button class="btn-prev" onclick="goToStep(2)">
+            <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+            السابق
+          </button>
+          <button class="btn-next" id="termsNextBtn" disabled onclick="goToStep(4)">
+            التالي
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Payment -->
+    <div class="step-content" id="step4">
+      <div class="payment-layout">
+        <div class="payment-methods-card">
+          <h3>اختر طريقة الدفع</h3>
+
+          <label class="payment-option selected" onclick="selectPayment('card', this)">
+            <input type="radio" name="payment" value="card" checked>
+            <div class="radio-custom"></div>
+            <div class="payment-icon card">
+              <svg viewBox="0 0 24 24" fill="#fff" width="20" height="20"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+            </div>
+            <div class="payment-info">
+              <div class="payment-name">بطاقة ائتمانية</div>
+              <div class="payment-desc">Visa / Mastercard / مدى</div>
+            </div>
+          </label>
+
+          <label class="payment-option" onclick="selectPayment('apple', this)">
+            <input type="radio" name="payment" value="apple">
+            <div class="radio-custom"></div>
+            <div class="payment-icon apple">
+              <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            </div>
+            <div class="payment-info">
+              <div class="payment-name">Apple Pay</div>
+              <div class="payment-desc">ادفع بسهولة عبر Apple Pay</div>
+            </div>
+          </label>
+
+          <label class="payment-option" onclick="selectPayment('bank', this)">
+            <input type="radio" name="payment" value="bank">
+            <div class="radio-custom"></div>
+            <div class="payment-icon bank">
+              <svg viewBox="0 0 24 24" fill="#fff" width="20" height="20"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/></svg>
+            </div>
+            <div class="payment-info">
+              <div class="payment-name">حوالة بنكية</div>
+              <div class="payment-desc">تحويل مباشر لحساب المنصة</div>
+            </div>
+          </label>
+
+          <label class="payment-option" onclick="selectPayment('tabby', this)">
+            <input type="radio" name="payment" value="tabby">
+            <div class="radio-custom"></div>
+            <div class="payment-icon tabby">
+              <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-2 0H3V6h14v8zm4-10v14c0 1.1-.9 2-2 2H5v-2h14V4h2z"/></svg>
+            </div>
+            <div class="payment-info">
+              <div class="payment-name">تابي</div>
+              <div class="payment-desc">قسّط بدون فوائد على 4 دفعات</div>
+            </div>
+          </label>
+
+          <label class="payment-option" onclick="selectPayment('tamara', this)">
+            <input type="radio" name="payment" value="tamara">
+            <div class="radio-custom"></div>
+            <div class="payment-icon tamara">
+              <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+            </div>
+            <div class="payment-info">
+              <div class="payment-name">تمارا</div>
+              <div class="payment-desc">اشترِ الآن وادفع لاحقاً</div>
+            </div>
+          </label>
+
+          <!-- Card Payment Panel -->
+          <div class="payment-detail-panel active" id="panelCard">
+            <div class="card-fields">
+              <div class="form-group">
+                <label>رقم البطاقة</label>
+                <input type="text" class="form-input" id="cardNumber" placeholder="0000 0000 0000 0000" dir="ltr" style="text-align:left; letter-spacing: 2px;" maxlength="19">
+              </div>
+              <div class="form-group">
+                <label>تاريخ الانتهاء</label>
+                <input type="text" class="form-input" id="cardExpiry" placeholder="MM/YY" dir="ltr" style="text-align:left;" maxlength="5">
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input type="text" class="form-input" id="cardCVV" placeholder="000" dir="ltr" style="text-align:left;" maxlength="4">
+              </div>
+              <div class="form-group">
+                <label>اسم حامل البطاقة</label>
+                <input type="text" class="form-input" id="cardName" placeholder="الاسم كما يظهر على البطاقة">
+              </div>
+            </div>
+          </div>
+
+          <!-- Apple Pay Panel -->
+          <div class="payment-detail-panel" id="panelApple">
+            <button class="apple-pay-btn" type="button" onclick="confirmOrder()">
+              <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              ادفع عبر Apple Pay
+            </button>
+          </div>
+
+          <!-- Bank Transfer Panel -->
+          <div class="payment-detail-panel" id="panelBank">
+            <div class="bank-details">
+              <div class="bank-detail-row">
+                <span class="bd-label">البنك</span>
+                <span class="bd-value">بنك الراجحي</span>
+              </div>
+              <div class="bank-detail-row">
+                <span class="bd-label">IBAN</span>
+                <span class="bd-value">SA0000000000000000000000</span>
+              </div>
+              <div class="bank-detail-row">
+                <span class="bd-label">اسم المستفيد</span>
+                <span class="bd-value">صيدات العود</span>
+              </div>
+            </div>
+            <div class="upload-area" onclick="document.getElementById('receiptUpload').click()">
+              <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+              <p>اضغط لرفع إيصال التحويل</p>
+              <span class="upload-hint">PNG, JPG, PDF (حد أقصى 5MB)</span>
+              <input type="file" id="receiptUpload" accept="image/*,.pdf">
+            </div>
+            <p id="uploadFileName" style="text-align:center; font-size:0.82rem; color:var(--green); margin-top:8px; font-weight:600;"></p>
+          </div>
+
+          <!-- Tabby Panel -->
+          <div class="payment-detail-panel" id="panelTabby">
+            <div class="installment-info">
+              <div class="installment-title">قسّم المبلغ على 4 دفعات بدون فوائد</div>
+              <div class="installment-breakdown" id="tabbyBreakdown"></div>
+            </div>
+          </div>
+
+          <!-- Tamara Panel -->
+          <div class="payment-detail-panel" id="panelTamara">
+            <div class="tamara-options">
+              <div class="tamara-option">
+                <div class="tamara-title">ادفع خلال 30 يوم</div>
+                <div class="tamara-desc">استلم طلبك الآن وادفع المبلغ كاملاً خلال 30 يوم</div>
+                <div class="tamara-amount" id="tamara30Day"></div>
+              </div>
+              <div class="tamara-option">
+                <div class="tamara-title">قسّط على 3 دفعات</div>
+                <div class="tamara-desc">ادفع على 3 أقساط شهرية متساوية بدون فوائد</div>
+                <div class="tamara-amount" id="tamara3Inst"></div>
+                <div class="installment-breakdown" id="tamaraBreakdown"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn-prev" onclick="goToStep(3)">
+              <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+              السابق
+            </button>
+            <button class="btn-confirm" onclick="confirmOrder()">
+              <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+              تأكيد الطلب
+            </button>
+          </div>
+        </div>
+
+        <div class="order-summary">
+          <h3>
+            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            ملخص الطلب
+          </h3>
+          <div class="summary-row product-row">
+            <span class="label" id="summaryProductName"></span>
+            <span class="value" id="summaryProductQty"></span>
+          </div>
+          <div class="summary-row">
+            <span class="label">المجموع الفرعي</span>
+            <span class="value" id="summarySubtotal"></span>
+          </div>
+          <div class="summary-row">
+            <span class="label">الشحن</span>
+            <span class="value" id="summaryShipping"></span>
+          </div>
+          <div class="summary-row">
+            <span class="label">ضريبة القيمة المضافة (15%)</span>
+            <span class="value" id="summaryVAT"></span>
+          </div>
+          <div class="summary-row total">
+            <span class="label">الإجمالي</span>
+            <span class="value" id="summaryTotal"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ===== SUCCESS MODAL ===== -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+    </div>
+    <h2>تم تأكيد طلبك بنجاح!</h2>
+    <p>شكراً لك على ثقتك بمنصة صيدات العود. سيتم إرسال تفاصيل الطلب إلى جوالك.</p>
+    <div class="order-number" id="orderNumber"></div>
+    <p style="font-size: 0.82rem; color: var(--accent-amber-light);">رقم الطلب - احتفظ به للمتابعة</p>
+    <a href="market.html" class="btn btn-filled" style="margin-top: 20px; display: inline-flex;">
+      تصفح المزيد من المنتجات
+    </a>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>عن المنصة</h4>
+        <p>صيدات العود هي منصة سعودية متخصصة في بيع وشراء العود والبخور والدهن بأعلى معايير الجودة والثقة.</p>
+      </div>
+      <div class="footer-col">
+        <h4>روابط سريعة</h4>
+        <a href="index.html">الرئيسية</a>
+        <a href="market.html">السوق</a>
+        <a href="index.html#auctions">المزادات</a>
+        <a href="index.html#services">الخدمات</a>
+        <a href="index.html#about">من نحن</a>
+      </div>
+      <div class="footer-col">
+        <h4>للتجار</h4>
+        <a href="sell.html">ابدأ البيع</a>
+        <a href="#">إدارة المتجر</a>
+        <a href="#">الأسعار والباقات</a>
+        <a href="#">الشروط والأحكام</a>
+      </div>
+      <div class="footer-col">
+        <h4>تواصل معنا</h4>
+        <a href="mailto:info@saidat-aloud.com">info@saidat-aloud.com</a>
+        <a href="tel:+966500000000">+966 50 000 0000</a>
+        <a href="#">تويتر</a>
+        <a href="#">انستقرام</a>
+      </div>
+    </div>
+    <div class="footer-payments">
+      <span class="payment-badge"> Apple Pay</span>
+      <span class="payment-badge">Visa</span>
+      <span class="payment-badge">Mastercard</span>
+      <span class="payment-badge">مدى</span>
+      <span class="payment-badge">تحويل بنكي</span>
+      <span class="payment-badge">تابي</span>
+      <span class="payment-badge">تمارا</span>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 صيدات العود. جميع الحقوق محفوظة.
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== PRODUCT DATA =====
+const products = [
+  { id: 1, name: 'عود كمبودي بورسات فاخر', category: 'بخور', type: 'طبيعي', origin: 'كمبودي', weight: 50, unit: 'جرام', price: 285, rating: 4.8, seller: 'محمد العتيبي', verified: true, image: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=600&h=500&fit=crop&q=80', description: 'عود كمبودي فاخر من غابات بورسات المعروفة برائحتها الدافئة والحلوة. قطع مختارة بعناية من أجود أشجار العود الكمبودي.' },
+  { id: 2, name: 'دهن عود هندي أسامي', category: 'دهن عود', type: 'بيور', origin: 'هندي', weight: 1, unit: 'تولة', price: 650, rating: 4.9, seller: 'عبدالله الشمري', verified: true, image: 'https://images.unsplash.com/photo-1594035910387-fea081d36b4c?w=600&h=500&fit=crop&q=80', description: 'دهن عود هندي أسامي بيور من ولاية آسام. رائحة عميقة ومعتقة، مناسب للمناسبات الخاصة.' },
+  { id: 3, name: 'بخور لاوسي جبلي', category: 'بخور', type: 'طبيعي', origin: 'لاوسي', weight: 30, unit: 'جرام', price: 195, rating: 4.7, seller: 'خالد الدوسري', verified: false, image: 'https://images.unsplash.com/photo-1595535373192-fc8935bacd89?w=600&h=500&fit=crop&q=80', description: 'بخور لاوسي من مرتفعات لاوس الجبلية. رائحة هادئة وناعمة مع لمسة خشبية مميزة.' },
+  { id: 4, name: 'دهن عود كمبودي ترابي', category: 'دهن عود', type: 'مخلط', origin: 'كمبودي', weight: 0.5, unit: 'تولة', price: 320, rating: 4.6, seller: 'فهد القحطاني', verified: false, image: 'https://images.unsplash.com/photo-1547887538-e3a2f32cb1cc?w=600&h=500&fit=crop&q=80', description: 'دهن عود كمبودي مخلط بنفحة ترابية أصيلة. مزيج فريد يجمع بين العمق والنعومة.' },
+  { id: 5, name: 'عود ماليزي سوبر', category: 'بخور', type: 'محسن', origin: 'ماليزي', weight: 100, unit: 'جرام', price: 150, rating: 4.5, seller: 'سعد المطيري', verified: false, image: 'https://images.unsplash.com/photo-1602836831852-ef75b5311391?w=600&h=500&fit=crop&q=80', description: 'عود ماليزي محسن بجودة عالية وسعر مناسب. مثالي للاستخدام اليومي مع ثبات ممتاز.' },
+  { id: 6, name: 'دهن عود فيتنامي خاص', category: 'دهن عود', type: 'بيور', origin: 'فيتنامي', weight: 1, unit: 'تولة', price: 890, rating: 5.0, seller: 'ناصر الحربي', verified: true, image: 'https://images.unsplash.com/photo-1616949755610-8c9c1e378a56?w=600&h=500&fit=crop&q=80', description: 'دهن عود فيتنامي نادر من الدرجة الأولى. رائحة فريدة تجمع بين الحلاوة والعمق الخشبي.' },
+  { id: 7, name: 'بخور إندونيسي كلمنتان', category: 'بخور', type: 'طبيعي', origin: 'إندونيسي', weight: 50, unit: 'جرام', price: 220, rating: 4.4, seller: 'تركي العنزي', verified: false, image: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600&h=500&fit=crop&q=80', description: 'بخور إندونيسي طبيعي من جزيرة كلمنتان. رائحة خشبية أصيلة مع لمحات دخانية.' },
+  { id: 8, name: 'دهن عود بورمي ملكي', category: 'دهن عود', type: 'بيور', origin: 'بورمي', weight: 0.25, unit: 'تولة', price: 1200, rating: 4.9, seller: 'عمر السبيعي', verified: true, image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600&h=500&fit=crop&q=80', description: 'دهن عود بورمي ملكي نادر الوجود. من أرقى أنواع الدهن العود في العالم بثبات استثنائي.' },
+  { id: 9, name: 'عود تايلندي ترات', category: 'بخور', type: 'محسن', origin: 'تايلندي', weight: 75, unit: 'جرام', price: 175, rating: 4.3, seller: 'بندر الزهراني', verified: false, image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=500&fit=crop&q=80', description: 'عود تايلندي من منطقة ترات الشهيرة. بخور محسن بجودة ممتازة ورائحة مميزة.' },
+  { id: 10, name: 'دهن عود لاوسي مميز', category: 'دهن عود', type: 'مخلط', origin: 'لاوسي', weight: 1, unit: 'تولة', price: 480, rating: 4.7, seller: 'ماجد الغامدي', verified: true, image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=600&h=500&fit=crop&q=80', description: 'دهن عود لاوسي مخلط بعناية فائقة. مزيج متوازن يناسب جميع الأذواق.' },
+  { id: 11, name: 'بخور سريلانكي سيلاني', category: 'بخور', type: 'طبيعي', origin: 'سريلانكي', weight: 25, unit: 'جرام', price: 340, rating: 4.8, seller: 'يزيد الراشد', verified: true, image: 'https://images.unsplash.com/photo-1603204077167-2fa0397ffc8a?w=600&h=500&fit=crop&q=80', description: 'بخور سريلانكي سيلاني نادر. من أندر أنواع البخور في العالم برائحة استوائية فاخرة.' },
+  { id: 12, name: 'دهن عود هندي كلاكاسي', category: 'دهن عود', type: 'بيور', origin: 'هندي', weight: 0.25, unit: 'تولة', price: 2100, rating: 5.0, seller: 'سلطان العمري', verified: true, image: 'https://images.unsplash.com/photo-1617500603321-a3ee9e934eee?w=600&h=500&fit=crop&q=80', description: 'دهن عود هندي كلاكاسي من الدرجة الممتازة. أعلى مراتب دهن العود الهندي بثبات يفوق 24 ساعة.' }
+];
+
+// ===== STATE =====
+let currentStep = 1;
+let quantity = 1;
+let shippingCost = 25;
+let selectedPayment = 'card';
+let product = null;
+
+// ===== INIT =====
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const id = parseInt(params.get('id')) || 1;
+  product = products.find(p => p.id === id) || products[0];
+
+  renderProduct();
+  setupEventListeners();
+}
+
+function renderProduct() {
+  document.getElementById('productName').textContent = product.name;
+  document.getElementById('productImage').src = product.image;
+  document.getElementById('productImage').alt = product.name;
+  document.getElementById('productBadge').textContent = product.category;
+  document.getElementById('metaType').textContent = product.type;
+  document.getElementById('metaOrigin').textContent = product.origin;
+  document.getElementById('metaWeight').textContent = product.weight + ' ' + product.unit;
+  document.getElementById('productPrice').textContent = product.price.toLocaleString('ar-SA');
+  document.getElementById('productDescription').textContent = product.description;
+
+  // Rating
+  const fullStars = Math.floor(product.rating);
+  const halfStar = product.rating % 1 >= 0.5;
+  let starsHTML = '';
+  for (let i = 0; i < fullStars; i++) starsHTML += '\u2605';
+  if (halfStar) starsHTML += '\u2605';
+  for (let i = fullStars + (halfStar ? 1 : 0); i < 5; i++) starsHTML += '\u2606';
+  document.getElementById('productStars').textContent = starsHTML;
+  document.getElementById('productRating').textContent = product.rating;
+
+  // Seller
+  document.getElementById('sellerName').textContent = product.seller;
+  document.getElementById('sellerAvatar').textContent = product.seller.charAt(0);
+  if (product.verified) {
+    document.getElementById('verifiedBadge').style.display = 'inline-flex';
+  }
+
+  document.title = product.name + ' | صيدات العود';
+}
+
+function setupEventListeners() {
+  // Quantity
+  document.getElementById('qtyPlus').addEventListener('click', function() {
+    if (quantity < 10) {
+      quantity++;
+      document.getElementById('qtyValue').textContent = quantity;
+    }
+  });
+
+  document.getElementById('qtyMinus').addEventListener('click', function() {
+    if (quantity > 1) {
+      quantity--;
+      document.getElementById('qtyValue').textContent = quantity;
+    }
+  });
+
+  // Mobile menu
+  document.getElementById('mobileToggle').addEventListener('click', function() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  // Card number formatting
+  document.getElementById('cardNumber').addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '').substring(0, 16);
+    let formatted = val.replace(/(.{4})/g, '$1 ').trim();
+    e.target.value = formatted;
+  });
+
+  // Card expiry formatting
+  document.getElementById('cardExpiry').addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '').substring(0, 4);
+    if (val.length >= 2) {
+      val = val.substring(0, 2) + '/' + val.substring(2);
+    }
+    e.target.value = val;
+  });
+
+  // CVV
+  document.getElementById('cardCVV').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+  });
+
+  // Phone formatting
+  document.getElementById('phone').addEventListener('input', function(e) {
+    let val = e.target.value.replace(/[^\d+]/g, '');
+    if (!val.startsWith('+966') && !val.startsWith('+')) {
+      if (val.startsWith('05')) {
+        val = '+966' + val.substring(1);
+      } else if (val.startsWith('5')) {
+        val = '+966' + val;
+      } else if (val.length > 0 && !val.startsWith('+')) {
+        val = '+966' + val;
+      }
+    }
+    e.target.value = val;
+  });
+
+  // Receipt upload
+  document.getElementById('receiptUpload').addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+      document.getElementById('uploadFileName').textContent = '\u2713 ' + e.target.files[0].name;
+    }
+  });
+}
+
+// ===== NAVIGATION =====
+function goToStep(step) {
+  if (step === currentStep) return;
+
+  // Hide current
+  document.getElementById('step' + currentStep).classList.remove('active');
+
+  // Update stepper
+  const steps = document.querySelectorAll('.step-item');
+  const connectors = document.querySelectorAll('.step-connector');
+
+  steps.forEach(function(s, i) {
+    s.classList.remove('active', 'completed');
+    if (i + 1 < step) {
+      s.classList.add('completed');
+    } else if (i + 1 === step) {
+      s.classList.add('active');
+    }
+  });
+
+  connectors.forEach(function(c, i) {
+    c.classList.remove('completed');
+    if (i + 1 < step) {
+      c.classList.add('completed');
+    }
+  });
+
+  currentStep = step;
+
+  // Update payment summary if going to step 4
+  if (step === 4) {
+    updateOrderSummary();
+    updateInstallments();
+  }
+
+  // Show new step
+  var el = document.getElementById('step' + step);
+  el.classList.add('active');
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== VALIDATION =====
+function validateStep2() {
+  let valid = true;
+  var fields = [
+    { id: 'fullName', errId: 'fullNameError', check: function(v) { return v.trim().length >= 3; } },
+    { id: 'phone', errId: 'phoneError', check: function(v) { return /^\+966[0-9]{8,9}$/.test(v.replace(/\s/g, '')); } },
+    { id: 'city', errId: 'cityError', check: function(v) { return v !== ''; } },
+    { id: 'district', errId: 'districtError', check: function(v) { return v.trim().length >= 2; } },
+    { id: 'street', errId: 'streetError', check: function(v) { return v.trim().length >= 5; } }
+  ];
+
+  fields.forEach(function(f) {
+    var el = document.getElementById(f.id);
+    var err = document.getElementById(f.errId);
+    if (!f.check(el.value)) {
+      el.classList.add('error');
+      err.classList.add('show');
+      valid = false;
+    } else {
+      el.classList.remove('error');
+      err.classList.remove('show');
+    }
+  });
+
+  if (valid) {
+    goToStep(3);
+  }
+}
+
+// ===== SHIPPING =====
+function selectShipping(el, cost) {
+  document.querySelectorAll('.shipping-option').forEach(function(opt) {
+    opt.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  el.querySelector('input[type="radio"]').checked = true;
+  shippingCost = cost;
+}
+
+// ===== TERMS =====
+function toggleTerms() {
+  var cb = document.getElementById('termsCheck');
+  var wrapper = document.getElementById('termsCheckbox');
+  var btn = document.getElementById('termsNextBtn');
+
+  cb.checked = !cb.checked;
+
+  if (cb.checked) {
+    wrapper.classList.add('checked');
+    btn.disabled = false;
+  } else {
+    wrapper.classList.remove('checked');
+    btn.disabled = true;
+  }
+}
+
+// ===== PAYMENT =====
+function selectPayment(method, el) {
+  document.querySelectorAll('.payment-option').forEach(function(opt) {
+    opt.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  el.querySelector('input[type="radio"]').checked = true;
+  selectedPayment = method;
+
+  // Hide all panels
+  document.querySelectorAll('.payment-detail-panel').forEach(function(p) {
+    p.classList.remove('active');
+  });
+
+  // Show selected panel
+  var panelMap = {
+    card: 'panelCard',
+    apple: 'panelApple',
+    bank: 'panelBank',
+    tabby: 'panelTabby',
+    tamara: 'panelTamara'
+  };
+  document.getElementById(panelMap[method]).classList.add('active');
+}
+
+// ===== ORDER SUMMARY =====
+function updateOrderSummary() {
+  var subtotal = product.price * quantity;
+  var vat = subtotal * 0.15;
+  var total = subtotal + shippingCost + vat;
+
+  document.getElementById('summaryProductName').textContent = product.name;
+  document.getElementById('summaryProductQty').textContent = quantity + ' x ' + product.price.toLocaleString('ar-SA') + ' ر.س';
+  document.getElementById('summarySubtotal').textContent = subtotal.toLocaleString('ar-SA') + ' ر.س';
+  document.getElementById('summaryShipping').textContent = shippingCost.toLocaleString('ar-SA') + ' ر.س';
+  document.getElementById('summaryVAT').textContent = vat.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س';
+  document.getElementById('summaryTotal').textContent = total.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س';
+}
+
+function updateInstallments() {
+  var subtotal = product.price * quantity;
+  var vat = subtotal * 0.15;
+  var total = subtotal + shippingCost + vat;
+
+  // Tabby: 4 installments
+  var tabbyContainer = document.getElementById('tabbyBreakdown');
+  tabbyContainer.innerHTML = '';
+  var perTabby = total / 4;
+  for (var i = 1; i <= 4; i++) {
+    var label = '';
+    if (i === 1) label = 'اليوم';
+    else if (i === 2) label = 'بعد شهر';
+    else if (i === 3) label = 'بعد شهرين';
+    else label = 'بعد 3 أشهر';
+
+    tabbyContainer.innerHTML += '<div class="installment-item"><div class="inst-num">' + label + '</div><div class="inst-amount">' + perTabby.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س</div></div>';
+  }
+
+  // Tamara: 30 day + 3 installments
+  document.getElementById('tamara30Day').textContent = total.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س';
+
+  var perTamara = total / 3;
+  document.getElementById('tamara3Inst').textContent = perTamara.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س / شهر';
+
+  var tamaraContainer = document.getElementById('tamaraBreakdown');
+  tamaraContainer.innerHTML = '';
+  for (var j = 1; j <= 3; j++) {
+    var tLabel = '';
+    if (j === 1) tLabel = 'اليوم';
+    else if (j === 2) tLabel = 'بعد شهر';
+    else tLabel = 'بعد شهرين';
+
+    tamaraContainer.innerHTML += '<div class="installment-item"><div class="inst-num">' + tLabel + '</div><div class="inst-amount">' + perTamara.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س</div></div>';
+  }
+}
+
+// ===== CONFIRM ORDER =====
+function confirmOrder() {
+  var orderNum = 'SA-' + Math.floor(100000 + Math.random() * 900000);
+  document.getElementById('orderNumber').textContent = orderNum;
+  document.getElementById('successModal').classList.add('active');
+}
+
+// Close modal on overlay click
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'successModal') {
+    document.getElementById('successModal').classList.remove('active');
+  }
+});
+
+// ===== INIT =====
+init();
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

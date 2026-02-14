@@ -1,0 +1,441 @@
+/* ===== Index Page ===== */
+
+/* Hero */
+.hero {
+  padding: 80px 0 60px;
+  text-align: center;
+  background: var(--bg-white);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--text-medium);
+  max-width: 600px;
+  margin: 0 auto 48px;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background: var(--bg-offwhite);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 28px 40px;
+  min-width: 200px;
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px var(--shadow-warm);
+  border-color: var(--accent-amber);
+}
+
+.stat-number {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--text-medium);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Features */
+.features {
+  padding: 80px 0;
+  background: var(--bg-white);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: var(--bg-offwhite);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 32px 28px;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px var(--shadow-warm);
+  border-color: var(--accent-amber);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.feature-card h3 {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-deep);
+}
+
+.feature-card p {
+  font-size: 0.9rem;
+  color: var(--text-medium);
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+/* Auction Types */
+.auctions-section {
+  padding: 80px 0;
+  background: var(--bg-beige);
+}
+
+.auction-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.auction-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 36px 32px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.auction-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px var(--shadow-warm);
+  border-color: var(--accent-amber);
+}
+
+.auction-badge {
+  display: inline-block;
+  background: var(--accent-amber);
+  color: var(--bg-white);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.auction-card h3 {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-deep);
+}
+
+.auction-features {
+  list-style: none;
+  margin-bottom: 24px;
+}
+
+.auction-features li {
+  padding: 6px 0;
+  font-size: 0.9rem;
+  color: var(--text-medium);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auction-features li::before {
+  content: '\2713';
+  color: var(--green);
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.auction-price {
+  display: inline-block;
+  background: var(--bg-beige);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-btn);
+  padding: 10px 20px;
+  font-weight: 700;
+  color: var(--accent-amber);
+  font-size: 1.1rem;
+}
+
+/* Dashboard Preview */
+.dashboard-section {
+  padding: 80px 0;
+  background: var(--bg-white);
+}
+
+.dashboard-mockup {
+  background: var(--bg-beige);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  max-width: 960px;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px var(--shadow-warm);
+}
+
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-taupe);
+}
+
+.dash-greeting {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-deep);
+}
+
+.dash-add-btn {
+  background: var(--accent-amber);
+  color: var(--bg-white);
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: 8px 20px;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dash-add-btn:hover {
+  background: var(--accent-amber-dark);
+}
+
+.dash-body {
+  padding: 24px 28px;
+}
+
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.dash-stat {
+  background: var(--bg-white);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 20px 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.dash-stat:hover {
+  border-color: var(--accent-amber);
+}
+
+.dash-stat-icon {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+
+.dash-stat-value {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-deep);
+  direction: ltr;
+}
+
+.dash-stat-label {
+  font-size: 0.78rem;
+  color: var(--text-medium);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.dash-auctions-title {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-deep);
+  margin-bottom: 14px;
+}
+
+.dash-auction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-auction-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-white);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-btn);
+  padding: 14px 18px;
+  transition: all 0.3s ease;
+}
+
+.dash-auction-item:hover {
+  border-color: var(--accent-amber);
+}
+
+.dash-auction-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-auction-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-deep);
+}
+
+.dash-auction-time {
+  font-size: 0.78rem;
+  color: var(--text-medium);
+  font-weight: 300;
+}
+
+.dash-auction-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-bids {
+  font-size: 0.82rem;
+  color: var(--text-medium);
+  font-weight: 600;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 48px 0 40px;
+  }
+
+  .hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    margin-bottom: 32px;
+  }
+
+  .stats-row {
+    gap: 16px;
+  }
+
+  .stat-box {
+    padding: 20px 24px;
+    min-width: 140px;
+    flex: 1;
+  }
+
+  .stat-number {
+    font-size: 1.6rem;
+  }
+
+  .features {
+    padding: 48px 0;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .auctions-section {
+    padding: 48px 0;
+  }
+
+  .auction-cards {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .dashboard-section {
+    padding: 48px 0;
+  }
+
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .dash-auction-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .dash-auction-meta {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-box {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .dash-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dash-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

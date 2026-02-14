@@ -1,0 +1,33 @@
+/* ===== CSS Variables - صيدات العود ===== */
+:root {
+  /* Backgrounds */
+  --bg-white: #FFFFFF;
+  --bg-offwhite: #FDFBF7;
+  --bg-beige: #FAF7F2;
+
+  /* Text */
+  --text-deep: #2C1810;
+  --text-medium: #4A2C1A;
+
+  /* Accent */
+  --accent-amber: #C19A6B;
+  --accent-amber-light: #D4B08C;
+  --accent-amber-dark: #A07D52;
+
+  /* Borders */
+  --border-taupe: #E8DDD0;
+
+  /* Shadows */
+  --shadow-warm: rgba(44, 24, 16, 0.08);
+  --shadow-warm-md: rgba(44, 24, 16, 0.12);
+  --shadow-warm-lg: rgba(44, 24, 16, 0.16);
+
+  /* Radius */
+  --radius-card: 12px;
+  --radius-btn: 8px;
+
+  /* Semantic Colors */
+  --green: #4A7C59;
+  --orange: #C17A3A;
+  --red: #B5403A;
+}

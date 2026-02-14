@@ -1,0 +1,67 @@
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 24px;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border-taupe);
+  color: var(--text-medium);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+  background: rgba(193, 154, 107, 0.05);
+}
+
+.btn-filled {
+  background: var(--accent-amber);
+  color: var(--bg-white);
+  border: 1.5px solid var(--accent-amber);
+}
+
+.btn-filled:hover {
+  background: var(--accent-amber-dark);
+  border-color: var(--accent-amber-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(193, 154, 107, 0.35);
+}
+
+.btn-white {
+  background: var(--bg-white);
+  color: var(--text-deep);
+  border: 1.5px solid var(--border-taupe);
+}
+
+.btn-white:hover {
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+.btn-lg {
+  padding: 14px 36px;
+  font-size: 1rem;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+}
+
+.btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول - صيدات العود</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/header.css">
+<link rel="stylesheet" href="css/buttons.css">
+<link rel="stylesheet" href="css/forms.css">
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <span class="logo-text">صيدات العود</span>
+    </a>
+    <a href="index.html" class="header-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      العودة للرئيسية
+    </a>
+  </div>
+</header>
+
+<!-- ===== LOGIN PAGE ===== -->
+<main class="login-page">
+  <div class="login-wrapper">
+
+    <!-- Side Panel -->
+    <aside class="login-side">
+      <div class="side-content">
+        <h2 class="side-title">مرحباً بك في صيدات العود</h2>
+        <p class="side-desc">انضم إلى أكبر منصة متخصصة في تجارة العود والبخور في العالم العربي. بيع واشترِ بثقة وأمان.</p>
+        <ul class="side-features">
+          <li>
+            <span class="check">✓</span>
+            ضمان مالي على جميع المعاملات
+          </li>
+          <li>
+            <span class="check">✓</span>
+            مزادات احترافية بعمولة 1% فقط
+          </li>
+          <li>
+            <span class="check">✓</span>
+            أكثر من 5,000 تاجر موثوق
+          </li>
+          <li>
+            <span class="check">✓</span>
+            دعم فني متواصل على مدار الساعة
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Form Panel -->
+    <div class="login-form-panel">
+      <div class="form-header">
+        <h1>أهلاً بعودتك</h1>
+        <p>سجّل دخولك للوصول إلى حسابك ومتابعة مزاداتك</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">تسجيل الدخول</button>
+        <button class="auth-tab" data-tab="register">حساب جديد</button>
+      </div>
+
+      <!-- Login Form -->
+      <div class="tab-content active" id="tab-login">
+        <form id="loginForm" onsubmit="return handleLogin(event);">
+          <div id="loginError" class="form-error" style="display:none;"></div>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">📧</span>
+              <input type="email" class="form-input" id="loginEmail" placeholder="example@email.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-input" id="loginPassword" placeholder="أدخل كلمة المرور" style="padding-left: 44px;" required minlength="6">
+              <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">👁️</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="remember-check">
+              <input type="checkbox" checked>
+              <span>تذكرني</span>
+            </label>
+            <a href="#" class="forgot-link">نسيت كلمة المرور؟</a>
+          </div>
+
+          <button type="submit" class="btn btn-filled">تسجيل الدخول</button>
+
+          <div class="divider">
+            <span>أو سجّل الدخول بواسطة</span>
+          </div>
+
+          <div class="social-login">
+            <button type="button" class="social-btn" onclick="alert('تسجيل الدخول عبر Apple قريباً!')">
+              <span class="icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></span>
+              Apple
+            </button>
+            <button type="button" class="social-btn" onclick="alert('تسجيل الدخول عبر Google قريباً!')">
+              <span class="icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg></span>
+              Google
+            </button>
+          </div>
+
+          <p class="form-footer">ليس لديك حساب؟ <a href="#" onclick="switchTab('register')">أنشئ حساباً جديداً</a></p>
+        </form>
+      </div>
+
+      <!-- Register Form -->
+      <div class="tab-content" id="tab-register">
+        <form id="registerForm" onsubmit="return handleRegister(event);">
+          <div id="registerError" class="form-error" style="display:none;"></div>
+          <div id="registerSuccess" class="form-success" style="display:none;"></div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">الاسم الأول</label>
+              <input type="text" class="form-input" id="regFirstName" placeholder="محمد" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">الاسم الأخير</label>
+              <input type="text" class="form-input" id="regLastName" placeholder="العتيبي" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">📧</span>
+              <input type="email" class="form-input" id="regEmail" placeholder="example@email.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">رقم الجوال</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">📱</span>
+              <input type="tel" class="form-input" id="regPhone" placeholder="05X XXX XXXX" style="direction: ltr; text-align: right;" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-input" id="regPassword" placeholder="6 أحرف على الأقل" style="padding-left: 44px;" required minlength="6">
+              <button type="button" class="password-toggle" onclick="togglePassword('regPassword', this)">👁️</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">تأكيد كلمة المرور</label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-input" id="regPasswordConfirm" placeholder="أعد إدخال كلمة المرور" style="padding-left: 44px;" required minlength="6">
+              <button type="button" class="password-toggle" onclick="togglePassword('regPasswordConfirm', this)">👁️</button>
+            </div>
+          </div>
+
+          <label class="terms-check">
+            <input type="checkbox" id="regTerms" required>
+            <span>أوافق على <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a> الخاصة بمنصة صيدات العود</span>
+          </label>
+
+          <button type="submit" class="btn btn-filled">إنشاء حساب</button>
+
+          <div class="divider">
+            <span>أو سجّل بواسطة</span>
+          </div>
+
+          <div class="social-login">
+            <button type="button" class="social-btn" onclick="alert('التسجيل عبر Apple قريباً!')">
+              <span class="icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></span>
+              Apple
+            </button>
+            <button type="button" class="social-btn" onclick="alert('التسجيل عبر Google قريباً!')">
+              <span class="icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg></span>
+              Google
+            </button>
+          </div>
+
+          <p class="form-footer">لديك حساب بالفعل؟ <a href="#" onclick="switchTab('login')">سجّل الدخول</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<div class="mini-footer">
+  © 2026 صيدات العود. جميع الحقوق محفوظة.
+</div>
+
+<style>
+.form-error { background: #FDF2F2; color: #C0392B; border: 1px solid #F5C6CB; border-radius: 8px; padding: 12px 16px; font-size: 0.88rem; font-weight: 500; margin-bottom: 16px; text-align: center; }
+.form-success { background: #F0F9F4; color: #27AE60; border: 1px solid #C3E6CB; border-radius: 8px; padding: 12px 16px; font-size: 0.88rem; font-weight: 500; margin-bottom: 16px; text-align: center; }
+.btn.loading { opacity: 0.7; pointer-events: none; }
+</style>
+<script src="auth.js"></script>
+<script>
+// Tab switching
+function switchTab(tabName) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+  document.getElementById(`tab-${tabName}`).classList.add('active');
+}
+
+document.querySelectorAll('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+// Password toggle
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+// إذا كان المستخدم مسجل دخول، وجّهه للرئيسية
+if (AUTH.isLoggedIn()) {
+  window.location.href = 'dashboard.html';
+}
+
+// معالجة تسجيل الدخول
+function handleLogin(e) {
+  e.preventDefault();
+  var errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
+
+  if (!email || !password) {
+    errEl.textContent = 'يرجى تعبئة جميع الحقول';
+    errEl.style.display = 'block';
+    return false;
+  }
+
+  var result = AUTH.login(email, password);
+
+  if (result.success) {
+    window.location.href = 'dashboard.html';
+  } else {
+    errEl.textContent = result.message;
+    errEl.style.display = 'block';
+    document.getElementById('loginPassword').value = '';
+  }
+  return false;
+}
+
+// معالجة إنشاء الحساب
+function handleRegister(e) {
+  e.preventDefault();
+  var errEl = document.getElementById('registerError');
+  var sucEl = document.getElementById('registerSuccess');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  var firstName = document.getElementById('regFirstName').value.trim();
+  var lastName = document.getElementById('regLastName').value.trim();
+  var email = document.getElementById('regEmail').value.trim();
+  var phone = document.getElementById('regPhone').value.trim();
+  var password = document.getElementById('regPassword').value;
+  var confirm = document.getElementById('regPasswordConfirm').value;
+  var terms = document.getElementById('regTerms').checked;
+
+  if (!firstName || !lastName || !email || !phone || !password || !confirm) {
+    errEl.textContent = 'يرجى تعبئة جميع الحقول';
+    errEl.style.display = 'block';
+    return false;
+  }
+
+  if (password.length < 6) {
+    errEl.textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+    errEl.style.display = 'block';
+    return false;
+  }
+
+  if (password !== confirm) {
+    errEl.textContent = 'كلمة المرور غير متطابقة';
+    errEl.style.display = 'block';
+    return false;
+  }
+
+  if (!terms) {
+    errEl.textContent = 'يجب الموافقة على شروط الاستخدام وسياسة الخصوصية';
+    errEl.style.display = 'block';
+    return false;
+  }
+
+  var result = AUTH.register({
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phone: phone,
+    password: password
+  });
+
+  if (result.success) {
+    window.location.href = 'dashboard.html';
+  } else {
+    errEl.textContent = result.message;
+    errEl.style.display = 'block';
+  }
+  return false;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" width="360" height="80">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@900&amp;display=swap');
+    </style>
+  </defs>
+  <text x="180" y="56" text-anchor="middle" font-family="'Tajawal', sans-serif" font-weight="900" font-size="44" fill="#2C1810" direction="rtl" unicode-bidi="bidi-override" letter-spacing="1">صيدات العود</text>
+</svg>

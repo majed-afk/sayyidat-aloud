@@ -1,0 +1,219 @@
+/* ===== Badges ===== */
+.badge {
+  position: absolute;
+  top: 12px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  z-index: 2;
+  letter-spacing: 0.02em;
+}
+
+.badge-category {
+  right: 12px;
+  background: var(--accent-amber);
+  color: #fff;
+}
+
+.badge-new {
+  left: 12px;
+  background: var(--green);
+  color: #fff;
+}
+
+.badge-featured {
+  left: 12px;
+  background: var(--orange);
+  color: #fff;
+}
+
+.badge-verified {
+  left: 12px;
+  background: #1A73E8;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.badge-verified svg {
+  width: 11px;
+  height: 11px;
+  fill: #fff;
+  flex-shrink: 0;
+}
+
+.badge-green {
+  background: rgba(74, 124, 89, 0.12);
+  color: var(--green);
+}
+
+.badge-orange {
+  background: rgba(193, 122, 58, 0.12);
+  color: var(--orange);
+}
+
+/* ===== Chips (filter pills) ===== */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1.5px solid var(--border-taupe);
+  background: transparent;
+  color: var(--text-medium);
+}
+
+.chip:hover {
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+.chip.active {
+  background: var(--accent-amber);
+  color: #fff;
+  border-color: var(--accent-amber);
+}
+
+/* ===== Status Badges ===== */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-new {
+  background: rgba(41, 128, 185, 0.1);
+  color: #2980B9;
+}
+
+.status-processing {
+  background: rgba(243, 156, 18, 0.1);
+  color: #F39C12;
+}
+
+.status-completed {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+}
+
+.status-cancelled {
+  background: rgba(231, 76, 60, 0.1);
+  color: #E74C3C;
+}
+
+.status-active {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+}
+
+.status-inactive {
+  background: rgba(149, 165, 166, 0.15);
+  color: #95A5A6;
+}
+
+/* Transaction statuses */
+.status-sale {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+}
+
+.status-commission {
+  background: rgba(243, 156, 18, 0.1);
+  color: #F39C12;
+}
+
+.status-withdrawal {
+  background: rgba(231, 76, 60, 0.1);
+  color: #E74C3C;
+}
+
+/* Listing type statuses */
+.status-market {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+}
+
+.status-auction {
+  background: rgba(142, 68, 173, 0.1);
+  color: #8E44AD;
+}
+
+.status-auction-live {
+  background: rgba(231, 76, 60, 0.12);
+  color: #E74C3C;
+  animation: pulse-live 2s infinite;
+}
+
+.status-auction-ended {
+  background: rgba(149, 165, 166, 0.15);
+  color: #95A5A6;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Listing badges (dashboard table) */
+.listing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.listing-badge.badge-market {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+}
+
+.listing-badge.badge-auction {
+  background: rgba(142, 68, 173, 0.1);
+  color: #8E44AD;
+}
+
+.listing-badge.badge-auction-live {
+  background: rgba(231, 76, 60, 0.1);
+  color: #E74C3C;
+}
+
+/* Sidebar badge count */
+.badge-count {
+  margin-right: auto;
+  background: #C0392B;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}
