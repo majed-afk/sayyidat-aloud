@@ -1,0 +1,366 @@
+/* ===== admin.css — أنماط خاصة بلوحة تحكم الأدمن ===== */
+
+/* متغيرات Sidebar */
+:root {
+  --sidebar-bg: #1A0F0A;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-active: rgba(193, 154, 107, 0.1);
+}
+
+/* شبكة إحصائيات 5 أعمدة */
+.stats-grid.admin-stats {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .stats-grid.admin-stats { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .stats-grid.admin-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .stats-grid.admin-stats { grid-template-columns: 1fr; }
+}
+
+/* أيقونات إحصائيات الأدمن */
+.stat-icon.users { background: linear-gradient(135deg, #8E44AD, #9B59B6); }
+.stat-icon.orders { background: linear-gradient(135deg, #2980B9, #5DADE2); }
+.stat-icon.commission { background: linear-gradient(135deg, #E67E22, #F39C12); }
+
+/* Badges جديدة */
+.status-suspended {
+  background: rgba(192, 57, 43, 0.1);
+  color: #C0392B;
+}
+.status-suspended .status-dot {
+  background: #C0392B;
+}
+
+.status-approved {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+}
+.status-approved .status-dot {
+  background: #27AE60;
+}
+
+.status-rejected {
+  background: rgba(231, 76, 60, 0.1);
+  color: #E74C3C;
+}
+.status-rejected .status-dot {
+  background: #E74C3C;
+}
+
+.status-pending-withdrawal {
+  background: rgba(41, 128, 185, 0.1);
+  color: #2980B9;
+}
+.status-pending-withdrawal .status-dot {
+  background: #2980B9;
+}
+
+/* Badge الدور */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.role-badge.role-admin {
+  background: rgba(142, 68, 173, 0.1);
+  color: #8E44AD;
+}
+.role-badge.role-seller {
+  background: rgba(74, 124, 89, 0.12);
+  color: #4A7C59;
+}
+
+/* شريط البحث والفلاتر */
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-search .form-input {
+  max-width: 220px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+.admin-search .form-select {
+  max-width: 150px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  border: 1.5px solid var(--border-taupe);
+  border-radius: var(--radius-btn);
+  background: var(--bg-white);
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  color: var(--text-deep);
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.admin-search .form-select:focus {
+  outline: none;
+  border-color: var(--accent-amber);
+}
+
+/* تخطيط عمودين للوحة القيادة */
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 1024px) {
+  .admin-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* آخر النشاطات */
+.activity-feed {
+  background: var(--bg-white);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 24px;
+}
+
+.activity-feed-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-deep);
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(232, 221, 208, 0.5);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.activity-icon.order { background: rgba(41, 128, 185, 0.15); color: #2980B9; }
+.activity-icon.user { background: rgba(142, 68, 173, 0.15); color: #8E44AD; }
+.activity-icon.product { background: rgba(39, 174, 96, 0.15); color: #27AE60; }
+.activity-icon.finance { background: rgba(230, 126, 34, 0.15); color: #E67E22; }
+
+.activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-text {
+  font-size: 0.85rem;
+  color: var(--text-deep);
+  line-height: 1.5;
+}
+
+.activity-time {
+  font-size: 0.75rem;
+  color: var(--text-medium);
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+/* بطاقات الإعدادات */
+.settings-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.settings-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-taupe);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-deep);
+}
+
+.settings-card-title svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--accent-amber);
+}
+
+/* زر الحذف */
+.btn-danger {
+  background: #C0392B;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-btn);
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-danger:hover {
+  background: #A93226;
+}
+
+/* زر التحذير */
+.btn-warning {
+  background: #E67E22;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-btn);
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-warning:hover {
+  background: #D35400;
+}
+
+/* زر النجاح */
+.btn-success {
+  background: #27AE60;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-btn);
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-success:hover {
+  background: #219A52;
+}
+
+/* تفاصيل المستخدم في الـ Modal */
+.user-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.user-detail-grid .detail-item {
+  padding: 12px;
+  background: var(--bg-cream);
+  border-radius: 8px;
+}
+
+.user-detail-grid .detail-label {
+  font-size: 0.75rem;
+  color: var(--text-medium);
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.user-detail-grid .detail-value {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-deep);
+}
+
+.user-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-taupe);
+}
+
+.user-detail-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent-amber);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-detail-info h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-deep);
+  margin: 0 0 4px 0;
+}
+
+.user-detail-info p {
+  font-size: 0.85rem;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+/* تفاصيل الطلب في الـ Modal */
+.order-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .order-detail-grid { grid-template-columns: 1fr; }
+  .user-detail-grid { grid-template-columns: 1fr; }
+  .admin-search { flex-direction: column; align-items: stretch; }
+  .admin-search .form-input,
+  .admin-search .form-select { max-width: 100%; }
+}
+
+/* إجراءات الجدول */
+.table-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.table-actions .btn {
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* Sidebar badge للأدمن */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(142, 68, 173, 0.2);
+  color: #D2B4DE;
+}

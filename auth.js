@@ -77,6 +77,35 @@
       });
       localStorage.setItem(USERS_KEY, JSON.stringify(users));
     }
+
+    // إضافة حساب الأدمن إن لم يكن موجوداً
+    users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    var hasAdmin = users.some(function(u) { return u.role === 'admin'; });
+    if (!hasAdmin) {
+      users.push({
+        id: 'u_admin_1',
+        firstName: 'مدير',
+        lastName: 'النظام',
+        email: 'admin@saidat.com',
+        password: btoa('admin123'),
+        role: 'admin',
+        verified: true,
+        createdAt: '2026-01-01',
+        storeName: '',
+        storeDesc: '',
+        bankName: '',
+        iban: '',
+        bankHolder: '',
+        balance: 0,
+        totalSales: 0,
+        totalRevenue: 0,
+        products: [],
+        orders: [],
+        transactions: [],
+        monthlySales: []
+      });
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
   }
 
   // ===== AUTH Object =====
@@ -148,6 +177,10 @@
         return { success: false, message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' };
       }
 
+      if (user.suspended) {
+        return { success: false, message: 'تم تعليق حسابك. تواصل مع إدارة الموقع.' };
+      }
+
       localStorage.setItem(SESSION_KEY, user.id);
       return { success: true, user: user };
     },
@@ -182,6 +215,24 @@
         return true;
       }
       return false;
+    },
+
+    // هل المستخدم الحالي أدمن؟
+    isAdmin: function() {
+      var user = this.getCurrentUser();
+      return user && user.role === 'admin';
+    },
+
+    // جلب جميع المستخدمين
+    getAllUsers: function() {
+      return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    },
+
+    // حذف مستخدم
+    deleteUser: function(userId) {
+      var users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+      users = users.filter(function(u) { return u.id !== userId; });
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
     },
 
     // ===== تحديث الهيدر =====
