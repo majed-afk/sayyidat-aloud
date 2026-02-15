@@ -1,255 +1,464 @@
-// ===== auth.js - نظام المصادقة لمنصة صيدات العود =====
+// ===== auth.js - نظام المصادقة لمنصة صيدات العود (Supabase) =====
 
 (function() {
   'use strict';
 
-  var USERS_KEY = 'saidat_users';
-  var SESSION_KEY = 'saidat_session';
-
-  var DATA_VERSION = 'v3_orders';
-
-  // ===== مستخدم تجريبي افتراضي =====
-  function initDefaultUsers() {
-    // Reset data if version changed (to include auction products)
-    if (localStorage.getItem('saidat_data_version') !== DATA_VERSION) {
-      localStorage.removeItem(USERS_KEY);
-      localStorage.setItem('saidat_data_version', DATA_VERSION);
-    }
-    var users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-    if (users.length === 0) {
-      users.push({
-        id: 'u_' + Date.now(),
-        firstName: 'ماجد',
-        lastName: 'الخضير',
-        email: 'test@test.com',
-        phone: '+966554165165',
-        password: btoa('123456'),
-        role: 'seller',
-        verified: true,
-        createdAt: '2026-01-15',
-        storeName: 'متجر ماجد للعود',
-        storeDesc: 'متخصصون في أجود أنواع العود الكمبودي والهندي منذ أكثر من 10 سنوات',
-        bankName: 'بنك الراجحي',
-        iban: 'SA4420000001234567891234',
-        bankHolder: 'ماجد عبدالله الخضير',
-        balance: 12500,
-        totalSales: 45,
-        totalRevenue: 38750,
-        products: [
-          { id: 'p1', name: 'عود كمبودي بورسات فاخر', listingType: 'market', category: 'بخور', type: 'طبيعي', origin: 'كمبودي', weight: 50, unit: 'جرام', price: 285, stock: 12, active: true, image: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=400&h=300&fit=crop&q=80', description: 'عود كمبودي فاخر من غابات بورسات', createdAt: '2026-01-20' },
-          { id: 'p2', name: 'دهن عود هندي أسامي', listingType: 'market', category: 'دهن عود', type: 'بيور', origin: 'هندي', weight: 1, unit: 'تولة', price: 650, stock: 5, active: true, image: 'https://images.unsplash.com/photo-1594035910387-fea081d36b4c?w=400&h=300&fit=crop&q=80', description: 'دهن عود هندي أسامي بيور من ولاية آسام', createdAt: '2026-01-25' },
-          { id: 'p3', name: 'بخور لاوسي جبلي', listingType: 'market', category: 'بخور', type: 'طبيعي', origin: 'لاوسي', weight: 30, unit: 'جرام', price: 195, stock: 20, active: true, image: 'https://images.unsplash.com/photo-1595535373192-fc8935bacd89?w=400&h=300&fit=crop&q=80', description: 'بخور لاوسي من المرتفعات الجبلية', createdAt: '2026-02-01' },
-          { id: 'p4', name: 'دهن عود فيتنامي خاص', listingType: 'auction', auctionType: 'timed', auctionStatus: 'live', startPrice: 500, minBid: 50, auctionDuration: 7, buyNow: 1200, auctionStartDate: '2026-02-12', auctionEndDate: '2026-02-19', bids: [{bidder:'خالد الحربي',amount:500,date:'2026-02-12T10:00:00'},{bidder:'ناصر القحطاني',amount:550,date:'2026-02-12T14:30:00'},{bidder:'تركي الشمري',amount:650,date:'2026-02-13T09:15:00'},{bidder:'سعود الدوسري',amount:750,date:'2026-02-13T16:45:00'},{bidder:'خالد الحربي',amount:800,date:'2026-02-14T08:20:00'}], category: 'دهن عود', type: 'بيور', origin: 'فيتنامي', weight: 1, unit: 'تولة', price: 800, stock: 1, active: true, image: 'https://images.unsplash.com/photo-1616949755610-8c9c1e378a56?w=400&h=300&fit=crop&q=80', description: 'دهن عود فيتنامي نادر من الدرجة الأولى', createdAt: '2026-02-05' },
-          { id: 'p5', name: 'عود ماليزي سوبر', listingType: 'market', category: 'بخور', type: 'محسن', origin: 'ماليزي', weight: 100, unit: 'جرام', price: 150, stock: 30, active: true, image: 'https://images.unsplash.com/photo-1602836831852-ef75b5311391?w=400&h=300&fit=crop&q=80', description: 'عود ماليزي محسن بجودة عالية', createdAt: '2026-02-08' },
-          { id: 'p6', name: 'دهن عود بورمي ملكي', listingType: 'auction', auctionType: 'until_sold', auctionStatus: 'live', startPrice: 800, minBid: 100, auctionDuration: 0, buyNow: 0, auctionStartDate: '2026-02-10', auctionEndDate: null, bids: [{bidder:'محمد الزهراني',amount:800,date:'2026-02-10T12:00:00'},{bidder:'عمر السبيعي',amount:900,date:'2026-02-11T10:00:00'},{bidder:'بندر الراشد',amount:1050,date:'2026-02-12T15:30:00'}], category: 'دهن عود', type: 'بيور', origin: 'بورمي', weight: 0.25, unit: 'تولة', price: 1050, stock: 1, active: true, image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=300&fit=crop&q=80', description: 'دهن عود بورمي ملكي نادر', createdAt: '2026-02-10' },
-          { id: 'p7', name: 'بخور إندونيسي كلمنتان', listingType: 'market', category: 'بخور', type: 'طبيعي', origin: 'إندونيسي', weight: 50, unit: 'جرام', price: 220, stock: 15, active: true, image: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&h=300&fit=crop&q=80', description: 'بخور إندونيسي طبيعي من جزيرة كلمنتان', createdAt: '2026-02-12' },
-          { id: 'p8', name: 'دهن عود هندي كلاكاسي', listingType: 'market', category: 'دهن عود', type: 'بيور', origin: 'هندي', weight: 0.25, unit: 'تولة', price: 2100, stock: 1, active: true, image: 'https://images.unsplash.com/photo-1617500603321-a3ee9e934eee?w=400&h=300&fit=crop&q=80', description: 'أعلى مراتب دهن العود الهندي', createdAt: '2026-02-14' }
-        ],
-        orders: [
-          { id: 'SA-847291', productName: 'عود كمبودي بورسات فاخر', productId: 'p1', buyer: 'عبدالرحمن السالم', buyerPhone: '+966551234567', buyerCity: 'الرياض', buyerDistrict: 'النرجس', buyerStreet: 'شارع الأمير سلطان 45', qty: 2, price: 285, total: 570, shipping: 25, status: 'new', date: '2026-02-14', shippingMethod: 'عادي', statusHistory: [{status:'new',date:'2026-02-14T08:30:00',note:'طلب جديد'}], carrier: '', carrierName: '', trackingNumber: '', waybillGenerated: false, waybillDate: '', cancelReason: '' },
-          { id: 'SA-736184', productName: 'دهن عود هندي أسامي', productId: 'p2', buyer: 'فيصل العمري', buyerPhone: '+966559876543', buyerCity: 'جدة', buyerDistrict: 'الحمراء', buyerStreet: 'شارع فلسطين 12', qty: 1, price: 650, total: 650, shipping: 45, status: 'processing', date: '2026-02-13', shippingMethod: 'سريع', statusHistory: [{status:'new',date:'2026-02-13T09:00:00',note:'طلب جديد'},{status:'processing',date:'2026-02-13T11:20:00',note:'تم قبول الطلب'}], carrier: '', carrierName: '', trackingNumber: '', waybillGenerated: false, waybillDate: '', cancelReason: '' },
-          { id: 'SA-625073', productName: 'بخور لاوسي جبلي', productId: 'p3', buyer: 'سعود الدوسري', buyerPhone: '+966553216549', buyerCity: 'الدمام', buyerDistrict: 'الشاطئ', buyerStreet: 'شارع الخليج 8', qty: 3, price: 195, total: 585, shipping: 25, status: 'completed', date: '2026-02-12', shippingMethod: 'عادي', statusHistory: [{status:'new',date:'2026-02-12T07:00:00',note:'طلب جديد'},{status:'processing',date:'2026-02-12T09:30:00',note:'تم قبول الطلب'},{status:'completed',date:'2026-02-12T16:00:00',note:'تم شحن الطلب وإتمامه'}], carrier: 'aramex', carrierName: 'Aramex - أرامكس', trackingNumber: '29438764523', waybillGenerated: true, waybillDate: '2026-02-12', cancelReason: '' },
-          { id: 'SA-514962', productName: 'دهن عود فيتنامي خاص', productId: 'p4', buyer: 'خالد الحربي', buyerPhone: '+966557894561', buyerCity: 'مكة', buyerDistrict: 'العزيزية', buyerStreet: 'شارع إبراهيم الخليل 22', qty: 1, price: 890, total: 890, shipping: 75, status: 'completed', date: '2026-02-11', shippingMethod: 'يوم واحد', statusHistory: [{status:'new',date:'2026-02-11T10:00:00',note:'طلب جديد'},{status:'processing',date:'2026-02-11T12:00:00',note:'تم قبول الطلب'},{status:'completed',date:'2026-02-11T18:00:00',note:'تم شحن الطلب وإتمامه'}], carrier: 'smsa', carrierName: 'SMSA Express', trackingNumber: 'SM9876543210', waybillGenerated: true, waybillDate: '2026-02-11', cancelReason: '' },
-          { id: 'SA-403851', productName: 'عود ماليزي سوبر', productId: 'p5', buyer: 'تركي الشمري', buyerPhone: '+966556547891', buyerCity: 'المدينة', buyerDistrict: 'السلام', buyerStreet: 'شارع أبو بكر 5', qty: 5, price: 150, total: 750, shipping: 25, status: 'completed', date: '2026-02-10', shippingMethod: 'عادي', statusHistory: [{status:'new',date:'2026-02-10T08:00:00',note:'طلب جديد'},{status:'processing',date:'2026-02-10T10:00:00',note:'تم قبول الطلب'},{status:'completed',date:'2026-02-10T15:30:00',note:'تم شحن الطلب وإتمامه'}], carrier: 'spl', carrierName: 'البريد السعودي - SPL', trackingNumber: 'SPL11223344', waybillGenerated: true, waybillDate: '2026-02-10', cancelReason: '' },
-          { id: 'SA-392740', productName: 'بخور إندونيسي كلمنتان', productId: 'p7', buyer: 'ناصر القحطاني', buyerPhone: '+966552345678', buyerCity: 'أبها', buyerDistrict: 'المنسك', buyerStreet: 'شارع الملك فيصل 30', qty: 2, price: 220, total: 440, shipping: 45, status: 'new', date: '2026-02-14', shippingMethod: 'سريع', statusHistory: [{status:'new',date:'2026-02-14T10:15:00',note:'طلب جديد'}], carrier: '', carrierName: '', trackingNumber: '', waybillGenerated: false, waybillDate: '', cancelReason: '' },
-          { id: 'SA-281639', productName: 'دهن عود هندي كلاكاسي', productId: 'p8', buyer: 'محمد الزهراني', buyerPhone: '+966558765432', buyerCity: 'الطائف', buyerDistrict: 'الشهداء', buyerStreet: 'شارع شبرا 15', qty: 1, price: 2100, total: 2100, shipping: 75, status: 'processing', date: '2026-02-13', shippingMethod: 'يوم واحد', statusHistory: [{status:'new',date:'2026-02-13T14:00:00',note:'طلب جديد'},{status:'processing',date:'2026-02-13T16:30:00',note:'تم قبول الطلب'}], carrier: '', carrierName: '', trackingNumber: '', waybillGenerated: false, waybillDate: '', cancelReason: '' }
-        ],
-        transactions: [
-          { id: 't1', type: 'sale', amount: 585, date: '2026-02-12', ref: 'SA-625073', status: 'completed', description: 'بيع: بخور لاوسي جبلي × 3' },
-          { id: 't2', type: 'commission', amount: -29.25, date: '2026-02-12', ref: 'SA-625073', status: 'completed', description: 'عمولة المنصة 5%' },
-          { id: 't3', type: 'sale', amount: 890, date: '2026-02-11', ref: 'SA-514962', status: 'completed', description: 'بيع: دهن عود فيتنامي خاص × 1' },
-          { id: 't4', type: 'commission', amount: -44.50, date: '2026-02-11', ref: 'SA-514962', status: 'completed', description: 'عمولة المنصة 5%' },
-          { id: 't5', type: 'sale', amount: 750, date: '2026-02-10', ref: 'SA-403851', status: 'completed', description: 'بيع: عود ماليزي سوبر × 5' },
-          { id: 't6', type: 'commission', amount: -37.50, date: '2026-02-10', ref: 'SA-403851', status: 'completed', description: 'عمولة المنصة 5%' },
-          { id: 't7', type: 'withdrawal', amount: -5000, date: '2026-02-08', ref: 'W-001', status: 'completed', description: 'سحب إلى بنك الراجحي' },
-          { id: 't8', type: 'sale', amount: 1425, date: '2026-02-05', ref: 'SA-192528', status: 'completed', description: 'بيع: عود كمبودي فاخر × 5' },
-          { id: 't9', type: 'commission', amount: -71.25, date: '2026-02-05', ref: 'SA-192528', status: 'completed', description: 'عمولة المنصة 5%' },
-          { id: 't10', type: 'withdrawal', amount: -3000, date: '2026-01-28', ref: 'W-002', status: 'completed', description: 'سحب إلى بنك الراجحي' }
-        ],
-        monthlySales: [
-          { month: 'سبتمبر', amount: 2800 },
-          { month: 'أكتوبر', amount: 4200 },
-          { month: 'نوفمبر', amount: 5100 },
-          { month: 'ديسمبر', amount: 7800 },
-          { month: 'يناير', amount: 9500 },
-          { month: 'فبراير', amount: 9350 }
-        ]
-      });
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
-
-    // إضافة حساب الأدمن إن لم يكن موجوداً
-    users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-    var hasAdmin = users.some(function(u) { return u.role === 'admin'; });
-    if (!hasAdmin) {
-      users.push({
-        id: 'u_admin_1',
-        firstName: 'مدير',
-        lastName: 'النظام',
-        email: 'admin@saidat.com',
-        password: btoa('admin123'),
-        role: 'admin',
-        verified: true,
-        createdAt: '2026-01-01',
-        storeName: '',
-        storeDesc: '',
-        bankName: '',
-        iban: '',
-        bankHolder: '',
-        balance: 0,
-        totalSales: 0,
-        totalRevenue: 0,
-        products: [],
-        orders: [],
-        transactions: [],
-        monthlySales: []
-      });
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
-  }
-
   // ===== AUTH Object =====
   window.AUTH = {
 
-    init: function() {
-      initDefaultUsers();
+    _user: null,       // cached auth user
+    _profile: null,    // cached profile from DB
+
+    // ===== التهيئة =====
+    init: async function() {
+      var sb = SUPA.getClient();
+      if (!sb) { console.warn('Supabase not available'); return; }
+
+      // استرجاع الجلسة الحالية
+      try {
+        var res = await sb.auth.getSession();
+        var session = res.data.session;
+        if (session && session.user) {
+          this._user = session.user;
+          await this._loadProfile();
+        }
+      } catch(e) {
+        console.warn('Auth init error:', e);
+      }
+
+      // الاستماع لتغييرات الجلسة
+      sb.auth.onAuthStateChange(async function(event, session) {
+        if (session && session.user) {
+          AUTH._user = session.user;
+          await AUTH._loadProfile();
+        } else {
+          AUTH._user = null;
+          AUTH._profile = null;
+        }
+        AUTH.updateHeader();
+      });
+
       this.updateHeader();
     },
 
-    // تسجيل مستخدم جديد
-    register: function(data) {
-      var users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-
-      // تحقق من وجود البريد
-      var exists = users.some(function(u) { return u.email === data.email; });
-      if (exists) {
-        return { success: false, message: 'البريد الإلكتروني مسجل مسبقاً' };
+    // تحميل بيانات البروفايل من جدول profiles
+    _loadProfile: async function() {
+      if (!this._user) return;
+      var sb = SUPA.getClient();
+      try {
+        var res = await sb
+          .from('profiles')
+          .select('*')
+          .eq('id', this._user.id)
+          .single();
+        if (res.data) this._profile = res.data;
+      } catch(e) {
+        console.warn('Profile load error:', e);
       }
-
-      var user = {
-        id: 'u_' + Date.now(),
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone,
-        password: btoa(data.password),
-        role: 'seller',
-        verified: false,
-        createdAt: new Date().toISOString().split('T')[0],
-        storeName: '',
-        storeDesc: '',
-        bankName: '',
-        iban: '',
-        bankHolder: '',
-        balance: 0,
-        totalSales: 0,
-        totalRevenue: 0,
-        products: [],
-        orders: [],
-        transactions: [],
-        monthlySales: [
-          { month: 'سبتمبر', amount: 0 },
-          { month: 'أكتوبر', amount: 0 },
-          { month: 'نوفمبر', amount: 0 },
-          { month: 'ديسمبر', amount: 0 },
-          { month: 'يناير', amount: 0 },
-          { month: 'فبراير', amount: 0 }
-        ]
-      };
-
-      users.push(user);
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-
-      // تسجيل دخول تلقائي
-      localStorage.setItem(SESSION_KEY, user.id);
-
-      return { success: true, user: user };
     },
 
-    // تسجيل الدخول
-    login: function(email, password) {
-      var users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-      var user = users.find(function(u) {
-        return u.email === email && u.password === btoa(password);
-      });
+    // ===== تسجيل مستخدم جديد =====
+    register: async function(data) {
+      var sb = SUPA.getClient();
+      if (!sb) return { success: false, message: 'خطأ في الاتصال بالخادم' };
 
-      if (!user) {
-        return { success: false, message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' };
+      try {
+        var res = await sb.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              first_name: data.firstName,
+              last_name: data.lastName,
+              phone: data.phone,
+              role: 'seller'
+            }
+          }
+        });
+
+        if (res.error) {
+          if (res.error.message.includes('already registered')) {
+            return { success: false, message: 'البريد الإلكتروني مسجل مسبقاً' };
+          }
+          return { success: false, message: res.error.message };
+        }
+
+        if (res.data.user) {
+          this._user = res.data.user;
+          // انتظر قليلاً ليتم إنشاء البروفايل من الـ trigger
+          await new Promise(function(r) { setTimeout(r, 1500); });
+          await this._loadProfile();
+          return { success: true, user: this._formatUser() };
+        }
+
+        return { success: false, message: 'حدث خطأ غير متوقع' };
+      } catch(e) {
+        return { success: false, message: 'خطأ في الاتصال: ' + e.message };
       }
-
-      if (user.suspended) {
-        return { success: false, message: 'تم تعليق حسابك. تواصل مع إدارة الموقع.' };
-      }
-
-      localStorage.setItem(SESSION_KEY, user.id);
-      return { success: true, user: user };
     },
 
-    // تسجيل الخروج
-    logout: function() {
-      localStorage.removeItem(SESSION_KEY);
+    // ===== تسجيل الدخول =====
+    login: async function(email, password) {
+      var sb = SUPA.getClient();
+      if (!sb) return { success: false, message: 'خطأ في الاتصال بالخادم' };
+
+      try {
+        var res = await sb.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (res.error) {
+          if (res.error.message.includes('Invalid login')) {
+            return { success: false, message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' };
+          }
+          return { success: false, message: res.error.message };
+        }
+
+        if (res.data.user) {
+          this._user = res.data.user;
+          await this._loadProfile();
+
+          // تحقق من التعليق
+          if (this._profile && this._profile.suspended) {
+            await sb.auth.signOut();
+            this._user = null;
+            this._profile = null;
+            return { success: false, message: 'تم تعليق حسابك. تواصل مع إدارة الموقع.' };
+          }
+
+          return { success: true, user: this._formatUser() };
+        }
+
+        return { success: false, message: 'حدث خطأ غير متوقع' };
+      } catch(e) {
+        return { success: false, message: 'خطأ في الاتصال: ' + e.message };
+      }
+    },
+
+    // ===== تسجيل الخروج =====
+    logout: async function() {
+      var sb = SUPA.getClient();
+      if (sb) {
+        await sb.auth.signOut();
+      }
+      this._user = null;
+      this._profile = null;
       window.location.href = 'index.html';
     },
 
-    // المستخدم الحالي
+    // ===== المستخدم الحالي =====
     getCurrentUser: function() {
-      var sessionId = localStorage.getItem(SESSION_KEY);
-      if (!sessionId) return null;
-
-      var users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-      return users.find(function(u) { return u.id === sessionId; }) || null;
+      if (!this._user || !this._profile) return null;
+      return this._formatUser();
     },
 
-    // هل مسجل دخول؟
+    // تحويل البيانات لنفس الصيغة القديمة (للتوافق مع الصفحات)
+    _formatUser: function() {
+      var p = this._profile;
+      if (!p) return null;
+      return {
+        id: p.id,
+        firstName: p.first_name,
+        lastName: p.last_name,
+        email: this._user ? this._user.email : '',
+        phone: p.phone || '',
+        role: p.role,
+        verified: p.verified,
+        suspended: p.suspended,
+        createdAt: p.created_at ? p.created_at.split('T')[0] : '',
+        storeName: p.store_name || '',
+        storeDesc: p.store_desc || '',
+        bankName: p.bank_name || '',
+        iban: p.iban || '',
+        bankHolder: p.bank_holder || '',
+        balance: parseFloat(p.balance) || 0,
+        totalSales: parseInt(p.total_sales) || 0,
+        totalRevenue: parseFloat(p.total_revenue) || 0
+      };
+    },
+
+    // ===== هل مسجل دخول؟ =====
     isLoggedIn: function() {
-      return this.getCurrentUser() !== null;
+      return this._user !== null && this._profile !== null;
     },
 
-    // تحديث بيانات المستخدم
-    updateUser: function(updatedUser) {
-      var users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-      var index = users.findIndex(function(u) { return u.id === updatedUser.id; });
-      if (index !== -1) {
-        users[index] = updatedUser;
-        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    // ===== تحديث بيانات البروفايل =====
+    updateUser: async function(updatedData) {
+      var sb = SUPA.getClient();
+      if (!sb || !this._user) return false;
+
+      try {
+        var updateObj = {};
+        if (updatedData.firstName !== undefined) updateObj.first_name = updatedData.firstName;
+        if (updatedData.lastName !== undefined) updateObj.last_name = updatedData.lastName;
+        if (updatedData.phone !== undefined) updateObj.phone = updatedData.phone;
+        if (updatedData.storeName !== undefined) updateObj.store_name = updatedData.storeName;
+        if (updatedData.storeDesc !== undefined) updateObj.store_desc = updatedData.storeDesc;
+        if (updatedData.bankName !== undefined) updateObj.bank_name = updatedData.bankName;
+        if (updatedData.iban !== undefined) updateObj.iban = updatedData.iban;
+        if (updatedData.bankHolder !== undefined) updateObj.bank_holder = updatedData.bankHolder;
+        if (updatedData.balance !== undefined) updateObj.balance = updatedData.balance;
+        if (updatedData.totalSales !== undefined) updateObj.total_sales = updatedData.totalSales;
+        if (updatedData.totalRevenue !== undefined) updateObj.total_revenue = updatedData.totalRevenue;
+        if (updatedData.verified !== undefined) updateObj.verified = updatedData.verified;
+        if (updatedData.suspended !== undefined) updateObj.suspended = updatedData.suspended;
+        if (updatedData.role !== undefined) updateObj.role = updatedData.role;
+
+        // إذا لم يتم تحويل أي حقول، استخدم البيانات كما هي
+        if (Object.keys(updateObj).length === 0) {
+          updateObj = Object.assign({}, updatedData);
+          delete updateObj.id;
+          delete updateObj.email;
+        }
+
+        var targetId = updatedData.id || this._user.id;
+
+        var res = await sb
+          .from('profiles')
+          .update(updateObj)
+          .eq('id', targetId);
+
+        if (res.error) {
+          console.error('Update error:', res.error);
+          return false;
+        }
+
+        if (targetId === this._user.id) {
+          await this._loadProfile();
+        }
         return true;
+      } catch(e) {
+        console.error('Update error:', e);
+        return false;
       }
-      return false;
     },
 
-    // هل المستخدم الحالي أدمن؟
+    // ===== هل المستخدم الحالي أدمن؟ =====
     isAdmin: function() {
-      var user = this.getCurrentUser();
-      return user && user.role === 'admin';
+      return this._profile && this._profile.role === 'admin';
     },
 
-    // جلب جميع المستخدمين
-    getAllUsers: function() {
-      return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    // ===== جلب جميع المستخدمين (للأدمن) =====
+    getAllUsers: async function() {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+
+      try {
+        var res = await sb
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (res.error || !res.data) return [];
+
+        return res.data.map(function(p) {
+          return {
+            id: p.id,
+            firstName: p.first_name,
+            lastName: p.last_name,
+            email: '',
+            phone: p.phone || '',
+            role: p.role,
+            verified: p.verified,
+            suspended: p.suspended,
+            createdAt: p.created_at ? p.created_at.split('T')[0] : '',
+            storeName: p.store_name || '',
+            storeDesc: p.store_desc || '',
+            bankName: p.bank_name || '',
+            iban: p.iban || '',
+            bankHolder: p.bank_holder || '',
+            balance: parseFloat(p.balance) || 0,
+            totalSales: parseInt(p.total_sales) || 0,
+            totalRevenue: parseFloat(p.total_revenue) || 0
+          };
+        });
+      } catch(e) {
+        console.error('getAllUsers error:', e);
+        return [];
+      }
     },
 
-    // حذف مستخدم
-    deleteUser: function(userId) {
-      var users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-      users = users.filter(function(u) { return u.id !== userId; });
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    // ===== حذف/تعليق مستخدم =====
+    deleteUser: async function(userId) {
+      var sb = SUPA.getClient();
+      if (!sb) return;
+      await sb.from('profiles').update({ suspended: true }).eq('id', userId);
+    },
+
+    // ===== DB: منتجات تاجر =====
+    getProducts: async function(sellerId) {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var id = sellerId || (this._user ? this._user.id : null);
+      if (!id) return [];
+      var res = await sb.from('products').select('*').eq('seller_id', id).order('created_at', { ascending: false });
+      return res.data || [];
+    },
+
+    // ===== DB: كل المنتجات النشطة =====
+    getAllProducts: async function() {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var res = await sb.from('products').select('*, profiles(store_name, first_name, last_name, verified)').eq('active', true).order('created_at', { ascending: false });
+      return res.data || [];
+    },
+
+    // ===== DB: منتج واحد =====
+    getProduct: async function(productId) {
+      var sb = SUPA.getClient();
+      if (!sb) return null;
+      var res = await sb.from('products').select('*, profiles(store_name, first_name, last_name, verified, phone)').eq('id', productId).single();
+      return res.data || null;
+    },
+
+    // ===== DB: إضافة منتج =====
+    addProduct: async function(product) {
+      var sb = SUPA.getClient();
+      if (!sb || !this._user) return null;
+      product.seller_id = this._user.id;
+      var res = await sb.from('products').insert(product).select().single();
+      if (res.error) { console.error('addProduct:', res.error); return null; }
+      return res.data;
+    },
+
+    // ===== DB: تحديث منتج =====
+    updateProduct: async function(productId, updates) {
+      var sb = SUPA.getClient();
+      if (!sb) return false;
+      var res = await sb.from('products').update(updates).eq('id', productId);
+      return !res.error;
+    },
+
+    // ===== DB: حذف منتج =====
+    deleteProduct: async function(productId) {
+      var sb = SUPA.getClient();
+      if (!sb) return false;
+      var res = await sb.from('products').delete().eq('id', productId);
+      return !res.error;
+    },
+
+    // ===== DB: طلبات تاجر =====
+    getOrders: async function(sellerId) {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var id = sellerId || (this._user ? this._user.id : null);
+      if (!id) return [];
+      var res = await sb.from('orders').select('*').eq('seller_id', id).order('created_at', { ascending: false });
+      return res.data || [];
+    },
+
+    // ===== DB: كل الطلبات =====
+    getAllOrders: async function() {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var res = await sb.from('orders').select('*').order('created_at', { ascending: false });
+      return res.data || [];
+    },
+
+    // ===== DB: تحديث طلب =====
+    updateOrder: async function(orderId, updates) {
+      var sb = SUPA.getClient();
+      if (!sb) return false;
+      var res = await sb.from('orders').update(updates).eq('id', orderId);
+      return !res.error;
+    },
+
+    // ===== DB: إضافة طلب =====
+    addOrder: async function(order) {
+      var sb = SUPA.getClient();
+      if (!sb) return null;
+      var res = await sb.from('orders').insert(order).select().single();
+      if (res.error) { console.error('addOrder:', res.error); return null; }
+      return res.data;
+    },
+
+    // ===== DB: سجل حالة الطلب =====
+    addOrderHistory: async function(orderId, status, note) {
+      var sb = SUPA.getClient();
+      if (!sb) return false;
+      var res = await sb.from('order_status_history').insert({ order_id: orderId, status: status, note: note || '' });
+      return !res.error;
+    },
+
+    getOrderHistory: async function(orderId) {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var res = await sb.from('order_status_history').select('*').eq('order_id', orderId).order('created_at', { ascending: true });
+      return res.data || [];
+    },
+
+    // ===== DB: معاملات تاجر =====
+    getTransactions: async function(sellerId) {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var id = sellerId || (this._user ? this._user.id : null);
+      if (!id) return [];
+      var res = await sb.from('transactions').select('*').eq('seller_id', id).order('created_at', { ascending: false });
+      return res.data || [];
+    },
+
+    addTransaction: async function(transaction) {
+      var sb = SUPA.getClient();
+      if (!sb) return null;
+      var res = await sb.from('transactions').insert(transaction).select().single();
+      return res.data || null;
+    },
+
+    // ===== DB: مزايدات =====
+    getBids: async function(productId) {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var res = await sb.from('bids').select('*').eq('product_id', productId).order('amount', { ascending: false });
+      return res.data || [];
+    },
+
+    addBid: async function(bid) {
+      var sb = SUPA.getClient();
+      if (!sb) return null;
+      var res = await sb.from('bids').insert(bid).select().single();
+      return res.data || null;
+    },
+
+    // ===== DB: مبيعات شهرية =====
+    getMonthlySales: async function(sellerId) {
+      var sb = SUPA.getClient();
+      if (!sb) return [];
+      var id = sellerId || (this._user ? this._user.id : null);
+      if (!id) return [];
+      var res = await sb.from('monthly_sales').select('*').eq('seller_id', id).order('month', { ascending: true });
+      return res.data || [];
+    },
+
+    // ===== DB: إعدادات الأدمن =====
+    getAdminSettings: async function() {
+      var sb = SUPA.getClient();
+      if (!sb) return {};
+      var res = await sb.from('admin_settings').select('*');
+      var settings = {};
+      if (res.data) { res.data.forEach(function(r) { settings[r.key] = r.value; }); }
+      return settings;
+    },
+
+    setAdminSetting: async function(key, value) {
+      var sb = SUPA.getClient();
+      if (!sb) return false;
+      var res = await sb.from('admin_settings').upsert({ key: key, value: value });
+      return !res.error;
     },
 
     // ===== تحديث الهيدر =====
     updateHeader: function() {
       var user = this.getCurrentUser();
-      // Desktop header actions
       var desktopActions = document.querySelector('.header > .container > .header-actions');
-      // Mobile header actions
       var mobileActions = document.querySelector('.mobile-menu .header-actions');
 
       if (!desktopActions) return;
 
       if (user) {
-        var initial = user.firstName.charAt(0);
-        var name = user.firstName;
+        var initial = user.firstName ? user.firstName.charAt(0) : '?';
+        var name = user.firstName || '';
 
-        // Desktop
         desktopActions.innerHTML =
           '<div class="user-menu-wrapper">' +
             '<button class="user-menu-btn" onclick="AUTH.toggleUserMenu()">' +
@@ -260,8 +469,8 @@
             '<div class="user-dropdown" id="userDropdown">' +
               '<div class="dropdown-header">' +
                 '<span class="dropdown-avatar">' + initial + '</span>' +
-                '<div><div class="dropdown-name">' + user.firstName + ' ' + user.lastName + '</div>' +
-                '<div class="dropdown-email">' + user.email + '</div></div>' +
+                '<div><div class="dropdown-name">' + (user.firstName || '') + ' ' + (user.lastName || '') + '</div>' +
+                '<div class="dropdown-email">' + (user.email || '') + '</div></div>' +
               '</div>' +
               '<div class="dropdown-divider"></div>' +
               '<a href="dashboard.html" class="dropdown-item"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> لوحة التحكم</a>' +
@@ -272,7 +481,6 @@
             '</div>' +
           '</div>';
 
-        // Mobile
         if (mobileActions) {
           mobileActions.innerHTML =
             '<a href="dashboard.html" class="btn btn-outline">لوحة التحكم</a>' +
@@ -296,7 +504,7 @@
     }
   });
 
-  // ===== CSS للهيدر المحدث =====
+  // ===== CSS للهيدر =====
   var style = document.createElement('style');
   style.textContent = '' +
     '.user-menu-wrapper { position: relative; }' +
