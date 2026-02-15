@@ -299,6 +299,51 @@
           </div>
         </div>
 
+        <!-- ===== قسم التوثيق ===== -->
+        <div class="profile-section">
+          <div class="profile-section-title">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-1.25 17.47l-4.82-4.82 1.41-1.41 3.41 3.41 7.2-7.2 1.41 1.42-8.61 8.6z"/></svg>
+            التوثيق
+          </div>
+
+          <!-- حالة توثيق التاجر -->
+          <div class="verify-status-card" id="merchantVerifyCard">
+            <div class="verify-status-header">
+              <span class="verify-icon merchant">🏪</span>
+              <div>
+                <strong>تاجر موثق</strong>
+                <p class="verify-desc">وثّق حسابك كتاجر عن طريق رفع السجل التجاري</p>
+              </div>
+              <span class="verify-badge" id="merchantBadge">غير موثق</span>
+            </div>
+            <div id="merchantVerifyForm" class="verify-form">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label">رقم السجل التجاري</label>
+                <input type="text" class="form-input" id="profCommercialRegister" placeholder="أدخل رقم السجل التجاري" style="direction: ltr; text-align: right;">
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="submitMerchantVerification()">إرسال طلب توثيق</button>
+            </div>
+          </div>
+
+          <!-- حالة توثيق البائع -->
+          <div class="verify-status-card" id="sellerVerifyCard" style="margin-top: 16px;">
+            <div class="verify-status-header">
+              <span class="verify-icon seller">⭐</span>
+              <div>
+                <strong>بائع موثق</strong>
+                <p class="verify-desc">يُمنح تلقائياً بعد إتمام بيع مزادين بنجاح</p>
+              </div>
+              <span class="verify-badge" id="sellerBadge">غير موثق</span>
+            </div>
+            <div class="verify-progress">
+              <div class="verify-progress-bar">
+                <div class="verify-progress-fill" id="auctionProgressFill" style="width: 0%"></div>
+              </div>
+              <span class="verify-progress-text" id="auctionProgressText">0 / 2 مزاد مكتمل</span>
+            </div>
+          </div>
+        </div>
+
         <div class="profile-section">
           <div class="profile-section-title">
             <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
@@ -717,11 +762,22 @@ function updateSidebar() {
   // تحديث حالة التوثيق
   var roleEl = document.querySelector('.sidebar-user-role');
   if (roleEl) {
-    if (currentUser.verified) {
-      roleEl.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-1.25 17.47l-4.82-4.82 1.41-1.41 3.41 3.41 7.2-7.2 1.41 1.42-8.61 8.6z"/></svg> تاجر موثق';
+    var isMerchant = currentUser.merchantVerified;
+    var isSeller = currentUser.sellerVerified;
+    var checkSvg = '<svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-1.25 17.47l-4.82-4.82 1.41-1.41 3.41 3.41 7.2-7.2 1.41 1.42-8.61 8.6z"/></svg>';
+
+    if (isMerchant && isSeller) {
+      roleEl.innerHTML = checkSvg + ' تاجر وبائع موثق';
+      roleEl.className = 'sidebar-user-role verify-both';
+    } else if (isMerchant) {
+      roleEl.innerHTML = checkSvg + ' تاجر موثق';
+      roleEl.className = 'sidebar-user-role verify-merchant';
+    } else if (isSeller) {
+      roleEl.innerHTML = checkSvg + ' بائع موثق';
+      roleEl.className = 'sidebar-user-role verify-seller';
     } else {
-      roleEl.innerHTML = 'تاجر';
-      roleEl.style.opacity = '0.6';
+      roleEl.innerHTML = 'بائع';
+      roleEl.className = 'sidebar-user-role verify-none';
     }
   }
 }
@@ -1612,6 +1668,50 @@ function loadProfile() {
   document.getElementById('profCurrentPass').value = '';
   document.getElementById('profNewPass').value = '';
   document.getElementById('profConfirmPass').value = '';
+
+  // تحديث قسم التوثيق
+  document.getElementById('profCommercialRegister').value = user.commercialRegister || '';
+
+  // شارة التاجر الموثق
+  var merchantBadge = document.getElementById('merchantBadge');
+  var merchantForm = document.getElementById('merchantVerifyForm');
+  if (user.merchantVerified) {
+    merchantBadge.textContent = 'موثق ✓';
+    merchantBadge.className = 'verify-badge verified';
+    merchantForm.style.display = 'none';
+  } else if (user.commercialRegister) {
+    merchantBadge.textContent = 'قيد المراجعة';
+    merchantBadge.className = 'verify-badge pending';
+    merchantForm.style.display = 'none';
+  } else {
+    merchantBadge.textContent = 'غير موثق';
+    merchantBadge.className = 'verify-badge';
+    merchantForm.style.display = 'block';
+  }
+
+  // شارة البائع الموثق
+  var sellerBadge = document.getElementById('sellerBadge');
+  var completed = user.completedAuctions || 0;
+  var progress = Math.min(completed / 2 * 100, 100);
+  document.getElementById('auctionProgressFill').style.width = progress + '%';
+  document.getElementById('auctionProgressText').textContent = completed + ' / 2 مزاد مكتمل';
+  if (user.sellerVerified) {
+    sellerBadge.textContent = 'موثق ✓';
+    sellerBadge.className = 'verify-badge verified';
+  } else {
+    sellerBadge.textContent = 'غير موثق';
+    sellerBadge.className = 'verify-badge';
+  }
+}
+
+// إرسال طلب توثيق تاجر
+function submitMerchantVerification() {
+  var register = document.getElementById('profCommercialRegister').value.trim();
+  if (!register) { showToast('الرجاء إدخال رقم السجل التجاري', 'error'); return; }
+  currentUser.commercialRegister = register;
+  AUTH.updateUser({ commercialRegister: register });
+  loadProfile();
+  showToast('تم إرسال طلب التوثيق - سيتم مراجعته من الإدارة', 'success');
 }
 
 function saveProfile() {

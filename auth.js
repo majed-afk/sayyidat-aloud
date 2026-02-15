@@ -170,7 +170,11 @@
         email: this._user ? this._user.email : '',
         phone: p.phone || '',
         role: p.role,
-        verified: p.verified,
+        merchantVerified: p.merchant_verified || false,
+        sellerVerified: p.seller_verified || false,
+        verified: p.merchant_verified || p.seller_verified || false,
+        commercialRegister: p.commercial_register || '',
+        completedAuctions: parseInt(p.completed_auctions) || 0,
         suspended: p.suspended,
         createdAt: p.created_at ? p.created_at.split('T')[0] : '',
         storeName: p.store_name || '',
@@ -208,6 +212,10 @@
         if (updatedData.totalSales !== undefined) updateObj.total_sales = updatedData.totalSales;
         if (updatedData.totalRevenue !== undefined) updateObj.total_revenue = updatedData.totalRevenue;
         if (updatedData.verified !== undefined) updateObj.verified = updatedData.verified;
+        if (updatedData.merchantVerified !== undefined) updateObj.merchant_verified = updatedData.merchantVerified;
+        if (updatedData.sellerVerified !== undefined) updateObj.seller_verified = updatedData.sellerVerified;
+        if (updatedData.commercialRegister !== undefined) updateObj.commercial_register = updatedData.commercialRegister;
+        if (updatedData.completedAuctions !== undefined) updateObj.completed_auctions = updatedData.completedAuctions;
         if (updatedData.suspended !== undefined) updateObj.suspended = updatedData.suspended;
         if (updatedData.role !== undefined) updateObj.role = updatedData.role;
 
@@ -266,7 +274,11 @@
             email: '',
             phone: p.phone || '',
             role: p.role,
-            verified: p.verified,
+            merchantVerified: p.merchant_verified || false,
+            sellerVerified: p.seller_verified || false,
+            verified: p.merchant_verified || p.seller_verified || false,
+            commercialRegister: p.commercial_register || '',
+            completedAuctions: parseInt(p.completed_auctions) || 0,
             suspended: p.suspended,
             createdAt: p.created_at ? p.created_at.split('T')[0] : '',
             storeName: p.store_name || '',

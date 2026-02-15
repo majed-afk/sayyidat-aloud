@@ -1331,6 +1331,174 @@ tbody tr:last-child td {
   background: var(--accent-amber-dark);
 }
 
+/* ===== Verification Badges — Sidebar ===== */
+.sidebar-user-role.verify-both {
+  color: #2ECC71;
+}
+.sidebar-user-role.verify-both svg { fill: #2ECC71; }
+
+.sidebar-user-role.verify-merchant {
+  color: #5DADE2;
+}
+.sidebar-user-role.verify-merchant svg { fill: #5DADE2; }
+
+.sidebar-user-role.verify-seller {
+  color: #F5B041;
+}
+.sidebar-user-role.verify-seller svg { fill: #F5B041; }
+
+.sidebar-user-role.verify-none {
+  color: rgba(255,255,255,0.4);
+}
+.sidebar-user-role.verify-none svg { fill: rgba(255,255,255,0.4); }
+
+/* ===== Verification Section — Profile ===== */
+.verify-status-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  transition: border-color 0.3s ease;
+}
+
+.verify-status-card:hover {
+  border-color: var(--accent-amber-light);
+}
+
+.verify-status-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.verify-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.verify-icon.merchant {
+  background: rgba(52, 152, 219, 0.12);
+}
+
+.verify-icon.seller {
+  background: rgba(243, 156, 18, 0.12);
+}
+
+.verify-status-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.verify-status-info h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-deep);
+  margin-bottom: 2px;
+}
+
+.verify-desc {
+  font-size: 0.78rem;
+  color: var(--text-medium);
+  opacity: 0.7;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.verify-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: rgba(149, 165, 166, 0.12);
+  color: #95A5A6;
+}
+
+.verify-badge.verified {
+  background: rgba(39, 174, 96, 0.12);
+  color: #27AE60;
+}
+
+.verify-badge.pending {
+  background: rgba(243, 156, 18, 0.12);
+  color: #F39C12;
+}
+
+/* Verification Form (merchant) */
+.verify-form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-taupe);
+}
+
+.verify-form .form-group {
+  margin-bottom: 12px;
+}
+
+.verify-form .form-group label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-deep);
+  margin-bottom: 6px;
+}
+
+.verify-form .form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border-taupe);
+  border-radius: var(--radius-btn);
+  font-family: inherit;
+  font-size: 0.88rem;
+  background: var(--bg-offwhite);
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.verify-form .form-group input:focus {
+  outline: none;
+  border-color: var(--accent-amber);
+}
+
+/* Verification Progress (seller) */
+.verify-progress {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-taupe);
+}
+
+.verify-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 50px;
+  background: var(--bg-beige);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.verify-progress-fill {
+  height: 100%;
+  border-radius: 50px;
+  background: linear-gradient(90deg, #F39C12, #F5B041);
+  transition: width 0.6s ease;
+}
+
+.verify-progress-text {
+  font-size: 0.78rem;
+  color: var(--text-medium);
+  opacity: 0.7;
+}
+
 /* ===== Print Styles for Waybill ===== */
 @media print {
   body * {

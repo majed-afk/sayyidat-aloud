@@ -721,6 +721,28 @@
       if (!user) return;
       var initial = user.firstName.charAt(0);
 
+      // === Merchant Verification Section ===
+      var merchantVerifiedBadge = user.merchantVerified
+        ? '<span class="status status-completed"><span class="status-dot"></span>موثّق كتاجر</span>'
+        : '<span class="status status-cancelled"><span class="status-dot"></span>غير موثّق</span>';
+
+      var sellerVerifiedBadge = user.sellerVerified
+        ? '<span class="status status-completed"><span class="status-dot"></span>بائع موثّق</span>'
+        : '<span class="status status-cancelled"><span class="status-dot"></span>غير موثّق</span>';
+
+      var commercialRegisterHtml = '';
+      if (user.commercialRegister) {
+        commercialRegisterHtml =
+          '<div style="margin-top:16px;padding:12px;background:var(--bg-warm);border:1.5px solid var(--border-taupe);border-radius:var(--radius-btn);">' +
+          '<div style="font-weight:600;font-size:0.85rem;margin-bottom:8px;color:var(--accent-amber);">السجل التجاري المرفق</div>' +
+          '<a href="' + user.commercialRegister + '" target="_blank" rel="noopener noreferrer" style="color:var(--accent-amber);text-decoration:underline;font-size:0.85rem;">عرض السجل التجاري</a>' +
+          '</div>';
+      }
+
+      var merchantActionBtn = user.merchantVerified
+        ? '<button class="btn btn-warning btn-sm" onclick="revokeMerchant(\'' + user.id + '\')">إلغاء توثيق التاجر</button>'
+        : '<button class="btn btn-success btn-sm" onclick="verifyMerchant(\'' + user.id + '\')">توثيق كتاجر</button>';
+
       document.getElementById('userDetailBody').innerHTML =
         '<div class="user-detail-header">' +
         '<div class="user-detail-avatar">' + initial + '</div>' +
@@ -740,9 +762,20 @@
         detailItem('البنك', user.bankName || '—') +
         detailItem('IBAN', user.iban || '—') +
         detailItem('الوصف', user.storeDesc || '—') +
+        '</div>' +
+        // === Verification Section ===
+        '<div style="margin-top:20px;padding:16px;background:var(--bg-warm);border:1.5px solid var(--border-taupe);border-radius:var(--radius-btn);">' +
+        '<h4 style="margin:0 0 12px;font-size:0.9rem;color:var(--accent-amber);">حالة التوثيق</h4>' +
+        '<div class="user-detail-grid">' +
+        detailItem('توثيق التاجر', merchantVerifiedBadge) +
+        detailItem('توثيق البائع (تلقائي)', sellerVerifiedBadge) +
+        detailItem('المزادات المكتملة', formatNumber(user.completedAuctions || 0)) +
+        '</div>' +
+        commercialRegisterHtml +
         '</div>';
 
       document.getElementById('userDetailFooter').innerHTML =
+        merchantActionBtn +
         '<button class="btn ' + (user.suspended ? 'btn-success' : 'btn-warning') + ' btn-sm" onclick="toggleUserStatus(\'' + user.id + '\');closeModal(\'userDetailModal\');">' + (user.suspended ? 'تفعيل الحساب' : 'تعليق الحساب') + '</button>' +
         '<button class="btn btn-outline btn-sm" onclick="closeModal(\'userDetailModal\')">إغلاق</button>';
 
@@ -772,6 +805,25 @@
       renderOrders();
       renderFinance();
       showToast('تم حذف المستخدم بنجاح', 'success');
+    };
+
+    // ===== MERCHANT VERIFICATION =====
+    window.verifyMerchant = function(userId) {
+      if (!confirm('هل أنت متأكد من توثيق هذا المستخدم كتاجر؟')) return;
+      AUTH.updateUser({ id: userId, merchantVerified: true });
+      refreshData();
+      renderUsers();
+      closeModal('userDetailModal');
+      showToast('تم توثيق المستخدم كتاجر بنجاح', 'success');
+    };
+
+    window.revokeMerchant = function(userId) {
+      if (!confirm('هل أنت متأكد من إلغاء توثيق التاجر؟')) return;
+      AUTH.updateUser({ id: userId, merchantVerified: false });
+      refreshData();
+      renderUsers();
+      closeModal('userDetailModal');
+      showToast('تم إلغاء توثيق التاجر', 'success');
     };
 
     // ===== RENDER PRODUCTS =====
