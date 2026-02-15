@@ -713,6 +713,17 @@ function updateSidebar() {
   var initial = currentUser.firstName.charAt(0);
   document.getElementById('sidebarAvatar').textContent = initial;
   document.getElementById('sidebarName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+
+  // تحديث حالة التوثيق
+  var roleEl = document.querySelector('.sidebar-user-role');
+  if (roleEl) {
+    if (currentUser.verified) {
+      roleEl.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-1.25 17.47l-4.82-4.82 1.41-1.41 3.41 3.41 7.2-7.2 1.41 1.42-8.61 8.6z"/></svg> تاجر موثق';
+    } else {
+      roleEl.innerHTML = 'تاجر';
+      roleEl.style.opacity = '0.6';
+    }
+  }
 }
 
 function toggleSidebar() {
