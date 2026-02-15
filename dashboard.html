@@ -1060,23 +1060,54 @@ function saveProduct() {
     product.listingType = 'market';
   }
 
+  // تحويل أسماء الحقول لصيغة Supabase (snake_case)
+  var dbProduct = {
+    name: product.name,
+    listing_type: product.listingType,
+    category: product.category,
+    type: product.type,
+    origin: product.origin,
+    weight: product.weight,
+    unit: product.unit,
+    price: product.price,
+    stock: product.stock,
+    active: product.active,
+    image: product.image,
+    description: product.description,
+    start_price: product.startPrice || null,
+    min_bid: product.minBid || null,
+    auction_type: product.auctionType || null,
+    auction_duration: product.auctionDuration || null,
+    buy_now: product.buyNow || null,
+    auction_status: product.auctionStatus || null,
+    auction_start_date: product.auctionStartDate || null,
+    auction_end_date: product.auctionEndDate || null
+  };
+
   if (editId) {
+    AUTH.updateProduct(editId, dbProduct).then(function() {
+      showToast(listingType === 'auction' ? 'تم تحديث المزاد بنجاح' : 'تم تحديث المنتج بنجاح', 'success');
+    });
+    // تحديث محلياً
     var idx = currentUser.products.findIndex(function(p) { return p.id === editId; });
     if (idx !== -1) {
-      product.createdAt = currentUser.products[idx].createdAt;
-      product.active = currentUser.products[idx].active;
-      if (listingType === 'auction' && currentUser.products[idx].auctionStartDate) {
-        product.auctionStartDate = currentUser.products[idx].auctionStartDate;
-      }
-      currentUser.products[idx] = product;
+      currentUser.products[idx] = Object.assign(currentUser.products[idx], product);
     }
-    showToast(listingType === 'auction' ? 'تم تحديث المزاد بنجاح' : 'تم تحديث المنتج بنجاح', 'success');
   } else {
+    AUTH.addProduct(dbProduct).then(function(saved) {
+      if (saved) {
+        product.id = saved.id;
+        currentUser.products.push(product);
+        renderProducts();
+        renderOverview();
+      }
+    });
+    // مؤقتاً أضف محلياً
+    currentUser.products = currentUser.products || [];
     currentUser.products.push(product);
     showToast(listingType === 'auction' ? 'تم طرح المزاد بنجاح' : 'تم إضافة المنتج بنجاح', 'success');
   }
 
-  AUTH.updateUser(currentUser);
   renderProducts();
   renderOverview();
   closeProductModal();
@@ -1091,7 +1122,7 @@ function toggleProduct(id) {
   var p = currentUser.products.find(function(pr) { return pr.id === id; });
   if (p) {
     p.active = !p.active;
-    AUTH.updateUser(currentUser);
+    AUTH.updateProduct(id, { active: p.active });
     renderProducts();
     renderOverview();
     showToast(p.active ? 'تم تفعيل المنتج' : 'تم إيقاف المنتج', 'success');
@@ -1101,7 +1132,7 @@ function toggleProduct(id) {
 function deleteProduct(id) {
   if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
   currentUser.products = currentUser.products.filter(function(p) { return p.id !== id; });
-  AUTH.updateUser(currentUser);
+  AUTH.deleteProduct(id);
   renderProducts();
   renderOverview();
   showToast('تم حذف المنتج', 'success');
