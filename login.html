@@ -260,39 +260,17 @@ async function handleLogin(e) {
   btn.textContent = 'جاري تسجيل الدخول...';
 
   try {
-    // تجربة الاتصال المباشر بـ Supabase
-    var sb = SUPA.getClient();
-    if (!sb) {
-      errEl.textContent = 'DEBUG: Supabase client = null!';
+    var result = await AUTH.login(email, password);
+
+    if (result.success) {
+      window.location.href = 'dashboard.html';
+    } else {
+      errEl.textContent = result.message;
       errEl.style.display = 'block';
+      document.getElementById('loginPassword').value = '';
       btn.classList.remove('loading');
       btn.textContent = 'تسجيل الدخول';
-      return false;
     }
-
-    var directResult = await sb.auth.signInWithPassword({ email: email, password: password });
-
-    if (directResult.error) {
-      errEl.textContent = 'خطأ Supabase: ' + directResult.error.message;
-      errEl.style.display = 'block';
-      btn.classList.remove('loading');
-      btn.textContent = 'تسجيل الدخول';
-      return false;
-    }
-
-    // الدخول نجح — حمّل البروفايل
-    AUTH._user = directResult.data.user;
-    await AUTH._loadProfile();
-
-    if (!AUTH._profile) {
-      errEl.textContent = 'DEBUG: Auth OK لكن البروفايل فاضي! User ID: ' + directResult.data.user.id;
-      errEl.style.display = 'block';
-      btn.classList.remove('loading');
-      btn.textContent = 'تسجيل الدخول';
-      return false;
-    }
-
-    window.location.href = 'dashboard.html';
   } catch(err) {
     errEl.textContent = 'خطأ: ' + err.message;
     errEl.style.display = 'block';

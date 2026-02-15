@@ -651,7 +651,10 @@ var currentUser = null;
 var currentOrderFilter = 'all';
 
 // ===== INIT =====
-function initDashboard() {
+async function initDashboard() {
+  // انتظر تحميل الجلسة من Supabase
+  await AUTH.ready();
+
   currentUser = AUTH.getCurrentUser();
   if (!currentUser) {
     window.location.href = 'login.html';

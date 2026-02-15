@@ -8,6 +8,23 @@
 
     _user: null,       // cached auth user
     _profile: null,    // cached profile from DB
+    _ready: false,     // هل انتهت التهيئة؟
+    _readyPromise: null,
+
+    // ===== انتظار التهيئة =====
+    ready: function() {
+      if (this._ready) return Promise.resolve();
+      if (this._readyPromise) return this._readyPromise;
+      var self = this;
+      this._readyPromise = new Promise(function(resolve) {
+        var check = setInterval(function() {
+          if (self._ready) { clearInterval(check); resolve(); }
+        }, 50);
+        // timeout بعد 5 ثواني
+        setTimeout(function() { clearInterval(check); self._ready = true; resolve(); }, 5000);
+      });
+      return this._readyPromise;
+    },
 
     // ===== التهيئة =====
     init: async function() {
@@ -38,6 +55,7 @@
         AUTH.updateHeader();
       });
 
+      this._ready = true;
       this.updateHeader();
     },
 
