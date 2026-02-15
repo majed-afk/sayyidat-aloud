@@ -17,6 +17,11 @@
   /* Borders */
   --border-taupe: #E8DDD0;
 
+  /* Sidebar */
+  --sidebar-bg: #1A0F0A;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-active: rgba(193, 154, 107, 0.1);
+
   /* Shadows */
   --shadow-warm: rgba(44, 24, 16, 0.08);
   --shadow-warm-md: rgba(44, 24, 16, 0.12);

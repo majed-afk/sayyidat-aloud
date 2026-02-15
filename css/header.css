@@ -315,12 +315,44 @@
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
+  .header > .container,
+  .header .container {
+    height: 60px;
+    padding: 0 16px;
+  }
+
+  .logo-text {
+    font-size: 1.35rem;
+  }
+
   .nav-desktop {
+    display: none;
+  }
+
+  .header-actions .btn {
     display: none;
   }
 
   .mobile-toggle {
     display: block;
+  }
+
+  .mobile-menu {
+    top: 60px;
+    padding: 16px;
+  }
+
+  .mobile-menu .nav-link {
+    padding: 10px 0;
+    font-size: 0.95rem;
+  }
+
+  .mobile-menu .header-actions {
+    margin-top: 12px;
+  }
+
+  .mobile-menu .header-actions .btn {
+    display: flex;
   }
 
   .user-name-sm {
@@ -331,5 +363,34 @@
     left: auto;
     right: 0;
     min-width: 240px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header > .container,
+  .header .container {
+    height: 54px;
+    padding: 0 14px;
+  }
+
+  .logo-text {
+    font-size: 1.2rem;
+  }
+
+  .logo img,
+  .logo svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mobile-menu {
+    top: 54px;
+    padding: 14px;
+    gap: 8px;
+  }
+
+  .mobile-toggle {
+    padding: 6px;
+    font-size: 1.3rem;
   }
 }

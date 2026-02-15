@@ -360,54 +360,115 @@ body {
   }
 
   .filter-bar {
-    top: 72px;
+    top: 60px;
+  }
+
+  .search-input {
+    padding: 12px 20px 12px 44px;
+    font-size: 0.95rem;
+  }
+
+  .market-hero {
+    padding: 40px 0 32px;
+  }
+
+  .card-image {
+    height: 180px;
   }
 }
 
 @media (max-width: 480px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .container {
-    padding: 0 16px;
+    gap: 10px;
   }
 
   .market-hero {
-    padding: 40px 0 36px;
+    padding: 32px 0 28px;
   }
 
   .market-hero h1 {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
+  }
+
+  .market-hero .subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+
+  .search-input {
+    padding: 10px 16px 10px 40px;
+    font-size: 0.88rem;
+  }
+
+  .filter-bar {
+    top: 54px;
+    padding: 10px 0;
+  }
+
+  .filter-label {
+    font-size: 0.78rem;
   }
 
   .card-image {
-    height: 160px;
+    height: 140px;
   }
 
   .card-body {
-    padding: 12px;
+    padding: 10px;
+    gap: 4px;
   }
 
   .card-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .card-meta {
+    font-size: 0.72rem;
+  }
+
+  .card-weight {
+    font-size: 0.72rem;
   }
 
   .card-price {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
+  }
+
+  .card-seller {
+    font-size: 0.7rem;
   }
 
   .card-btn {
-    padding: 8px;
-    font-size: 0.82rem;
-  }
-
-  .header > .container {
-    padding: 0 16px;
+    padding: 7px;
+    font-size: 0.78rem;
+    margin-top: 6px;
   }
 
   .products-section {
-    padding: 24px 0 48px;
+    padding: 20px 0 40px;
+  }
+
+  .empty-state {
+    padding: 48px 16px;
+  }
+
+  .empty-icon {
+    font-size: 2.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .card-image {
+    height: 180px;
   }
 }

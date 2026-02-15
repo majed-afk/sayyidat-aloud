@@ -65,3 +65,27 @@
   opacity: 0.7;
   pointer-events: none;
 }
+
+/* Touch feedback */
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+  .btn {
+    padding: 9px 18px;
+    font-size: 0.85rem;
+  }
+
+  .btn-lg {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    min-height: 32px;
+  }
+}

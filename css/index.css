@@ -419,23 +419,122 @@
 }
 
 @media (max-width: 480px) {
+  .hero {
+    padding: 36px 0 28px;
+  }
+
+  .hero h1 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  .hero-sub {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    line-height: 1.7;
+  }
+
+  .hero .btn {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+
+  .hero .btn-lg {
+    padding: 12px 24px;
+    font-size: 0.88rem;
+  }
+
   .stats-row {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    gap: 10px;
   }
 
   .stat-box {
     width: 100%;
-    max-width: 280px;
+    max-width: none;
+    padding: 16px 20px;
+    min-width: 0;
+  }
+
+  .stat-number {
+    font-size: 1.4rem;
+  }
+
+  .stat-label {
+    font-size: 0.82rem;
+  }
+
+  .features {
+    padding: 36px 0;
+  }
+
+  .feature-card {
+    padding: 24px 20px;
+  }
+
+  .feature-icon {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+  }
+
+  .feature-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+  }
+
+  .auctions-section {
+    padding: 36px 0;
+  }
+
+  .auction-card {
+    padding: 24px 20px;
+  }
+
+  .auction-card h3 {
+    font-size: 1.05rem;
+  }
+
+  .auction-features li {
+    font-size: 0.85rem;
+  }
+
+  .dashboard-section {
+    padding: 36px 0;
   }
 
   .dash-stats {
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .dash-stat {
+    padding: 14px 10px;
+  }
+
+  .dash-stat-value {
+    font-size: 1.1rem;
+  }
+
+  .dash-stat-label {
+    font-size: 0.72rem;
   }
 
   .dash-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    padding: 16px 20px;
+  }
+
+  .dash-body {
+    padding: 16px 20px;
+  }
+
+  .dash-auction-item {
+    padding: 12px 14px;
   }
 }

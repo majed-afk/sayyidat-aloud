@@ -1,8 +1,18 @@
 /* ===== Layout Utilities ===== */
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  min-width: 0;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
+  box-sizing: border-box;
 }
 
 /* ===== Section Titles (shared across pages) ===== */
@@ -25,4 +35,41 @@
   height: 1px;
   background: var(--border-taupe);
   margin: 20px 0;
+}
+
+/* ===== Images ===== */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.92rem;
+    margin-bottom: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 14px;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
 }
