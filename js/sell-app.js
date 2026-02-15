@@ -9,6 +9,14 @@
   // ===== MOBILE MENU =====
   U.initMobileMenu('mobileToggle', 'mobileMenu', 'show-active');
 
+  // ===== فحص تسجيل الدخول =====
+  SAIDAT.auth.ready().then(function() {
+    if (!SAIDAT.auth.isLoggedIn()) {
+      SAIDAT.ui.showToast('\u064a\u062c\u0628 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0644\u0625\u0646\u0634\u0627\u0621 \u0645\u0632\u0627\u062f', 'error');
+      window.location.href = 'login.html';
+    }
+  });
+
   // ===== CATEGORY -> TYPE & UNIT DYNAMIC =====
   function onCategoryChange(value) {
     var unitSelect = document.getElementById('productUnit');
@@ -247,22 +255,109 @@
   }
 
   // ===== PUBLISH =====
-  function publishAuction() {
-    var auctionId = 'AUC-' + Math.floor(100000 + Math.random() * 900000);
-    var wrapper = document.getElementById('auctionFormWrapper');
+  async function publishAuction() {
+    var publishBtn = document.querySelector('.publish-btn, .btn-filled[onclick*="publishAuction"]');
+    if (publishBtn) { publishBtn.disabled = true; publishBtn.textContent = '\u062c\u0627\u0631\u064a \u0627\u0644\u0646\u0634\u0631...'; }
 
-    wrapper.innerHTML = '<div class="success-state">' +
-      '<span class="success-icon">\uD83C\uDF89</span>' +
-      '<h2>\u062a\u0645 \u0646\u0634\u0631 \u0645\u0632\u0627\u062f\u0643 \u0628\u0646\u062c\u0627\u062d!</h2>' +
-      '<p>\u0645\u0632\u0627\u062f\u0643 \u0623\u0635\u0628\u062d \u0645\u062a\u0627\u062d\u0627\u064b \u0627\u0644\u0622\u0646 \u0644\u0644\u0645\u0634\u062a\u0631\u064a\u0646. \u0633\u062a\u062a\u0644\u0642\u0649 \u0625\u0634\u0639\u0627\u0631\u0627\u062a \u0641\u0648\u0631\u064a\u0629 \u0639\u0646\u062f \u0643\u0644 \u0645\u0632\u0627\u064a\u062f\u0629 \u062c\u062f\u064a\u062f\u0629.</p>' +
-      '<div class="success-auction-id">\u0631\u0642\u0645 \u0627\u0644\u0645\u0632\u0627\u062f: ' + esc(auctionId) + '</div>' +
-      '<div class="success-btns">' +
-        '<a href="index.html" class="btn btn-outline">\u0627\u0644\u0639\u0648\u062f\u0629 \u0644\u0644\u0631\u0626\u064a\u0633\u064a\u0629</a>' +
-        '<a href="sell.html" class="btn btn-filled">\u0625\u0646\u0634\u0627\u0621 \u0645\u0632\u0627\u062f \u0622\u062e\u0631</a>' +
-      '</div>' +
-    '</div>';
+    try {
+      // 1. التحقق من تسجيل الدخول
+      await SAIDAT.auth.ready();
+      var user = SAIDAT.auth.getCurrentUser();
+      if (!user) {
+        SAIDAT.ui.showToast('\u064a\u062c\u0628 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0623\u0648\u0644\u0627\u064b', 'error');
+        window.location.href = 'login.html';
+        return;
+      }
 
-    document.getElementById('auction-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // 2. جمع بيانات النموذج
+      var name = (document.getElementById('productName').value || '').trim();
+      var category = document.getElementById('productCategory').value || '';
+      var productType = document.getElementById('productType').value || '';
+      var origin = document.getElementById('productOrigin').value || '';
+      var weight = document.getElementById('productWeight').value || '';
+      var unit = document.getElementById('productUnit').value || '';
+      var desc = (document.getElementById('productDesc').value || '').trim();
+      var startPrice = document.getElementById('startPrice').value || '';
+      var minBid = document.getElementById('minBid').value || '';
+      var buyNow = document.getElementById('buyNowPrice').value || '';
+      var duration = document.getElementById('auctionDuration').value || '3';
+      var auctionTypeVal = document.querySelector('input[name="auctionType"]:checked').value;
+      var freeShip = document.getElementById('freeShipping').checked;
+
+      // 3. التحقق من الحقول المطلوبة
+      if (!name) { SAIDAT.ui.showToast('\u0623\u062f\u062e\u0644 \u0627\u0633\u0645 \u0627\u0644\u0645\u0646\u062a\u062c', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; } return; }
+      if (!category) { SAIDAT.ui.showToast('\u0627\u062e\u062a\u0631 \u0627\u0644\u062a\u0635\u0646\u064a\u0641', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; } return; }
+      if (!startPrice || isNaN(Number(startPrice)) || Number(startPrice) <= 0) { SAIDAT.ui.showToast('\u0623\u062f\u062e\u0644 \u0633\u0639\u0631 \u0627\u0644\u0628\u062f\u0627\u064a\u0629', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; } return; }
+
+      // 4. حساب تاريخ انتهاء المزاد
+      var isOpenAuction = auctionTypeVal.includes('\u0639\u0631\u0648\u0636');
+      var durationDays = parseInt(duration) || 3;
+      var now = new Date();
+      var endDate = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+      // 5. بناء كائن المنتج
+      var dbProduct = {
+        name: name,
+        listing_type: 'auction',
+        category: category,
+        type: productType,
+        origin: origin,
+        weight: parseFloat(weight) || 0,
+        unit: unit,
+        description: desc,
+        price: parseFloat(startPrice) || 0,
+        start_price: parseFloat(startPrice) || 0,
+        min_bid: isOpenAuction ? null : (parseFloat(minBid) || null),
+        buy_now: parseFloat(buyNow) || null,
+        auction_type: isOpenAuction ? 'until_sold' : 'timed',
+        auction_duration: isOpenAuction ? null : durationDays,
+        auction_status: 'live',
+        auction_start_date: now.toISOString(),
+        auction_end_date: isOpenAuction ? null : endDate.toISOString(),
+        image_url: uploadedImages[0] || SAIDAT.config.DEFAULT_IMAGE,
+        active: true,
+        stock: 1,
+        free_shipping: freeShip
+      };
+
+      // 6. تحديد حالة الموافقة
+      var isVerified = user.merchantVerified || user.sellerVerified;
+      dbProduct.approval_status = isVerified ? 'approved' : 'pending';
+
+      // 7. حفظ في Supabase
+      var saved = await SAIDAT.products.add(dbProduct);
+      if (!saved) {
+        SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623 \u0623\u062b\u0646\u0627\u0621 \u062d\u0641\u0638 \u0627\u0644\u0645\u0632\u0627\u062f \u2014 \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649', 'error');
+        if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; }
+        return;
+      }
+
+      // 8. عرض رسالة النجاح
+      var wrapper = document.getElementById('auctionFormWrapper');
+      var msg = isVerified
+        ? '\u0645\u0632\u0627\u062f\u0643 \u0623\u0635\u0628\u062d \u0645\u062a\u0627\u062d\u0627\u064b \u0627\u0644\u0622\u0646 \u0644\u0644\u0645\u0634\u062a\u0631\u064a\u0646. \u0633\u062a\u062a\u0644\u0642\u0649 \u0625\u0634\u0639\u0627\u0631\u0627\u062a \u0641\u0648\u0631\u064a\u0629 \u0639\u0646\u062f \u0643\u0644 \u0645\u0632\u0627\u064a\u062f\u0629 \u062c\u062f\u064a\u062f\u0629.'
+        : '\u062a\u0645 \u0625\u0631\u0633\u0627\u0644 \u0645\u0632\u0627\u062f\u0643 \u0644\u0644\u0645\u0631\u0627\u062c\u0639\u0629. \u0633\u064a\u064f\u0646\u0634\u0631 \u0628\u0639\u062f \u0645\u0648\u0627\u0641\u0642\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629.';
+      var heading = isVerified
+        ? '\u062a\u0645 \u0646\u0634\u0631 \u0645\u0632\u0627\u062f\u0643 \u0628\u0646\u062c\u0627\u062d!'
+        : '\u062a\u0645 \u0625\u0631\u0633\u0627\u0644 \u0645\u0632\u0627\u062f\u0643 \u0644\u0644\u0645\u0631\u0627\u062c\u0639\u0629';
+
+      wrapper.innerHTML = '<div class="success-state">' +
+        '<span class="success-icon">' + (isVerified ? '\uD83C\uDF89' : '\u23F3') + '</span>' +
+        '<h2>' + esc(heading) + '</h2>' +
+        '<p>' + esc(msg) + '</p>' +
+        '<div class="success-btns">' +
+          '<a href="index.html" class="btn btn-outline">\u0627\u0644\u0639\u0648\u062f\u0629 \u0644\u0644\u0631\u0626\u064a\u0633\u064a\u0629</a>' +
+          '<a href="sell.html" class="btn btn-filled">\u0625\u0646\u0634\u0627\u0621 \u0645\u0632\u0627\u062f \u0622\u062e\u0631</a>' +
+        '</div>' +
+      '</div>';
+
+      document.getElementById('auction-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch(e) {
+      console.error('publishAuction error:', e);
+      SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623 \u063a\u064a\u0631 \u0645\u062a\u0648\u0642\u0639 \u2014 \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649', 'error');
+      if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; }
+    }
   }
 
   // ===== FAQ =====
