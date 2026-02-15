@@ -259,14 +259,23 @@ async function handleLogin(e) {
   btn.classList.add('loading');
   btn.textContent = 'جاري تسجيل الدخول...';
 
-  var result = await AUTH.login(email, password);
+  try {
+    var result = await AUTH.login(email, password);
+    console.log('Login result:', JSON.stringify(result));
 
-  if (result.success) {
-    window.location.href = 'dashboard.html';
-  } else {
-    errEl.textContent = result.message;
+    if (result.success) {
+      window.location.href = 'dashboard.html';
+    } else {
+      errEl.textContent = result.message;
+      errEl.style.display = 'block';
+      document.getElementById('loginPassword').value = '';
+      btn.classList.remove('loading');
+      btn.textContent = 'تسجيل الدخول';
+    }
+  } catch(err) {
+    console.error('Login error:', err);
+    errEl.textContent = 'خطأ: ' + err.message;
     errEl.style.display = 'block';
-    document.getElementById('loginPassword').value = '';
     btn.classList.remove('loading');
     btn.textContent = 'تسجيل الدخول';
   }
