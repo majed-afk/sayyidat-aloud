@@ -98,9 +98,27 @@
       if (!file.type.startsWith('image/')) return;
       if (file.size > MAX_SIZE) return;
 
+      // فحص الصورة بالذكاء الاصطناعي
       var reader = new FileReader();
-      reader.onload = function(e) {
-        uploadedImages.push(e.target.result);
+      reader.onload = async function(e) {
+        var dataUrl = e.target.result;
+
+        if (SAIDAT.imageGuard) {
+          try {
+            var result = await SAIDAT.imageGuard.checkImage(file);
+            if (!result.ok) {
+              SAIDAT.ui.showToast(result.issues[0] || 'تم رفض الصورة', 'error');
+              return;
+            }
+            if (result.warnings.length > 0) {
+              SAIDAT.ui.showToast(result.warnings[0], 'warning');
+            }
+          } catch(err) {
+            console.warn('Image check failed:', err);
+          }
+        }
+
+        uploadedImages.push(dataUrl);
         renderImageGrid();
       };
       reader.readAsDataURL(file);

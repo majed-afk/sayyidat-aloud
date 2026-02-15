@@ -321,7 +321,7 @@
     SAIDAT.ui.closeModal('productModal');
   }
 
-  function saveProduct() {
+  async function saveProduct() {
     var name = document.getElementById('pmName').value.trim();
     var stock = parseInt(document.getElementById('pmStock').value);
     var weight = parseFloat(document.getElementById('pmWeight').value);
@@ -347,6 +347,22 @@
       description: document.getElementById('pmDesc').value.trim(),
       createdAt: new Date().toISOString().split('T')[0]
     };
+
+    // فحص رابط الصورة بالذكاء الاصطناعي
+    if (product.image && SAIDAT.imageGuard && !editId) {
+      try {
+        var imgCheck = await SAIDAT.imageGuard.checkImage(product.image);
+        if (!imgCheck.ok) {
+          SAIDAT.ui.showToast(imgCheck.issues[0] || 'صورة المنتج غير مقبولة', 'error');
+          return;
+        }
+        if (imgCheck.warnings.length > 0) {
+          SAIDAT.ui.showToast(imgCheck.warnings[0], 'warning');
+        }
+      } catch(err) {
+        console.warn('Image check failed:', err);
+      }
+    }
 
     if (listingType === 'auction') {
       var startPrice = parseFloat(document.getElementById('pmStartPrice').value);
