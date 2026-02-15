@@ -64,6 +64,19 @@
       if (id && SAIDAT.products && typeof SAIDAT.products.getOne === 'function') {
         var data = await SAIDAT.products.getOne(id);
         if (data) {
+          // حماية: منع عرض منتج غير معتمد
+          if (data.approval_status && data.approval_status !== 'approved') {
+            var main = document.querySelector('.product-main') || document.querySelector('main');
+            if (main) {
+              main.innerHTML = '<div style="text-align:center;padding:80px 20px;">' +
+                '<div style="font-size:3rem;margin-bottom:16px">\u26A0\uFE0F</div>' +
+                '<h2 style="color:#2C1810;margin-bottom:8px">\u0647\u0630\u0627 \u0627\u0644\u0645\u0646\u062a\u062c \u063a\u064a\u0631 \u0645\u062a\u0627\u062d \u062d\u0627\u0644\u064a\u0627\u064b</h2>' +
+                '<p style="color:#4A2C1A;opacity:0.7">\u0627\u0644\u0645\u0646\u062a\u062c \u0628\u0627\u0646\u062a\u0638\u0627\u0631 \u0645\u0648\u0627\u0641\u0642\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629</p>' +
+                '<a href="market.html" style="display:inline-block;margin-top:20px;padding:10px 24px;background:#C19A6B;color:#fff;border-radius:8px;text-decoration:none">\u062a\u0635\u0641\u062d \u0627\u0644\u0633\u0648\u0642</a>' +
+              '</div>';
+            }
+            return;
+          }
           product = normalizeProduct(data);
           renderProduct();
           setupEventListeners();

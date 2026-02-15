@@ -13,6 +13,7 @@
   var allOrders = [];
   var allTransactions = [];
   var currentOrderFilter = 'all';
+  var productApprovalFilter = 'all';
 
   // ===== SECTION TITLES =====
   var sectionTitles = {
@@ -130,9 +131,12 @@
       .filter(function(t) { return t.type === 'commission'; })
       .reduce(function(s, t) { return s + Math.abs(t.amount || 0); }, 0);
 
+    var pendingProducts = allProducts.filter(function(p) { return (p.approval_status || 'approved') === 'pending'; }).length;
+
     document.getElementById('adminStatsGrid').innerHTML =
       statCard('users', '\u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646', U.formatNumber(totalUsers), '\u062a\u0627\u062c\u0631 \u0645\u0633\u062c\u0644') +
       statCard('products-stat', '\u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a', U.formatNumber(totalProducts), '\u0645\u0646\u062a\u062c \u0645\u0639\u0631\u0648\u0636') +
+      statCard('orders', '\u0628\u0627\u0646\u062a\u0638\u0627\u0631 \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629', U.formatNumber(pendingProducts), '\u0645\u0646\u062a\u062c \u064a\u0646\u062a\u0638\u0631 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629') +
       statCard('orders', '\u0627\u0644\u0637\u0644\u0628\u0627\u062a', U.formatNumber(totalOrders), '\u0637\u0644\u0628 \u0625\u062c\u0645\u0627\u0644\u064a') +
       statCard('revenue', '\u0627\u0644\u0625\u064a\u0631\u0627\u062f\u0627\u062a', U.formatCurrency(totalRevenue), '\u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u0645\u0628\u064a\u0639\u0627\u062a') +
       statCard('commission', '\u0627\u0644\u0639\u0645\u0648\u0644\u0627\u062a', U.formatCurrency(totalCommission), '\u0623\u0631\u0628\u0627\u062d \u0627\u0644\u0645\u0646\u0635\u0629');
@@ -443,6 +447,8 @@
       if (typeFilter !== 'all' && p.listing_type !== typeFilter) return false;
       if (statusFilter === 'active' && !p.active) return false;
       if (statusFilter === 'inactive' && p.active) return false;
+      var approvalStatus = p.approval_status || 'approved';
+      if (productApprovalFilter !== 'all' && approvalStatus !== productApprovalFilter) return false;
       return true;
     });
 
@@ -462,6 +468,22 @@
         ? '<span class="status status-completed"><span class="status-dot"></span>\u0646\u0634\u0637</span>'
         : '<span class="status status-cancelled"><span class="status-dot"></span>\u0645\u062a\u0648\u0642\u0641</span>';
 
+      var approvalStatus = p.approval_status || 'approved';
+      var approvalBadge = '';
+      if (approvalStatus === 'pending') {
+        approvalBadge = '<span class="status" style="background:rgba(243,156,18,0.1);color:#F39C12"><span class="status-dot" style="background:#F39C12"></span>\u0628\u0627\u0646\u062a\u0638\u0627\u0631 \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629</span>';
+      } else if (approvalStatus === 'rejected') {
+        approvalBadge = '<span class="status" style="background:rgba(231,76,60,0.1);color:#E74C3C"><span class="status-dot" style="background:#E74C3C"></span>\u0645\u0631\u0641\u0648\u0636</span>';
+      } else {
+        approvalBadge = '<span class="status" style="background:rgba(39,174,96,0.1);color:#27AE60"><span class="status-dot" style="background:#27AE60"></span>\u0645\u0639\u062a\u0645\u062f</span>';
+      }
+
+      var approvalActions = '';
+      if ((p.approval_status || 'approved') === 'pending') {
+        approvalActions = '<button class="btn btn-sm" style="background:#27AE60;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.78rem;margin-left:4px" onclick="approveProduct(\'' + U.escapeHtml(p.id) + '\')">\u2713 \u0627\u0639\u062a\u0645\u0627\u062f</button>' +
+          '<button class="btn btn-sm" style="background:#E74C3C;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.78rem;margin-left:4px" onclick="rejectProduct(\'' + U.escapeHtml(p.id) + '\')">\u2717 \u0631\u0641\u0636</button>';
+      }
+
       var imgUrl = U.safeImageUrl(p.image_url || p.image || '');
 
       html += '<tr>' +
@@ -476,13 +498,20 @@
         '<td>' + priceDisplay + '</td>' +
         '<td>' + U.formatNumber(p.stock || 0) + '</td>' +
         '<td>' + statusBdg + '</td>' +
+        '<td>' + approvalBadge + '</td>' +
         '<td><div class="table-actions">' +
+        approvalActions +
         '<button class="btn btn-outline btn-sm" onclick="toggleProduct(\'' + U.escapeHtml(p.id) + '\')">' + (p.active ? '\u0625\u064a\u0642\u0627\u0641' : '\u062a\u0641\u0639\u064a\u0644') + '</button>' +
         '<button class="btn btn-danger btn-sm" onclick="removeProduct(\'' + U.escapeHtml(p.id) + '\')">\u0625\u0632\u0627\u0644\u0629</button>' +
         '</div></td>' +
         '</tr>';
     });
-    document.getElementById('adminProductsBody').innerHTML = html || emptyRow(8);
+    document.getElementById('adminProductsBody').innerHTML = html || emptyRow(9);
+
+    // Update pending count badge
+    var pendingCount = allProducts.filter(function(p) { return (p.approval_status || 'approved') === 'pending'; }).length;
+    var countEl = document.getElementById('pendingProductsCount');
+    if (countEl) countEl.textContent = pendingCount;
   };
 
   window.toggleProduct = async function(productId) {
@@ -783,6 +812,43 @@
   function emptyRow(cols) {
     return '<tr><td colspan="' + cols + '"><div class="empty-state"><svg viewBox="0 0 24 24" width="48" height="48" fill="#ccc"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg><h3>\u0644\u0627 \u062a\u0648\u062c\u062f \u0628\u064a\u0627\u0646\u0627\u062a</h3></div></td></tr>';
   }
+
+  // ===== PRODUCT APPROVAL =====
+  window.approveProduct = async function(productId) {
+    var ok = await SAIDAT.products.update(productId, { approval_status: 'approved', active: true });
+    if (!ok) {
+      SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
+      return;
+    }
+    await refreshData();
+    renderProducts();
+    renderDashboard();
+    SAIDAT.ui.showToast('\u062a\u0645\u062a \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u0649 \u0627\u0644\u0645\u0646\u062a\u062c \u2713', 'success');
+  };
+
+  window.rejectProduct = async function(productId) {
+    var reason = prompt('\u0633\u0628\u0628 \u0627\u0644\u0631\u0641\u0636 (\u0627\u062e\u062a\u064a\u0627\u0631\u064a):') || '';
+    var updates = { approval_status: 'rejected', active: false };
+    if (reason) updates.rejection_reason = reason;
+    var ok = await SAIDAT.products.update(productId, updates);
+    if (!ok) {
+      SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
+      return;
+    }
+    await refreshData();
+    renderProducts();
+    renderDashboard();
+    SAIDAT.ui.showToast('\u062a\u0645 \u0631\u0641\u0636 \u0627\u0644\u0645\u0646\u062a\u062c', 'success');
+  };
+
+  window.filterProductApproval = function(filter) {
+    productApprovalFilter = filter;
+    var tabs = document.querySelectorAll('#productApprovalTabs .tab-btn');
+    tabs.forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+    });
+    renderProducts();
+  };
 
   // ===== HASH CHANGE =====
   window.addEventListener('hashchange', function() {

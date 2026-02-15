@@ -189,6 +189,16 @@
         priceHTML = U.formatCurrency(p.price);
       }
 
+      var approvalStatus = p.approval_status || p.approvalStatus || 'approved';
+      var approvalBadge = '';
+      if (approvalStatus === 'pending') {
+        approvalBadge = '<span class="badge badge-warning">بانتظار الموافقة</span>';
+      } else if (approvalStatus === 'approved') {
+        approvalBadge = '<span class="badge badge-success">معتمد</span>';
+      } else if (approvalStatus === 'rejected') {
+        approvalBadge = '<span class="badge badge-danger">مرفوض</span>';
+      }
+
       html +=
         '<tr>' +
           '<td><div class="product-name-cell"><img class="product-thumb" src="' + pImage + '" alt="' + pName + '" onerror="this.style.background=\'linear-gradient(135deg,#4A2C1A,#C19A6B)\';this.src=\'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==\'"><span>' + pName + '</span></div></td>' +
@@ -198,6 +208,7 @@
           '<td style="font-weight:600;">' + priceHTML + '</td>' +
           '<td>' + p.stock + '</td>' +
           '<td>' + (p.active ? '<span class="status status-active"><span class="status-dot"></span>نشط</span>' : '<span class="status status-inactive"><span class="status-dot"></span>متوقف</span>') + '</td>' +
+          '<td>' + approvalBadge + '</td>' +
           '<td><div class="action-btns">' +
             '<button class="btn btn-sm btn-outline" onclick="editProduct(\'' + U.escapeHtml(p.id) + '\')">تعديل</button>' +
             '<button class="btn btn-sm ' + (p.active ? 'btn-warning' : 'btn-success') + '" onclick="toggleProduct(\'' + U.escapeHtml(p.id) + '\')">' + (p.active ? 'إيقاف' : 'تفعيل') + '</button>' +
@@ -408,6 +419,12 @@
       auction_end_date: product.auctionEndDate || null
     };
 
+    // تحديد حالة الموافقة بناءً على توثيق البائع
+    if (!editId) {
+      var isVerified = currentUser.merchantVerified || currentUser.sellerVerified;
+      dbProduct.approval_status = isVerified ? 'approved' : 'pending';
+    }
+
     if (editId) {
       SAIDAT.products.update(editId, dbProduct).then(function() {
         SAIDAT.ui.showToast(listingType === 'auction' ? 'تم تحديث المزاد بنجاح' : 'تم تحديث المنتج بنجاح', 'success');
@@ -429,7 +446,11 @@
       // مؤقتاً أضف محلياً
       currentUser.products = currentUser.products || [];
       currentUser.products.push(product);
-      SAIDAT.ui.showToast(listingType === 'auction' ? 'تم طرح المزاد بنجاح' : 'تم إضافة المنتج بنجاح', 'success');
+      var isVerifiedToast = currentUser.merchantVerified || currentUser.sellerVerified;
+      SAIDAT.ui.showToast(
+        isVerifiedToast ? 'تم نشر المنتج بنجاح' : 'تم إرسال المنتج للمراجعة — سيتم نشره بعد موافقة الإدارة',
+        'success'
+      );
     }
 
     renderProducts();

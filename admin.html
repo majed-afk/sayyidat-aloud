@@ -181,6 +181,12 @@
 
         <!-- ===== القسم 3: إدارة المنتجات ===== -->
         <div class="section-panel" id="section-products">
+          <div id="productApprovalTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <button class="tab-btn active" data-filter="all" onclick="filterProductApproval('all')">الكل</button>
+            <button class="tab-btn" data-filter="pending" onclick="filterProductApproval('pending')">بانتظار الموافقة <span class="count-badge" id="pendingProductsCount" style="background:#F39C12;color:#fff;border-radius:10px;padding:1px 7px;font-size:0.72rem;margin-right:4px">0</span></button>
+            <button class="tab-btn" data-filter="approved" onclick="filterProductApproval('approved')">معتمد</button>
+            <button class="tab-btn" data-filter="rejected" onclick="filterProductApproval('rejected')">مرفوض</button>
+          </div>
           <div class="table-card">
             <div class="table-header">
               <span class="table-title">إدارة المنتجات</span>
@@ -209,6 +215,7 @@
                     <th>السعر</th>
                     <th>المخزون</th>
                     <th>الحالة</th>
+                    <th>الموافقة</th>
                     <th>إجراءات</th>
                   </tr>
                 </thead>

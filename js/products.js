@@ -40,10 +40,31 @@
           .from('products')
           .select('*, profiles(store_name, first_name, last_name, verified)')
           .eq('active', true)
+          .eq('approval_status', 'approved')
           .order('created_at', { ascending: false });
         return res.data || [];
       } catch(e) {
         console.error('getAllProducts error:', e);
+        return [];
+      }
+    },
+
+    /**
+     * جلب كل المنتجات (للأدمن — بدون فلترة)
+     * @returns {Promise<Array>}
+     */
+    getAllAdmin: async function() {
+      var sb = U.getSupabase();
+      if (!sb) return [];
+
+      try {
+        var res = await sb
+          .from('products')
+          .select('*, profiles(store_name, first_name, last_name, id, merchant_verified, seller_verified)')
+          .order('created_at', { ascending: false });
+        return res.data || [];
+      } catch(e) {
+        console.error('getAllAdmin error:', e);
         return [];
       }
     },

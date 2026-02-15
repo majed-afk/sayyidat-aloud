@@ -43,6 +43,13 @@ SAIDAT.config = {
     until_sold: 'منتهي بالبيع'
   },
 
+  // تسميات حالات الموافقة على المنتجات
+  APPROVAL_LABELS: {
+    pending: 'بانتظار الموافقة',
+    approved: 'معتمد',
+    rejected: 'مرفوض'
+  },
+
   // المبيعات الشهرية الافتراضية
   DEFAULT_MONTHLY_SALES: [
     { month: 'سبتمبر', amount: 0 },
@@ -75,6 +82,8 @@ SAIDAT.config = {
     auctionDuration: 'auction_duration',
     buyNow: 'buy_now',
     auctionStatus: 'auction_status',
+    approvalStatus: 'approval_status',
+    rejectionReason: 'rejection_reason',
     auctionStartDate: 'auction_start_date',
     auctionEndDate: 'auction_end_date',
     imageUrl: 'image_url',
