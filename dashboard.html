@@ -661,6 +661,39 @@ async function initDashboard() {
     return;
   }
 
+  // جلب البيانات من Supabase وإضافتها للمستخدم
+  try {
+    var products = await AUTH.getProducts();
+    var orders = await AUTH.getOrders();
+    var transactions = await AUTH.getTransactions();
+    var monthlySales = await AUTH.getMonthlySales();
+
+    currentUser.products = products || [];
+    currentUser.orders = orders || [];
+    currentUser.transactions = transactions || [];
+    currentUser.monthlySales = monthlySales.length > 0 ? monthlySales : [
+      { month: 'سبتمبر', amount: 0 },
+      { month: 'أكتوبر', amount: 0 },
+      { month: 'نوفمبر', amount: 0 },
+      { month: 'ديسمبر', amount: 0 },
+      { month: 'يناير', amount: 0 },
+      { month: 'فبراير', amount: 0 }
+    ];
+  } catch(e) {
+    console.warn('Data load error:', e);
+    currentUser.products = [];
+    currentUser.orders = [];
+    currentUser.transactions = [];
+    currentUser.monthlySales = [
+      { month: 'سبتمبر', amount: 0 },
+      { month: 'أكتوبر', amount: 0 },
+      { month: 'نوفمبر', amount: 0 },
+      { month: 'ديسمبر', amount: 0 },
+      { month: 'يناير', amount: 0 },
+      { month: 'فبراير', amount: 0 }
+    ];
+  }
+
   updateSidebar();
   renderOverview();
   renderProducts();
