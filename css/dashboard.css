@@ -1076,6 +1076,349 @@ tbody tr:last-child td {
   z-index: 99;
 }
 
+/* ===== Order Detail Sections ===== */
+.order-detail-section {
+  border: 1px solid var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  margin-bottom: 16px;
+  background: var(--bg-offwhite);
+}
+
+.order-detail-section-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-deep);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-taupe);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.order-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.85rem;
+}
+
+.order-detail-row label {
+  color: var(--text-medium);
+  opacity: 0.7;
+}
+
+.order-detail-row span {
+  font-weight: 600;
+  color: var(--text-deep);
+}
+
+.order-detail-total {
+  border-top: 2px solid var(--accent-amber);
+  margin-top: 8px;
+  padding-top: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.order-detail-total span {
+  color: var(--accent-amber);
+}
+
+/* Address Edit Form */
+.address-edit-form {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-taupe);
+}
+
+.address-edit-form.visible {
+  display: block;
+  animation: fadeInUp 0.3s ease;
+}
+
+/* Shipping Badge */
+.shipping-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+}
+
+.shipping-badge.pending {
+  background: rgba(243, 156, 18, 0.1);
+  color: #F39C12;
+}
+
+/* ===== Order Timeline ===== */
+.order-timeline {
+  position: relative;
+  padding: 8px 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border-taupe);
+  flex-shrink: 0;
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-dot.active {
+  background: var(--accent-amber);
+}
+
+.timeline-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  right: 5px;
+  top: 16px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-taupe);
+}
+
+.timeline-content {
+  flex: 1;
+}
+
+.timeline-date {
+  font-size: 0.72rem;
+  color: var(--text-medium);
+  opacity: 0.6;
+  margin-bottom: 2px;
+  direction: ltr;
+  text-align: right;
+}
+
+.timeline-note {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-deep);
+}
+
+/* ===== Waybill Preview ===== */
+.waybill-preview {
+  border: 2px dashed var(--border-taupe);
+  border-radius: var(--radius-card);
+  padding: 4px;
+  margin-top: 20px;
+  background: #fff;
+}
+
+.waybill-page {
+  padding: 24px;
+  font-size: 0.88rem;
+}
+
+.waybill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #1A0F0A;
+}
+
+.waybill-carrier-logo {
+  font-size: 1.2rem;
+  font-weight: 800;
+  border: 2px solid;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.waybill-barcode-area {
+  text-align: center;
+}
+
+.waybill-order-id {
+  font-size: 1.1rem;
+  font-weight: 800;
+  direction: ltr;
+  letter-spacing: 1px;
+}
+
+.waybill-barcode-placeholder {
+  font-family: monospace;
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+  margin: 4px 0;
+  opacity: 0.5;
+}
+
+.waybill-tracking-num {
+  font-size: 0.78rem;
+  color: var(--text-medium);
+  direction: ltr;
+}
+
+.waybill-section {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--border-taupe);
+  border-radius: 8px;
+}
+
+.waybill-section-title {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--accent-amber);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.waybill-row {
+  padding: 3px 0;
+  font-size: 0.85rem;
+}
+
+.waybill-row > span:first-child {
+  font-weight: 600;
+  color: var(--text-medium);
+  display: inline-block;
+  min-width: 70px;
+}
+
+.waybill-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-medium);
+  opacity: 0.6;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-taupe);
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-taupe);
+  justify-content: flex-start;
+}
+
+/* btn-primary */
+.btn-primary {
+  background: var(--accent-amber);
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--accent-amber-dark);
+}
+
+/* ===== Print Styles for Waybill ===== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .waybill-preview,
+  .waybill-preview * {
+    visibility: visible;
+  }
+
+  .waybill-preview {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .waybill-page {
+    padding: 15mm;
+    font-size: 11pt;
+  }
+
+  .waybill-page * {
+    color: #000 !important;
+  }
+
+  .waybill-header {
+    border-bottom: 3px solid #000;
+  }
+
+  .waybill-section {
+    border: 1.5px solid #000;
+    page-break-inside: avoid;
+  }
+
+  .waybill-section-title {
+    color: #000 !important;
+    font-size: 10pt;
+  }
+
+  .waybill-barcode-placeholder {
+    font-size: 20pt;
+    opacity: 1;
+  }
+
+  .waybill-carrier-logo {
+    font-size: 14pt;
+    border: 3px solid #000;
+    color: #000 !important;
+  }
+
+  .modal-overlay {
+    position: static;
+    background: none;
+    display: block;
+  }
+
+  .modal {
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: visible;
+  }
+
+  .modal-header,
+  .modal-footer,
+  .modal-body > .form-group,
+  .sidebar,
+  .main-content,
+  .toast,
+  .mobile-toggle,
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  @page {
+    size: A5;
+    margin: 10mm;
+  }
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .stats-grid {
@@ -1168,6 +1511,25 @@ tbody tr:last-child td {
   .modal {
     max-width: 100%;
     border-radius: 12px;
+  }
+
+  .waybill-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .order-detail-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .order-detail-section {
+    padding: 14px;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
   }
 }
 

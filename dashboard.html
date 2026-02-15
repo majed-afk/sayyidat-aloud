@@ -179,6 +179,7 @@
           <button class="tab-btn" data-tab="new" onclick="filterOrders('new')">جديدة <span class="count" id="countNew">0</span></button>
           <button class="tab-btn" data-tab="processing" onclick="filterOrders('processing')">قيد المعالجة <span class="count" id="countProcessing">0</span></button>
           <button class="tab-btn" data-tab="completed" onclick="filterOrders('completed')">مكتملة <span class="count" id="countCompleted">0</span></button>
+          <button class="tab-btn" data-tab="cancelled" onclick="filterOrders('cancelled')">ملغية <span class="count" id="countCancelled">0</span></button>
         </div>
 
         <div class="table-card">
@@ -555,15 +556,85 @@
   </div>
 </div>
 
-<!-- ===== ORDER DETAIL MODAL ===== -->
+<!-- ===== ORDER DETAIL MODAL (Enhanced) ===== -->
 <div class="modal-overlay" id="orderDetailModal">
-  <div class="modal" style="max-width: 580px;">
+  <div class="modal" style="max-width: 680px;">
     <div class="modal-header">
       <h2 id="orderDetailTitle">تفاصيل الطلب</h2>
-      <button class="modal-close" onclick="closeOrderDetail()">✕</button>
+      <button class="modal-close" onclick="closeOrderDetail()">&#10005;</button>
     </div>
     <div class="modal-body" id="orderDetailBody">
-      <!-- Filled by JS -->
+      <!-- Filled by JS: order info, address, shipping, timeline -->
+    </div>
+    <div class="modal-footer" id="orderDetailFooter">
+      <!-- Filled by JS: contextual action buttons -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== WAYBILL MODAL ===== -->
+<div class="modal-overlay" id="waybillModal">
+  <div class="modal" style="max-width: 700px;">
+    <div class="modal-header">
+      <h2>بوليصة الشحن</h2>
+      <button class="modal-close" onclick="closeWaybillModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="waybillOrderId" value="">
+      <div class="form-group">
+        <label class="form-label">شركة الشحن</label>
+        <select class="form-select" id="waybillCarrier" onchange="onWaybillCarrierChange()">
+          <option value="">اختر شركة الشحن</option>
+          <option value="aramex">Aramex - أرامكس</option>
+          <option value="smsa">SMSA Express</option>
+          <option value="spl">البريد السعودي - SPL</option>
+          <option value="other">شركة أخرى</option>
+        </select>
+      </div>
+      <div class="form-group" id="customCarrierGroup" style="display:none;">
+        <label class="form-label">اسم شركة الشحن</label>
+        <input type="text" class="form-input" id="waybillCustomCarrier" placeholder="أدخل اسم شركة الشحن">
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم التتبع</label>
+        <input type="text" class="form-input" id="waybillTracking" placeholder="أدخل رقم التتبع" style="direction: ltr; text-align: left;">
+      </div>
+      <!-- Waybill Preview (printable area) -->
+      <div class="waybill-preview" id="waybillPreview"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveAndPrintWaybill()">حفظ وطباعة البوليصة</button>
+      <button class="btn btn-outline" onclick="closeWaybillModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REJECT REASON MODAL ===== -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal" style="max-width: 440px;">
+    <div class="modal-header">
+      <h2>سبب الرفض</h2>
+      <button class="modal-close" onclick="closeRejectModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="rejectOrderId" value="">
+      <div class="form-group">
+        <label class="form-label">سبب رفض الطلب</label>
+        <select class="form-select" id="rejectReason" onchange="onRejectReasonChange()">
+          <option value="المنتج غير متوفر">المنتج غير متوفر</option>
+          <option value="خطأ في السعر">خطأ في السعر</option>
+          <option value="عنوان غير صحيح">عنوان غير صحيح</option>
+          <option value="other">سبب آخر</option>
+        </select>
+      </div>
+      <div class="form-group" id="customRejectGroup" style="display:none;">
+        <label class="form-label">اذكر السبب</label>
+        <textarea class="form-textarea" id="rejectCustomReason" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="confirmRejectOrder()">تأكيد الرفض</button>
+      <button class="btn btn-outline" onclick="closeRejectModal()">إلغاء</button>
     </div>
   </div>
 </div>
@@ -1007,11 +1078,13 @@ function renderOrders() {
   var countNew = orders.filter(function(o) { return o.status === 'new'; }).length;
   var countProcessing = orders.filter(function(o) { return o.status === 'processing'; }).length;
   var countCompleted = orders.filter(function(o) { return o.status === 'completed'; }).length;
+  var countCancelled = orders.filter(function(o) { return o.status === 'cancelled'; }).length;
 
   document.getElementById('countAll').textContent = orders.length;
   document.getElementById('countNew').textContent = countNew;
   document.getElementById('countProcessing').textContent = countProcessing;
   document.getElementById('countCompleted').textContent = countCompleted;
+  document.getElementById('countCancelled').textContent = countCancelled;
   document.getElementById('newOrdersCount').textContent = countNew;
 
   // Filter
@@ -1029,12 +1102,21 @@ function renderOrders() {
   filtered.forEach(function(o) {
     var actions = '';
     if (o.status === 'new') {
-      actions = '<button class="btn btn-sm btn-success" onclick="updateOrderStatus(\'' + o.id + '\',\'processing\')">قبول</button>' +
-                '<button class="btn btn-sm btn-danger" onclick="updateOrderStatus(\'' + o.id + '\',\'cancelled\')">رفض</button>';
+      actions = '<button class="btn btn-sm btn-success" onclick="acceptOrder(\'' + o.id + '\')">قبول</button>' +
+                '<button class="btn btn-sm btn-danger" onclick="openRejectModal(\'' + o.id + '\')">رفض</button>';
     } else if (o.status === 'processing') {
-      actions = '<button class="btn btn-sm btn-success" onclick="updateOrderStatus(\'' + o.id + '\',\'completed\')">تم الشحن</button>';
+      actions = '<button class="btn btn-sm btn-primary" onclick="openWaybillModal(\'' + o.id + '\')">بوليصة</button>' +
+                '<button class="btn btn-sm btn-success" onclick="updateOrderStatus(\'' + o.id + '\',\'completed\')">تم التسليم</button>';
     }
     actions += '<button class="btn btn-sm btn-outline" onclick="showOrderDetail(\'' + o.id + '\')">تفاصيل</button>';
+
+    // Waybill badge
+    var waybillBadge = '';
+    if (o.waybillGenerated) {
+      waybillBadge = ' <span class="shipping-badge">&#10003; بوليصة</span>';
+    } else if (o.status === 'processing') {
+      waybillBadge = ' <span class="shipping-badge pending">بدون بوليصة</span>';
+    }
 
     html +=
       '<tr>' +
@@ -1043,7 +1125,7 @@ function renderOrders() {
         '<td>' + o.buyer + '</td>' +
         '<td>' + o.qty + '</td>' +
         '<td style="font-weight:600;">' + formatCurrency(o.total) + '</td>' +
-        '<td>' + o.shippingMethod + ' (' + formatCurrency(o.shipping) + ')</td>' +
+        '<td>' + o.shippingMethod + waybillBadge + '</td>' +
         '<td>' + statusLabel(o.status) + '</td>' +
         '<td style="font-size:0.82rem; opacity:0.7;">' + o.date + '</td>' +
         '<td><div class="action-btns">' + actions + '</div></td>' +
@@ -1067,6 +1149,15 @@ function updateOrderStatus(orderId, newStatus) {
 
   order.status = newStatus;
 
+  // Push to status history
+  var statusNotes = { processing: 'تم قبول الطلب', completed: 'تم شحن الطلب وإتمامه', cancelled: 'تم رفض الطلب' };
+  order.statusHistory = order.statusHistory || [];
+  order.statusHistory.push({
+    status: newStatus,
+    date: new Date().toISOString(),
+    note: statusNotes[newStatus] || 'تم تحديث الحالة'
+  });
+
   // If completed, add transaction
   if (newStatus === 'completed') {
     var commission = order.total * 0.05;
@@ -1088,29 +1179,256 @@ function updateOrderStatus(orderId, newStatus) {
   showToast(msgs[newStatus] || 'تم التحديث', 'success');
 }
 
+// ===== ORDER DETAIL (Enhanced) =====
 function showOrderDetail(orderId) {
   var order = currentUser.orders.find(function(o) { return o.id === orderId; });
   if (!order) return;
 
   document.getElementById('orderDetailTitle').textContent = 'تفاصيل الطلب ' + order.id;
-  document.getElementById('orderDetailBody').innerHTML =
-    '<div class="detail-grid">' +
-      '<div class="detail-item"><label>المشتري</label><span>' + order.buyer + '</span></div>' +
-      '<div class="detail-item"><label>الجوال</label><span style="direction:ltr;display:inline-block;">' + order.buyerPhone + '</span></div>' +
-      '<div class="detail-item"><label>المدينة</label><span>' + order.buyerCity + '</span></div>' +
-      '<div class="detail-item"><label>الحي</label><span>' + order.buyerDistrict + '</span></div>' +
-      '<div class="detail-item"><label>العنوان</label><span>' + order.buyerStreet + '</span></div>' +
-      '<div class="detail-item"><label>طريقة الشحن</label><span>' + order.shippingMethod + '</span></div>' +
-      '<div class="detail-item"><label>المنتج</label><span>' + order.productName + '</span></div>' +
-      '<div class="detail-item"><label>الكمية × السعر</label><span>' + order.qty + ' × ' + formatCurrency(order.price) + '</span></div>' +
-      '<div class="detail-item"><label>الإجمالي + الشحن</label><span style="font-weight:700;color:var(--accent-amber);">' + formatCurrency(order.total + order.shipping) + '</span></div>' +
-    '</div>';
+
+  // 1. Order Info Section
+  var html = '<div class="order-detail-section">' +
+    '<div class="order-detail-section-title">معلومات الطلب</div>' +
+    '<div class="order-detail-row"><label>المنتج</label><span>' + order.productName + '</span></div>' +
+    '<div class="order-detail-row"><label>الكمية</label><span>' + order.qty + '</span></div>' +
+    '<div class="order-detail-row"><label>سعر الوحدة</label><span>' + formatCurrency(order.price) + '</span></div>' +
+    '<div class="order-detail-row"><label>المجموع الفرعي</label><span>' + formatCurrency(order.total) + '</span></div>' +
+    '<div class="order-detail-row"><label>الشحن (' + order.shippingMethod + ')</label><span>' + formatCurrency(order.shipping) + '</span></div>' +
+    '<div class="order-detail-row order-detail-total"><label>الإجمالي</label><span>' + formatCurrency(order.total + order.shipping) + '</span></div>' +
+    '<div class="order-detail-row"><label>الحالة</label><span>' + statusLabel(order.status) + '</span></div>' +
+    '<div class="order-detail-row"><label>التاريخ</label><span>' + order.date + '</span></div>' +
+  '</div>';
+
+  // 2. Buyer Address Section
+  html += '<div class="order-detail-section">' +
+    '<div class="order-detail-section-title">' +
+      'عنوان المشتري' +
+      (order.status !== 'completed' && order.status !== 'cancelled' ? '<button class="btn btn-sm btn-outline" onclick="toggleAddressEdit(\'' + order.id + '\')">تعديل</button>' : '') +
+    '</div>' +
+    '<div class="order-detail-row"><label>الاسم</label><span>' + order.buyer + '</span></div>' +
+    '<div class="order-detail-row"><label>الجوال</label><span style="direction:ltr;display:inline-block;">' + order.buyerPhone + '</span></div>' +
+    '<div class="order-detail-row"><label>المدينة</label><span>' + order.buyerCity + '</span></div>' +
+    '<div class="order-detail-row"><label>الحي</label><span>' + order.buyerDistrict + '</span></div>' +
+    '<div class="order-detail-row"><label>العنوان</label><span>' + order.buyerStreet + '</span></div>' +
+    '<div class="address-edit-form" id="addressEditForm">' +
+      '<div class="form-group"><label class="form-label">المدينة</label><input type="text" class="form-input" id="editCity" value="' + order.buyerCity + '"></div>' +
+      '<div class="form-group"><label class="form-label">الحي</label><input type="text" class="form-input" id="editDistrict" value="' + order.buyerDistrict + '"></div>' +
+      '<div class="form-group"><label class="form-label">العنوان</label><input type="text" class="form-input" id="editStreet" value="' + order.buyerStreet + '"></div>' +
+      '<div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-sm btn-primary" onclick="saveOrderAddress(\'' + order.id + '\')">حفظ العنوان</button><button class="btn btn-sm btn-outline" onclick="toggleAddressEdit(\'' + order.id + '\')">إلغاء</button></div>' +
+    '</div>' +
+  '</div>';
+
+  // 3. Shipping Info Section (only if not new)
+  if (order.status !== 'new') {
+    html += '<div class="order-detail-section">' +
+      '<div class="order-detail-section-title">معلومات الشحن</div>';
+    if (order.waybillGenerated) {
+      html += '<div class="order-detail-row"><label>شركة الشحن</label><span>' + order.carrierName + '</span></div>' +
+        '<div class="order-detail-row"><label>رقم التتبع</label><span style="direction:ltr;display:inline-block;font-weight:700;">' + order.trackingNumber + '</span></div>' +
+        '<div class="order-detail-row"><label>تاريخ البوليصة</label><span>' + order.waybillDate + '</span></div>' +
+        '<div class="order-detail-row"><label>الحالة</label><span class="shipping-badge">&#10003; تم إصدار البوليصة</span></div>';
+    } else if (order.status === 'processing') {
+      html += '<div style="text-align:center;padding:16px;"><span class="shipping-badge pending">لم يتم إصدار بوليصة بعد</span>' +
+        '<br><button class="btn btn-sm btn-primary" style="margin-top:12px;" onclick="closeOrderDetail();openWaybillModal(\'' + order.id + '\')">إصدار بوليصة الآن</button></div>';
+    } else if (order.status === 'cancelled') {
+      html += '<div class="order-detail-row"><label>سبب الإلغاء</label><span style="color:var(--red);">' + (order.cancelReason || 'غير محدد') + '</span></div>';
+    }
+    html += '</div>';
+  }
+
+  // 4. Timeline Section
+  var history = order.statusHistory || [];
+  if (history.length > 0) {
+    html += '<div class="order-detail-section">' +
+      '<div class="order-detail-section-title">الجدول الزمني</div>' +
+      '<div class="order-timeline">';
+    history.forEach(function(h, i) {
+      var isLast = i === history.length - 1;
+      var dateStr = h.date ? new Date(h.date).toLocaleString('ar-SA', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      html += '<div class="timeline-item">' +
+        '<div class="timeline-dot' + (isLast ? ' active' : '') + '"></div>' +
+        '<div class="timeline-content">' +
+          '<div class="timeline-date">' + dateStr + '</div>' +
+          '<div class="timeline-note">' + (h.note || h.status) + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  document.getElementById('orderDetailBody').innerHTML = html;
+
+  // Footer actions based on status
+  var footerHTML = '';
+  if (order.status === 'new') {
+    footerHTML = '<button class="btn btn-success" onclick="acceptOrder(\'' + order.id + '\')">قبول الطلب</button>' +
+                 '<button class="btn btn-danger" onclick="openRejectModal(\'' + order.id + '\')">رفض الطلب</button>';
+  } else if (order.status === 'processing') {
+    footerHTML = '<button class="btn btn-primary" onclick="closeOrderDetail();openWaybillModal(\'' + order.id + '\')">إصدار بوليصة</button>' +
+                 '<button class="btn btn-success" onclick="updateOrderStatus(\'' + order.id + '\',\'completed\');closeOrderDetail();">تم التسليم</button>';
+  }
+  document.getElementById('orderDetailFooter').innerHTML = footerHTML;
 
   document.getElementById('orderDetailModal').classList.add('open');
 }
 
 function closeOrderDetail() {
   document.getElementById('orderDetailModal').classList.remove('open');
+}
+
+// ===== ORDER ACTIONS =====
+function acceptOrder(orderId) {
+  updateOrderStatus(orderId, 'processing');
+  closeOrderDetail();
+}
+
+function toggleAddressEdit() {
+  var form = document.getElementById('addressEditForm');
+  if (form) form.classList.toggle('visible');
+}
+
+function saveOrderAddress(orderId) {
+  var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+  if (!order) return;
+  var city = document.getElementById('editCity').value.trim();
+  var district = document.getElementById('editDistrict').value.trim();
+  var street = document.getElementById('editStreet').value.trim();
+  if (!city || !district || !street) { showToast('جميع حقول العنوان مطلوبة', 'error'); return; }
+  order.buyerCity = city;
+  order.buyerDistrict = district;
+  order.buyerStreet = street;
+  order.statusHistory = order.statusHistory || [];
+  order.statusHistory.push({ status: order.status, date: new Date().toISOString(), note: 'تم تعديل عنوان التوصيل' });
+  AUTH.updateUser(currentUser);
+  showOrderDetail(orderId);
+  showToast('تم تحديث العنوان بنجاح', 'success');
+}
+
+// ===== REJECT ORDER =====
+function openRejectModal(orderId) {
+  document.getElementById('rejectOrderId').value = orderId;
+  document.getElementById('rejectReason').value = 'المنتج غير متوفر';
+  document.getElementById('customRejectGroup').style.display = 'none';
+  document.getElementById('rejectModal').classList.add('open');
+}
+function closeRejectModal() { document.getElementById('rejectModal').classList.remove('open'); }
+function onRejectReasonChange() {
+  document.getElementById('customRejectGroup').style.display =
+    document.getElementById('rejectReason').value === 'other' ? 'block' : 'none';
+}
+function confirmRejectOrder() {
+  var orderId = document.getElementById('rejectOrderId').value;
+  var reason = document.getElementById('rejectReason').value;
+  if (reason === 'other') {
+    reason = document.getElementById('rejectCustomReason').value.trim();
+    if (!reason) { showToast('الرجاء كتابة سبب الرفض', 'error'); return; }
+  }
+  var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+  if (order) order.cancelReason = reason;
+  updateOrderStatus(orderId, 'cancelled');
+  closeRejectModal();
+  closeOrderDetail();
+}
+
+// ===== WAYBILL =====
+function openWaybillModal(orderId) {
+  document.getElementById('waybillOrderId').value = orderId;
+  var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+  if (!order) return;
+  document.getElementById('waybillCarrier').value = order.carrier || '';
+  document.getElementById('waybillTracking').value = order.trackingNumber || '';
+  document.getElementById('customCarrierGroup').style.display = order.carrier === 'other' ? 'block' : 'none';
+  if (order.carrier === 'other' && order.carrierName) {
+    document.getElementById('waybillCustomCarrier').value = order.carrierName;
+  }
+  updateWaybillPreview();
+  document.getElementById('waybillModal').classList.add('open');
+}
+function closeWaybillModal() { document.getElementById('waybillModal').classList.remove('open'); }
+function onWaybillCarrierChange() {
+  document.getElementById('customCarrierGroup').style.display =
+    document.getElementById('waybillCarrier').value === 'other' ? 'block' : 'none';
+  updateWaybillPreview();
+}
+function updateWaybillPreview() {
+  var orderId = document.getElementById('waybillOrderId').value;
+  var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+  if (!order) { document.getElementById('waybillPreview').innerHTML = ''; return; }
+  var carrier = document.getElementById('waybillCarrier').value;
+  var tracking = document.getElementById('waybillTracking').value;
+  var carrierLogos = {
+    aramex: { name: 'Aramex - \u0623\u0631\u0627\u0645\u0643\u0633', color: '#E74C3C' },
+    smsa: { name: 'SMSA Express', color: '#1A73E8' },
+    spl: { name: '\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0633\u0639\u0648\u062f\u064a - SPL', color: '#4A7C59' },
+    other: { name: document.getElementById('waybillCustomCarrier').value || '\u0634\u0631\u0643\u0629 \u0634\u062d\u0646', color: '#666' }
+  };
+  var ci = carrierLogos[carrier] || { name: 'اختر شركة الشحن', color: '#999' };
+  var senderName = currentUser.firstName + ' ' + currentUser.lastName;
+  var storeName = currentUser.storeName || 'صيدات العود';
+  var senderPhone = currentUser.phone || '';
+
+  var h = '<div class="waybill-page">' +
+    '<div class="waybill-header">' +
+      '<div class="waybill-carrier-logo" style="border-color:' + ci.color + ';color:' + ci.color + ';">' + ci.name + '</div>' +
+      '<div class="waybill-barcode-area">' +
+        '<div class="waybill-order-id">' + order.id + '</div>' +
+        '<div class="waybill-barcode-placeholder">||||| |||| ||||| ||||</div>' +
+        (tracking ? '<div class="waybill-tracking-num">' + tracking + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="waybill-section"><div class="waybill-section-title">المرسل</div>' +
+      '<div class="waybill-row"><span>الاسم:</span> ' + senderName + '</div>' +
+      '<div class="waybill-row"><span>المتجر:</span> ' + storeName + '</div>' +
+      '<div class="waybill-row"><span>الجوال:</span> <span style="direction:ltr;display:inline-block;">' + senderPhone + '</span></div>' +
+    '</div>' +
+    '<div class="waybill-section"><div class="waybill-section-title">المستلم</div>' +
+      '<div class="waybill-row"><span>الاسم:</span> ' + order.buyer + '</div>' +
+      '<div class="waybill-row"><span>الجوال:</span> <span style="direction:ltr;display:inline-block;">' + order.buyerPhone + '</span></div>' +
+      '<div class="waybill-row"><span>المدينة:</span> ' + order.buyerCity + '</div>' +
+      '<div class="waybill-row"><span>الحي:</span> ' + order.buyerDistrict + '</div>' +
+      '<div class="waybill-row"><span>العنوان:</span> ' + order.buyerStreet + '</div>' +
+    '</div>' +
+    '<div class="waybill-section"><div class="waybill-section-title">تفاصيل الشحنة</div>' +
+      '<div class="waybill-row"><span>المنتج:</span> ' + order.productName + '</div>' +
+      '<div class="waybill-row"><span>الكمية:</span> ' + order.qty + '</div>' +
+      '<div class="waybill-row"><span>القيمة:</span> ' + formatCurrency(order.total) + '</div>' +
+      '<div class="waybill-row"><span>طريقة الشحن:</span> ' + order.shippingMethod + '</div>' +
+      '<div class="waybill-row"><span>الدفع:</span> الدفع عند الاستلام</div>' +
+    '</div>' +
+    '<div class="waybill-footer"><span>صيدات العود</span><span>' + new Date().toISOString().split('T')[0] + '</span></div>' +
+  '</div>';
+
+  document.getElementById('waybillPreview').innerHTML = h;
+}
+
+function saveAndPrintWaybill() {
+  var orderId = document.getElementById('waybillOrderId').value;
+  var carrier = document.getElementById('waybillCarrier').value;
+  var tracking = document.getElementById('waybillTracking').value.trim();
+  if (!carrier) { showToast('اختر شركة الشحن', 'error'); return; }
+  if (!tracking) { showToast('أدخل رقم التتبع', 'error'); return; }
+  var carrierName = '';
+  var opt = document.querySelector('#waybillCarrier option:checked');
+  if (opt) carrierName = opt.textContent;
+  if (carrier === 'other') {
+    carrierName = document.getElementById('waybillCustomCarrier').value.trim();
+    if (!carrierName) { showToast('أدخل اسم شركة الشحن', 'error'); return; }
+  }
+  var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+  if (!order) return;
+  order.carrier = carrier;
+  order.carrierName = carrierName;
+  order.trackingNumber = tracking;
+  order.waybillGenerated = true;
+  order.waybillDate = new Date().toISOString().split('T')[0];
+  order.statusHistory = order.statusHistory || [];
+  order.statusHistory.push({ status: order.status, date: new Date().toISOString(), note: 'تم إصدار بوليصة الشحن - ' + carrierName + ' - ' + tracking });
+  AUTH.updateUser(currentUser);
+  renderOrders();
+  showToast('تم حفظ بيانات الشحن', 'success');
+  // Update preview then print
+  updateWaybillPreview();
+  setTimeout(function() { window.print(); }, 300);
 }
 
 // ===== FINANCE =====
