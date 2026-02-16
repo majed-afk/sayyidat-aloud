@@ -9,14 +9,6 @@
   // ===== MOBILE MENU =====
   U.initMobileMenu('mobileToggle', 'mobileMenu', 'show-active');
 
-  // ===== فحص تسجيل الدخول =====
-  SAIDAT.auth.ready().then(function() {
-    if (!SAIDAT.auth.isLoggedIn()) {
-      SAIDAT.ui.showToast('\u064a\u062c\u0628 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0644\u0625\u0646\u0634\u0627\u0621 \u0645\u0632\u0627\u062f', 'error');
-      window.location.href = 'login.html';
-    }
-  });
-
   // ===== CATEGORY -> TYPE & UNIT DYNAMIC =====
   function onCategoryChange(value) {
     var unitSelect = document.getElementById('productUnit');
