@@ -67,7 +67,15 @@
     if (sb) {
       try {
         var pRes = await sb.from('products').select('*, profiles(first_name, last_name, store_name, id)').order('created_at', { ascending: false });
-        allProducts = pRes.data || [];
+        if (pRes.error) {
+          console.error('Admin products query error:', pRes.error);
+          // Fallback: جلب بدون join في حال فشل الربط
+          var fallback = await sb.from('products').select('*').order('created_at', { ascending: false });
+          allProducts = (fallback.data || []);
+        } else {
+          allProducts = pRes.data || [];
+        }
+        console.log('Admin loaded products:', allProducts.length);
       } catch(e) {
         console.error('Admin load products error:', e);
         allProducts = [];
