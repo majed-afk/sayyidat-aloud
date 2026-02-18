@@ -200,12 +200,16 @@
   window.AUTH = SAIDAT.auth;
 
   // ===== تشغيل تلقائي =====
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      SAIDAT.auth._initPromise = SAIDAT.auth.init();
-    });
-  } else {
-    SAIDAT.auth._initPromise = SAIDAT.auth.init();
-  }
+  // _initPromise يُعيّن فوراً حتى يعمل ready() بشكل صحيح في كل الصفحات
+  SAIDAT.auth._initPromise = new Promise(function(resolve) {
+    function startInit() {
+      SAIDAT.auth.init().then(resolve).catch(resolve);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startInit);
+    } else {
+      startInit();
+    }
+  });
 
 })();
