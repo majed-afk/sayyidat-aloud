@@ -33,7 +33,7 @@
       var self = this;
 
       // onAuthStateChange يُطلق INITIAL_SESSION فوراً — نعتمد عليه
-      sb.auth.onAuthStateChange(async function(event, session) {
+      sb.auth.onAuthStateChange(function(event, session) {
         console.log('Auth event:', event, !!session);
 
         if (event === 'SIGNED_OUT') {
@@ -41,27 +41,47 @@
           self._profile = null;
         } else if (session && session.user) {
           self._user = session.user;
-          try {
-            await self._loadProfile();
-          } catch(e) {
-            console.warn('Auth: profile load failed:', e.message);
-          }
         }
         // session = null بدون SIGNED_OUT → لا نصفّر (مثل token refresh failure)
 
-        // أول حدث (INITIAL_SESSION) يحل الـ initPromise
+        // أول حدث → نحل الـ initPromise فوراً (بدون انتظار profile)
+        // ثم نحمّل البروفايل في الخلفية
         if (!self._initDone) {
           self._initDone = true;
-          console.log('Auth: init complete, user:', !!self._user, 'profile:', !!self._profile);
-          if (self._initResolve) {
-            self._initResolve();
-            self._initResolve = null;
-          }
-        }
 
-        // تحديث الهيدر عند كل تغيير
-        if (SAIDAT.header && SAIDAT.header.update) {
-          SAIDAT.header.update();
+          if (self._user) {
+            // نحمّل البروفايل مع timeout 5 ثوانٍ — ثم نحل الـ promise
+            var profileTimeout = new Promise(function(r) { setTimeout(r, 5000); });
+            Promise.race([self._loadProfile(), profileTimeout]).then(function() {
+              console.log('Auth: init complete, user:', !!self._user, 'profile:', !!self._profile);
+              if (self._initResolve) {
+                self._initResolve();
+                self._initResolve = null;
+              }
+              if (SAIDAT.header && SAIDAT.header.update) {
+                SAIDAT.header.update();
+              }
+            });
+          } else {
+            console.log('Auth: init complete, no user');
+            if (self._initResolve) {
+              self._initResolve();
+              self._initResolve = null;
+            }
+          }
+        } else {
+          // أحداث لاحقة (مش أول حدث) — نحمّل البروفايل ونحدّث الهيدر
+          if (session && session.user) {
+            self._loadProfile().then(function() {
+              if (SAIDAT.header && SAIDAT.header.update) {
+                SAIDAT.header.update();
+              }
+            });
+          } else {
+            if (SAIDAT.header && SAIDAT.header.update) {
+              SAIDAT.header.update();
+            }
+          }
         }
       });
 
@@ -78,16 +98,29 @@
       }, 8000);
     },
 
-    // ===== تحميل البروفايل =====
+    // ===== تحميل البروفايل (مع timeout 5 ثوانٍ) =====
     _loadProfile: async function() {
       if (!this._user) return;
       var sb = U.getSupabase();
       if (!sb) return;
       try {
-        var res = await sb.from('profiles').select('*').eq('id', this._user.id).single();
-        if (res.data) this._profile = res.data;
+        console.log('Auth: loading profile for', this._user.id);
+        var query = sb.from('profiles').select('*').eq('id', this._user.id).single();
+
+        // timeout 5 ثوانٍ — لو الـ query علّق نكمل بدون بروفايل
+        var timeout = new Promise(function(_, reject) {
+          setTimeout(function() { reject(new Error('Profile query timeout 5s')); }, 5000);
+        });
+
+        var res = await Promise.race([query, timeout]);
+        if (res.data) {
+          this._profile = res.data;
+          console.log('Auth: profile loaded, role:', res.data.role);
+        } else if (res.error) {
+          console.warn('Auth: profile query error:', res.error.message);
+        }
       } catch(e) {
-        console.warn('Profile load error:', e);
+        console.warn('Auth: profile load error:', e.message);
       }
     },
 
