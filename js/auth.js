@@ -23,16 +23,25 @@
       var sb = U.getSupabase();
       if (!sb) return;
 
-      // استرجاع الجلسة الحالية
-      try {
-        var res = await sb.auth.getSession();
-        var session = res.data.session;
-        if (session && session.user) {
-          this._user = session.user;
-          await this._loadProfile();
+      // استرجاع الجلسة الحالية — مع إعادة المحاولة عند AbortError
+      var maxRetries = 3;
+      for (var attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          var res = await sb.auth.getSession();
+          var session = res.data.session;
+          if (session && session.user) {
+            this._user = session.user;
+            await this._loadProfile();
+          }
+          console.log('Auth init OK (attempt ' + attempt + '), user:', !!this._user);
+          break; // نجحت — اخرج من الحلقة
+        } catch(e) {
+          console.warn('Auth init error (attempt ' + attempt + '):', e.message || e);
+          if (attempt < maxRetries) {
+            // انتظر قبل المحاولة التالية (500ms, 1000ms)
+            await new Promise(function(r) { setTimeout(r, attempt * 500); });
+          }
         }
-      } catch(e) {
-        console.warn('Auth init error:', e);
       }
 
       // الاستماع لتغييرات الجلسة
