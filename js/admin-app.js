@@ -37,11 +37,23 @@
   // ===== INIT =====
   async function initAdmin() {
     console.log('Admin: waiting for auth...');
-    await SAIDAT.auth.ready();
+
+    // انتظار auth مع timeout
+    var authTimeout = new Promise(function(resolve) { setTimeout(resolve, 10000); });
+    await Promise.race([SAIDAT.auth.ready(), authTimeout]);
     console.log('Admin: auth ready, isLoggedIn =', SAIDAT.auth.isLoggedIn(), 'isAdmin =', SAIDAT.auth.isAdmin());
+
     var user = SAIDAT.auth.getCurrentUser();
+
+    // لو ما في مستخدم — ننتظر ونعيد المحاولة
     if (!user || !SAIDAT.auth.isAdmin()) {
-      console.warn('Admin: no admin user → redirecting to login');
+      console.log('Admin: no admin yet, retrying in 3s...');
+      await new Promise(function(r) { setTimeout(r, 3000); });
+      user = SAIDAT.auth.getCurrentUser();
+    }
+
+    if (!user || !SAIDAT.auth.isAdmin()) {
+      console.warn('Admin: no admin user after retry → redirecting to login');
       window.location.href = 'login.html';
       return;
     }

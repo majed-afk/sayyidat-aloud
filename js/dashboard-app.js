@@ -24,13 +24,23 @@
   // ===== التهيئة =====
   async function initDashboard() {
     console.log('Dashboard: waiting for auth...');
-    // انتظر تحميل الجلسة من Supabase
-    await SAIDAT.auth.ready();
+
+    // انتظار auth مع timeout — لو علّق نعيد المحاولة
+    var authTimeout = new Promise(function(resolve) { setTimeout(resolve, 10000); });
+    await Promise.race([SAIDAT.auth.ready(), authTimeout]);
     console.log('Dashboard: auth ready, isLoggedIn =', SAIDAT.auth.isLoggedIn());
 
     currentUser = SAIDAT.auth.getCurrentUser();
+
+    // لو ما في مستخدم — ننتظر 3 ثوانٍ ونعيد المحاولة (ممكن auth بطيء)
     if (!currentUser) {
-      console.warn('Dashboard: no currentUser → redirecting to login');
+      console.log('Dashboard: no user yet, retrying in 3s...');
+      await new Promise(function(r) { setTimeout(r, 3000); });
+      currentUser = SAIDAT.auth.getCurrentUser();
+    }
+
+    if (!currentUser) {
+      console.warn('Dashboard: no currentUser after retry → redirecting to login');
       window.location.href = 'login.html';
       return;
     }
