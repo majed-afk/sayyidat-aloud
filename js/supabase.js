@@ -16,7 +16,18 @@
         console.error('Supabase SDK not loaded! Make sure to include the CDN script.');
         return null;
       }
-      _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+          // تعطيل Navigator.LockManager — يسبب timeout/deadlock عند فتح تابات متعددة
+          // بدل استخدام navigator.locks.request → ننفّذ الدالة مباشرة بدون lock
+          lock: function(name, acquireTimeout, fn) {
+            return fn();
+          },
+          // حفظ الجلسة في localStorage
+          persistSession: true,
+          detectSessionInUrl: true
+        }
+      });
     }
     return _supabase;
   }
