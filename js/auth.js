@@ -18,28 +18,38 @@
       return this._initPromise || Promise.resolve();
     },
 
+    // ===== timeout helper =====
+    _withTimeout: function(promise, ms) {
+      return Promise.race([
+        promise,
+        new Promise(function(_, reject) {
+          setTimeout(function() { reject(new Error('timeout')); }, ms);
+        })
+      ]);
+    },
+
     // ===== التهيئة =====
     init: async function() {
       var sb = U.getSupabase();
       if (!sb) return;
 
-      // استرجاع الجلسة الحالية — مع إعادة المحاولة عند AbortError
+      // استرجاع الجلسة الحالية — مع timeout + إعادة المحاولة
+      var self = this;
       var maxRetries = 3;
       for (var attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          var res = await sb.auth.getSession();
+          var res = await self._withTimeout(sb.auth.getSession(), 5000);
           var session = res.data.session;
           if (session && session.user) {
             this._user = session.user;
-            await this._loadProfile();
+            await self._withTimeout(this._loadProfile(), 5000);
           }
           console.log('Auth init OK (attempt ' + attempt + '), user:', !!this._user);
           break; // نجحت — اخرج من الحلقة
         } catch(e) {
           console.warn('Auth init error (attempt ' + attempt + '):', e.message || e);
           if (attempt < maxRetries) {
-            // انتظر قبل المحاولة التالية (500ms, 1000ms)
-            await new Promise(function(r) { setTimeout(r, attempt * 500); });
+            await new Promise(function(r) { setTimeout(r, attempt * 1000); });
           }
         }
       }
