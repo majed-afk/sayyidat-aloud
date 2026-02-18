@@ -12,68 +12,70 @@
     _user: null,
     _profile: null,
     _initPromise: null,
+    _initResolve: null,  // resolve function للـ init promise
+    _initDone: false,    // هل اكتملت التهيئة؟
 
     // ===== انتظار التهيئة =====
     ready: function() {
       return this._initPromise || Promise.resolve();
     },
 
-    // ===== timeout helper =====
-    _withTimeout: function(promise, ms) {
-      return Promise.race([
-        promise,
-        new Promise(function(_, reject) {
-          setTimeout(function() { reject(new Error('timeout')); }, ms);
-        })
-      ]);
-    },
-
     // ===== التهيئة =====
+    // تعتمد على onAuthStateChange بدل getSession — أكثر استقراراً
     init: async function() {
       var sb = U.getSupabase();
-      if (!sb) return;
-
-      // استرجاع الجلسة الحالية — مع timeout + إعادة المحاولة
-      var self = this;
-      var maxRetries = 3;
-      for (var attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          var res = await self._withTimeout(sb.auth.getSession(), 5000);
-          var session = res.data.session;
-          if (session && session.user) {
-            this._user = session.user;
-            await self._withTimeout(this._loadProfile(), 5000);
-          }
-          console.log('Auth init OK (attempt ' + attempt + '), user:', !!this._user);
-          break; // نجحت — اخرج من الحلقة
-        } catch(e) {
-          console.warn('Auth init error (attempt ' + attempt + '):', e.message || e);
-          if (attempt < maxRetries) {
-            await new Promise(function(r) { setTimeout(r, attempt * 1000); });
-          }
-        }
+      if (!sb) {
+        console.warn('Auth: no Supabase client');
+        return;
       }
 
-      // الاستماع لتغييرات الجلسة
+      console.log('Auth: init started');
       var self = this;
+
+      // onAuthStateChange يُطلق INITIAL_SESSION فوراً — نعتمد عليه
       sb.auth.onAuthStateChange(async function(event, session) {
         console.log('Auth event:', event, !!session);
+
         if (event === 'SIGNED_OUT') {
-          // فقط SIGNED_OUT يصفّر المستخدم — TOKEN_REFRESHED لا يطرد
           self._user = null;
           self._profile = null;
         } else if (session && session.user) {
           self._user = session.user;
-          await self._loadProfile();
+          try {
+            await self._loadProfile();
+          } catch(e) {
+            console.warn('Auth: profile load failed:', e.message);
+          }
         }
+        // session = null بدون SIGNED_OUT → لا نصفّر (مثل token refresh failure)
+
+        // أول حدث (INITIAL_SESSION) يحل الـ initPromise
+        if (!self._initDone) {
+          self._initDone = true;
+          console.log('Auth: init complete, user:', !!self._user, 'profile:', !!self._profile);
+          if (self._initResolve) {
+            self._initResolve();
+            self._initResolve = null;
+          }
+        }
+
+        // تحديث الهيدر عند كل تغيير
         if (SAIDAT.header && SAIDAT.header.update) {
           SAIDAT.header.update();
         }
       });
 
-      if (SAIDAT.header && SAIDAT.header.update) {
-        SAIDAT.header.update();
-      }
+      // Safety timeout — إذا onAuthStateChange ما أطلق خلال 8 ثوانٍ، نكمل بدون مستخدم
+      setTimeout(function() {
+        if (!self._initDone) {
+          self._initDone = true;
+          console.warn('Auth: init timeout — proceeding without user');
+          if (self._initResolve) {
+            self._initResolve();
+            self._initResolve = null;
+          }
+        }
+      }, 8000);
     },
 
     // ===== تحميل البروفايل =====
@@ -221,10 +223,14 @@
   window.AUTH = SAIDAT.auth;
 
   // ===== تشغيل تلقائي =====
-  // _initPromise يُعيّن فوراً حتى يعمل ready() بشكل صحيح في كل الصفحات
+  // _initPromise يُعيّن فوراً — يتحل عند أول حدث من onAuthStateChange
   SAIDAT.auth._initPromise = new Promise(function(resolve) {
+    SAIDAT.auth._initResolve = resolve;
     function startInit() {
-      SAIDAT.auth.init().then(resolve).catch(resolve);
+      SAIDAT.auth.init().catch(function(e) {
+        console.error('Auth init fatal:', e);
+        resolve(); // حتى لو فشلت — نحل الـ promise
+      });
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', startInit);
