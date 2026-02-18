@@ -23,14 +23,18 @@
 
   // ===== التهيئة =====
   async function initDashboard() {
+    console.log('Dashboard: waiting for auth...');
     // انتظر تحميل الجلسة من Supabase
     await SAIDAT.auth.ready();
+    console.log('Dashboard: auth ready, isLoggedIn =', SAIDAT.auth.isLoggedIn());
 
     currentUser = SAIDAT.auth.getCurrentUser();
     if (!currentUser) {
+      console.warn('Dashboard: no currentUser → redirecting to login');
       window.location.href = 'login.html';
       return;
     }
+    console.log('Dashboard: user loaded =', currentUser.email);
 
     // جلب البيانات من Supabase وإضافتها للمستخدم
     try {

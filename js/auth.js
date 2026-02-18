@@ -38,12 +38,14 @@
       // الاستماع لتغييرات الجلسة
       var self = this;
       sb.auth.onAuthStateChange(async function(event, session) {
-        if (session && session.user) {
-          self._user = session.user;
-          await self._loadProfile();
-        } else {
+        console.log('Auth event:', event, !!session);
+        if (event === 'SIGNED_OUT') {
+          // فقط SIGNED_OUT يصفّر المستخدم — TOKEN_REFRESHED لا يطرد
           self._user = null;
           self._profile = null;
+        } else if (session && session.user) {
+          self._user = session.user;
+          await self._loadProfile();
         }
         if (SAIDAT.header && SAIDAT.header.update) {
           SAIDAT.header.update();

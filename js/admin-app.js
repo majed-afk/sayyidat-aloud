@@ -36,9 +36,12 @@
 
   // ===== INIT =====
   async function initAdmin() {
+    console.log('Admin: waiting for auth...');
     await SAIDAT.auth.ready();
+    console.log('Admin: auth ready, isLoggedIn =', SAIDAT.auth.isLoggedIn(), 'isAdmin =', SAIDAT.auth.isAdmin());
     var user = SAIDAT.auth.getCurrentUser();
     if (!user || !SAIDAT.auth.isAdmin()) {
+      console.warn('Admin: no admin user → redirecting to login');
       window.location.href = 'login.html';
       return;
     }
