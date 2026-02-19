@@ -203,7 +203,7 @@
         priceHTML = U.formatCurrency(p.price);
       }
 
-      var approvalStatus = p.approval_status || p.approvalStatus || 'approved';
+      var approvalStatus = p.approval_status || p.approvalStatus || 'pending';
       var approvalBadge = '';
       if (approvalStatus === 'pending') {
         approvalBadge = '<span class="badge badge-warning">بانتظار الموافقة</span>';

@@ -154,7 +154,7 @@
       .filter(function(t) { return t.type === 'commission'; })
       .reduce(function(s, t) { return s + Math.abs(t.amount || 0); }, 0);
 
-    var pendingProducts = allProducts.filter(function(p) { return (p.approval_status || 'approved') === 'pending'; }).length;
+    var pendingProducts = allProducts.filter(function(p) { return (p.approval_status || 'pending') === 'pending'; }).length;
 
     document.getElementById('adminStatsGrid').innerHTML =
       statCard('users', '\u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646', U.formatNumber(totalUsers), '\u062a\u0627\u062c\u0631 \u0645\u0633\u062c\u0644') +
@@ -470,7 +470,7 @@
       if (typeFilter !== 'all' && p.listing_type !== typeFilter) return false;
       if (statusFilter === 'active' && !p.active) return false;
       if (statusFilter === 'inactive' && p.active) return false;
-      var approvalStatus = p.approval_status || 'approved';
+      var approvalStatus = p.approval_status || 'pending';
       if (productApprovalFilter !== 'all' && approvalStatus !== productApprovalFilter) return false;
       return true;
     });
@@ -491,7 +491,7 @@
         ? '<span class="status status-completed"><span class="status-dot"></span>\u0646\u0634\u0637</span>'
         : '<span class="status status-cancelled"><span class="status-dot"></span>\u0645\u062a\u0648\u0642\u0641</span>';
 
-      var approvalStatus = p.approval_status || 'approved';
+      var approvalStatus = p.approval_status || 'pending';
       var approvalBadge = '';
       if (approvalStatus === 'pending') {
         approvalBadge = '<span class="status" style="background:rgba(243,156,18,0.1);color:#F39C12"><span class="status-dot" style="background:#F39C12"></span>\u0628\u0627\u0646\u062a\u0638\u0627\u0631 \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629</span>';
@@ -502,7 +502,7 @@
       }
 
       var approvalActions = '';
-      if ((p.approval_status || 'approved') === 'pending') {
+      if ((p.approval_status || 'pending') === 'pending') {
         approvalActions = '<button class="btn btn-sm" style="background:#27AE60;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.78rem;margin-left:4px" onclick="approveProduct(\'' + U.escapeHtml(p.id) + '\')">\u2713 \u0627\u0639\u062a\u0645\u0627\u062f</button>' +
           '<button class="btn btn-sm" style="background:#E74C3C;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.78rem;margin-left:4px" onclick="rejectProduct(\'' + U.escapeHtml(p.id) + '\')">\u2717 \u0631\u0641\u0636</button>';
       }
@@ -532,7 +532,7 @@
     document.getElementById('adminProductsBody').innerHTML = html || emptyRow(9);
 
     // Update pending count badge
-    var pendingCount = allProducts.filter(function(p) { return (p.approval_status || 'approved') === 'pending'; }).length;
+    var pendingCount = allProducts.filter(function(p) { return (p.approval_status || 'pending') === 'pending'; }).length;
     var countEl = document.getElementById('pendingProductsCount');
     if (countEl) countEl.textContent = pendingCount;
   };
