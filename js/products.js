@@ -98,18 +98,24 @@
      */
     add: async function(product) {
       var sb = U.getSupabase();
-      if (!sb || !SAIDAT.auth.getAuthUser()) return null;
+      if (!sb || !SAIDAT.auth.getAuthUser()) {
+        console.error('addProduct: no supabase client or no auth user');
+        return null;
+      }
 
       try {
         product.seller_id = SAIDAT.auth.getAuthUser().id;
+        console.log('addProduct: inserting product:', product.name, 'approval:', product.approval_status);
         var res = await sb.from('products').insert(product).select().single();
         if (res.error) {
-          console.error('addProduct:', res.error);
+          console.error('addProduct DB error:', res.error.code, res.error.message, res.error.details);
+          SAIDAT.ui.showToast('خطأ في الحفظ: ' + res.error.message, 'error');
           return null;
         }
+        console.log('addProduct: saved successfully, id:', res.data.id);
         return res.data;
       } catch(e) {
-        console.error('addProduct error:', e);
+        console.error('addProduct exception:', e);
         return null;
       }
     },
