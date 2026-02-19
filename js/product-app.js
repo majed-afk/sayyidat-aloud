@@ -476,8 +476,34 @@
       return;
     }
 
-    // For now, redirect to product page in fixed mode
-    SAIDAT.ui.showToast('\u0645\u064a\u0632\u0629 \u0627\u0644\u0634\u0631\u0627\u0621 \u0627\u0644\u0641\u0648\u0631\u064a \u0642\u064a\u062f \u0627\u0644\u062a\u0637\u0648\u064a\u0631', 'info');
+    // Switch product price to buy_now price and quantity = 1
+    product.price = product.buyNow;
+    quantity = 1;
+
+    // Stop auction polling/countdown (user chose to buy now)
+    stopPolling();
+    if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+
+    // Hide auction panel
+    var auctionPanel = document.getElementById('auctionPanel');
+    if (auctionPanel) auctionPanel.style.display = 'none';
+
+    // Show stepper section
+    var stepperSection = document.querySelector('.stepper-section');
+    if (stepperSection) stepperSection.style.display = '';
+
+    // Update the displayed price to buy_now
+    document.getElementById('productPrice').textContent = U.formatNumber(product.buyNow);
+    var vatNote = document.querySelector('.product-vat-note');
+    if (vatNote) vatNote.textContent = '\u0633\u0639\u0631 \u0627\u0644\u0634\u0631\u0627\u0621 \u0627\u0644\u0641\u0648\u0631\u064a';
+
+    // Setup event listeners for the purchase flow
+    setupEventListeners();
+
+    // Go directly to step 2 (address & shipping)
+    goToStep(2);
+
+    SAIDAT.ui.showToast('\u0623\u0643\u0645\u0644 \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0634\u062d\u0646 \u0644\u0625\u062a\u0645\u0627\u0645 \u0627\u0644\u0634\u0631\u0627\u0621', 'success');
   }
 
   // ===== CLEANUP =====
