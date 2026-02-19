@@ -177,7 +177,7 @@
 
     user.products.forEach(function(p) {
       var pName = U.escapeHtml(p.name);
-      var pImage = U.safeImageUrl(p.image);
+      var pImage = U.safeImageUrl(p.image_url || p.image);
       var pCategory = U.escapeHtml(p.category);
       var pType = U.escapeHtml(p.type);
       var pOrigin = U.escapeHtml(p.origin);
@@ -300,7 +300,7 @@
         document.getElementById('pmUnit').value = p.unit;
         document.getElementById('pmPrice').value = p.price;
         document.getElementById('pmStock').value = p.stock;
-        document.getElementById('pmImage').value = p.image;
+        document.getElementById('pmImage').value = p.image_url || p.image || '';
         document.getElementById('pmDesc').value = p.description;
 
         // Auction fields
@@ -336,6 +336,10 @@
   }
 
   async function saveProduct() {
+    var saveBtn = document.getElementById('saveProductBtn');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'جاري الحفظ...'; }
+
+    try {
     var name = document.getElementById('pmName').value.trim();
     var stock = parseInt(document.getElementById('pmStock').value);
     var weight = parseFloat(document.getElementById('pmWeight').value);
@@ -437,7 +441,7 @@
       price: product.price,
       stock: product.stock,
       active: product.active,
-      image: product.image,
+      image_url: product.image,
       description: product.description,
       start_price: product.startPrice || null,
       min_bid: product.minBid || null,
@@ -456,24 +460,27 @@
     }
 
     if (editId) {
-      SAIDAT.products.update(editId, dbProduct).then(function() {
-        SAIDAT.ui.showToast(listingType === 'auction' ? 'تم تحديث المزاد بنجاح' : 'تم تحديث المنتج بنجاح', 'success');
-      });
-      // تحديث محلياً
+      // انتظار تحديث المنتج في قاعدة البيانات
+      var updated = await SAIDAT.products.update(editId, dbProduct);
+      if (!updated) {
+        SAIDAT.ui.showToast('حدث خطأ أثناء تحديث المنتج — حاول مرة أخرى', 'error');
+        return;
+      }
+      // تحديث محلياً بعد نجاح الحفظ
       var idx = currentUser.products.findIndex(function(p) { return p.id === editId; });
       if (idx !== -1) {
         currentUser.products[idx] = Object.assign(currentUser.products[idx], product);
       }
+      SAIDAT.ui.showToast(listingType === 'auction' ? 'تم تحديث المزاد بنجاح' : 'تم تحديث المنتج بنجاح', 'success');
     } else {
-      SAIDAT.products.add(dbProduct).then(function(saved) {
-        if (saved) {
-          product.id = saved.id;
-          currentUser.products.push(product);
-          renderProducts();
-          renderOverview();
-        }
-      });
-      // مؤقتاً أضف محلياً
+      // انتظار حفظ المنتج في قاعدة البيانات
+      var saved = await SAIDAT.products.add(dbProduct);
+      if (!saved) {
+        SAIDAT.ui.showToast('حدث خطأ أثناء حفظ المنتج — حاول مرة أخرى', 'error');
+        return;
+      }
+      // نجح الحفظ — أضف للقائمة المحلية بالبيانات المؤكدة
+      product.id = saved.id;
       currentUser.products = currentUser.products || [];
       currentUser.products.push(product);
       var isVerifiedToast = currentUser.merchantVerified || currentUser.sellerVerified;
@@ -486,6 +493,10 @@
     renderProducts();
     renderOverview();
     closeProductModal();
+
+    } finally {
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'حفظ المنتج'; }
+    }
   }
 
   function editProduct(id) {
