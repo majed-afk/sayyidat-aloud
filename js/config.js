@@ -37,6 +37,13 @@ SAIDAT.config = {
     withdrawal: 'سحب'
   },
 
+  // ثوابت المزاد
+  AUCTION: {
+    POLL_INTERVAL: 7000,
+    MIN_BID_DEFAULT: 10,
+    COUNTDOWN_UPDATE: 1000
+  },
+
   // تسميات أنواع المزادات
   AUCTION_TYPE_LABELS: {
     timed: 'محدد بوقت',

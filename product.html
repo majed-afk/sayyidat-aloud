@@ -133,7 +133,8 @@
 
           <p class="product-description" id="productDescription"></p>
 
-          <div class="quantity-section">
+          <!-- قسم الكمية (يُخفى للمزاد) -->
+          <div class="quantity-section" id="quantitySection">
             <div class="quantity-label">الكمية</div>
             <div class="quantity-control">
               <button class="qty-btn" id="qtyMinus">-</button>
@@ -142,7 +143,8 @@
             </div>
           </div>
 
-          <div class="step-actions" style="justify-content: flex-end;">
+          <!-- أزرار الخطوة (تُخفى للمزاد) -->
+          <div class="step-actions" id="stepActions" style="justify-content: flex-end;">
             <button class="btn-next" onclick="goToStep(2)">
               التالي
               <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -150,6 +152,109 @@
           </div>
         </div>
       </div>
+
+      <!-- ===== AUCTION PANEL (يظهر فقط للمزادات) ===== -->
+      <div id="auctionPanel" style="display:none;">
+
+        <!-- المؤقت التنازلي -->
+        <div class="auction-timer-card">
+          <div class="auction-timer-header">
+            <span class="auction-status-badge" id="auctionStatusBadge">
+              <span class="pulse-dot"></span>
+              جاري المزاد
+            </span>
+            <span class="auction-type-label" id="auctionTypeLabel"></span>
+          </div>
+          <div class="countdown-grid" id="countdownGrid">
+            <div class="countdown-unit">
+              <span class="countdown-value" id="cdDays">00</span>
+              <span class="countdown-label">يوم</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-unit">
+              <span class="countdown-value" id="cdHours">00</span>
+              <span class="countdown-label">ساعة</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-unit">
+              <span class="countdown-value" id="cdMinutes">00</span>
+              <span class="countdown-label">دقيقة</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-unit">
+              <span class="countdown-value" id="cdSeconds">00</span>
+              <span class="countdown-label">ثانية</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- معلومات المزايدة -->
+        <div class="bid-info-card">
+          <div class="bid-info-grid">
+            <div class="bid-info-item">
+              <span class="bid-info-label">السعر الابتدائي</span>
+              <span class="bid-info-value" id="startPriceValue">—</span>
+            </div>
+            <div class="bid-info-item highlight">
+              <span class="bid-info-label">أعلى مزايدة</span>
+              <span class="bid-info-value" id="highestBidValue">لا توجد مزايدات</span>
+            </div>
+            <div class="bid-info-item">
+              <span class="bid-info-label">الحد الأدنى التالي</span>
+              <span class="bid-info-value" id="minNextBidValue">—</span>
+            </div>
+            <div class="bid-info-item">
+              <span class="bid-info-label">عدد المزايدات</span>
+              <span class="bid-info-value" id="bidCountValue">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- نموذج المزايدة -->
+        <div class="bid-form-card" id="bidFormCard">
+          <div id="bidLoginMsg" style="display:none;">
+            <p class="bid-login-text">يجب عليك <a href="login.html">تسجيل الدخول</a> للمزايدة</p>
+          </div>
+          <div id="bidFormInner">
+            <div class="bid-form-row">
+              <div class="bid-input-wrap">
+                <input type="number" id="bidAmount" class="bid-input" placeholder="أدخل مبلغ المزايدة" min="0" step="1">
+                <span class="bid-currency">ر.س</span>
+              </div>
+              <button class="bid-submit-btn" id="bidSubmitBtn" onclick="submitBid()">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/></svg>
+                زايد الآن
+              </button>
+            </div>
+            <p class="bid-hint" id="bidHint"></p>
+          </div>
+        </div>
+
+        <!-- الشراء الفوري -->
+        <div class="buy-now-card" id="buyNowCard" style="display:none;">
+          <div class="buy-now-divider">
+            <span>أو</span>
+          </div>
+          <button class="buy-now-btn" onclick="buyNow()">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" fill="currentColor"/></svg>
+            اشتر الآن بـ <span id="buyNowPrice"></span> ر.س
+          </button>
+        </div>
+
+        <!-- سجل المزايدات -->
+        <div class="bid-history-card">
+          <h3 class="bid-history-title">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" fill="currentColor"/></svg>
+            سجل المزايدات
+          </h3>
+          <div id="bidHistoryList" class="bid-history-list">
+            <p class="bid-empty-msg">لا توجد مزايدات حتى الآن</p>
+          </div>
+        </div>
+
+      </div>
+      <!-- END AUCTION PANEL -->
+
     </div>
 
     <!-- STEP 2: Address & Shipping -->
@@ -557,6 +662,7 @@
 <script src="js/admin-api.js?v=2"></script>
 <script src="js/header.js?v=2"></script>
 <script src="js/ui.js?v=2"></script>
-<script src="js/product-app.js?v=2"></script>
+<script src="js/bids.js?v=1"></script>
+<script src="js/product-app.js?v=3"></script>
 </body>
 </html>
