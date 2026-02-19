@@ -422,16 +422,14 @@
       return;
     }
 
-    // Get bidder name from profile
+    // Get bidder name from profile (use auth.getRawProfile which is already loaded)
     var bidderName = '\u0645\u0632\u0627\u064a\u062f';
     try {
-      if (SAIDAT.profiles && typeof SAIDAT.profiles.get === 'function') {
-        var profile = await SAIDAT.profiles.get(authUser.id);
-        if (profile) {
-          bidderName = profile.first_name
-            ? (profile.first_name + ' ' + (profile.last_name || '')).trim()
-            : (profile.store_name || '\u0645\u0632\u0627\u064a\u062f');
-        }
+      var profile = SAIDAT.auth.getRawProfile();
+      if (profile) {
+        bidderName = profile.first_name
+          ? (profile.first_name + ' ' + (profile.last_name || '')).trim()
+          : (profile.store_name || '\u0645\u0632\u0627\u064a\u062f');
       }
     } catch(e) {
       console.warn('Could not load bidder profile:', e);
