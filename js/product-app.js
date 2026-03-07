@@ -657,7 +657,7 @@
     });
     el.classList.add('selected');
     el.querySelector('input[type="radio"]').checked = true;
-    shippingCost = cost;
+    shippingCost = (product.freeShipping || product.free_shipping) ? 0 : cost;
   }
 
   // ===== TERMS =====
@@ -705,7 +705,7 @@
   // ===== ORDER SUMMARY =====
   function updateOrderSummary() {
     var subtotal = product.price * quantity;
-    var vat = subtotal * CFG.VAT_RATE;
+    var vat = (subtotal + shippingCost) * CFG.VAT_RATE;
     var total = subtotal + shippingCost + vat;
 
     document.getElementById('summaryProductName').textContent = product.name;
@@ -718,7 +718,7 @@
 
   function updateInstallments() {
     var subtotal = product.price * quantity;
-    var vat = subtotal * CFG.VAT_RATE;
+    var vat = (subtotal + shippingCost) * CFG.VAT_RATE;
     var total = subtotal + shippingCost + vat;
 
     // Tabby: 4 installments
@@ -745,8 +745,40 @@
   }
 
   // ===== CONFIRM ORDER =====
-  function confirmOrder() {
-    var orderNum = 'SA-' + Math.floor(100000 + Math.random() * 900000);
+  async function confirmOrder() {
+    var orderNum = 'SA-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 4).toUpperCase();
+    var subtotal = product.price * quantity;
+    var vat = (subtotal + shippingCost) * CFG.VAT_RATE;
+    var total = subtotal + shippingCost + vat;
+
+    var user = SAIDAT.auth.getAuthUser();
+
+    var orderData = {
+      id: orderNum,
+      seller_id: product.sellerId || product.seller_id,
+      product_id: product.id,
+      product_name: product.name,
+      buyer_id: user ? user.id : null,
+      buyer_name: document.getElementById('fullName').value.trim(),
+      buyer_phone: document.getElementById('phone').value.trim(),
+      buyer_city: document.getElementById('city').value.trim(),
+      buyer_district: (document.getElementById('district').value || '').trim(),
+      buyer_street: (document.getElementById('street').value || '').trim(),
+      qty: quantity,
+      price: product.price,
+      shipping: shippingCost,
+      vat: Math.round(vat * 100) / 100,
+      total: Math.round(total * 100) / 100,
+      shipping_method: (document.querySelector('input[name="shipping"]:checked') || {}).value || 'standard',
+      status: 'new'
+    };
+
+    var saved = await SAIDAT.orders.add(orderData);
+    if (!saved) {
+      alert('حدث خطأ أثناء حفظ الطلب. يرجى المحاولة مرة أخرى.');
+      return;
+    }
+
     document.getElementById('orderNumber').textContent = orderNum;
     document.getElementById('successModal').classList.add('active');
   }

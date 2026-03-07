@@ -143,9 +143,29 @@
     return false;
   }
 
-  // ===== تسجيل دخول اجتماعي (غير متاح حالياً) =====
-  function socialLogin(provider) {
-    SAIDAT.ui.showToast('التسجيل عبر ' + provider + ' قريباً!', 'error');
+  // ===== تسجيل دخول اجتماعي =====
+  async function socialLogin(provider) {
+    provider = provider.toLowerCase();
+    var sb = SAIDAT.utils.getSupabase();
+    if (!sb) {
+      SAIDAT.ui.showToast('خطأ في الاتصال بالخادم', 'error');
+      return;
+    }
+
+    try {
+      var res = await sb.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: window.location.origin + '/dashboard.html'
+        }
+      });
+
+      if (res.error) {
+        SAIDAT.ui.showToast('خطأ: ' + res.error.message, 'error');
+      }
+    } catch(e) {
+      SAIDAT.ui.showToast('خطأ في تسجيل الدخول: ' + e.message, 'error');
+    }
   }
 
   // ===== كشف الدوال للـ onclick handlers =====
