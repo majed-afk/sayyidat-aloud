@@ -23,28 +23,28 @@
 
   // ===== التهيئة =====
   async function initDashboard() {
-    console.log('Dashboard: waiting for auth...');
+    U.log('log', 'Dashboard: waiting for auth...');
 
     // انتظار auth مع timeout — لو علّق نعيد المحاولة
     var authTimeout = new Promise(function(resolve) { setTimeout(resolve, 10000); });
     await Promise.race([SAIDAT.auth.ready(), authTimeout]);
-    console.log('Dashboard: auth ready, isLoggedIn =', SAIDAT.auth.isLoggedIn());
+    U.log('log', 'Dashboard: auth ready, isLoggedIn=' + SAIDAT.auth.isLoggedIn());
 
     currentUser = SAIDAT.auth.getCurrentUser();
 
     // لو ما في مستخدم — ننتظر 3 ثوانٍ ونعيد المحاولة (ممكن auth بطيء)
     if (!currentUser) {
-      console.log('Dashboard: no user yet, retrying in 3s...');
+      U.log('log', 'Dashboard: no user yet, retrying in 3s...');
       await new Promise(function(r) { setTimeout(r, 3000); });
       currentUser = SAIDAT.auth.getCurrentUser();
     }
 
     if (!currentUser) {
-      console.warn('Dashboard: no currentUser after retry → redirecting to login');
+      U.log('warn', 'Dashboard: no currentUser after retry → redirecting to login');
       window.location.href = 'login.html';
       return;
     }
-    console.log('Dashboard: user loaded =', currentUser.email);
+    U.log('log', 'Dashboard: user loaded =', currentUser.email);
 
     // جلب البيانات من Supabase وإضافتها للمستخدم
     try {
@@ -58,7 +58,7 @@
       currentUser.transactions = transactions || [];
       currentUser.monthlySales = monthlySales.length > 0 ? monthlySales : CFG.DEFAULT_MONTHLY_SALES.slice();
     } catch(e) {
-      console.warn('Data load error:', e);
+      U.log('warn', 'Data load error:', e);
       currentUser.products = [];
       currentUser.orders = [];
       currentUser.transactions = [];
@@ -379,7 +379,7 @@
           SAIDAT.ui.showToast(imgCheck.warnings[0], 'warning');
         }
       } catch(err) {
-        console.warn('Image check failed:', err);
+        U.log('warn', 'Image check failed:', err);
       }
     }
 
@@ -526,7 +526,52 @@
   }
 
   // ===== ORDERS =====
-  function renderOrders() {
+  // ===== DISPUTES =====
+  async function openDispute(orderId, sellerId) {
+    var reason = prompt('سبب النزاع:');
+    if (!reason || !reason.trim()) return;
+
+    var dispute = {
+      order_id: orderId,
+      seller_id: sellerId,
+      reason: reason.trim()
+    };
+
+    var result = await SAIDAT.disputes.create(dispute);
+    if (result) {
+      SAIDAT.ui.showToast('تم فتح النزاع بنجاح', 'success');
+      renderOrders();
+    } else {
+      SAIDAT.ui.showToast('حدث خطأ أثناء فتح النزاع', 'error');
+    }
+  }
+
+  function getDisputeStatusBadge(dispute) {
+    if (!dispute) return '';
+    var statusLabels = {
+      'open': 'نزاع مفتوح',
+      'resolved': 'تم الحل',
+      'rejected': 'مرفوض'
+    };
+    var statusClasses = {
+      'open': 'status-processing',
+      'resolved': 'status-completed',
+      'rejected': 'status-cancelled'
+    };
+    var label = statusLabels[dispute.status] || U.escapeHtml(dispute.status);
+    var cls = statusClasses[dispute.status] || 'status-new';
+    return '<span class="status ' + cls + '"><span class="status-dot"></span>' + U.escapeHtml(label) + '</span>';
+  }
+
+  function isWithin7Days(dateStr) {
+    if (!dateStr) return false;
+    var completed = new Date(dateStr);
+    var now = new Date();
+    var diff = now.getTime() - completed.getTime();
+    return diff <= 7 * 24 * 60 * 60 * 1000;
+  }
+
+  async function renderOrders() {
     var user = currentUser;
     var orders = user.orders;
 
@@ -542,6 +587,18 @@
     document.getElementById('countCompleted').textContent = countCompleted;
     document.getElementById('countCancelled').textContent = countCancelled;
     document.getElementById('newOrdersCount').textContent = countNew;
+
+    // Load disputes for completed orders
+    if (SAIDAT.disputes) {
+      var completedOrders = orders.filter(function(o) { return o.status === 'completed'; });
+      for (var i = 0; i < completedOrders.length; i++) {
+        try {
+          completedOrders[i]._dispute = await SAIDAT.disputes.getForOrder(completedOrders[i].id);
+        } catch(e) {
+          completedOrders[i]._dispute = null;
+        }
+      }
+    }
 
     // Filter
     var filtered = orders;
@@ -572,6 +629,20 @@
       }
       actions += '<button class="btn btn-sm btn-outline" onclick="showOrderDetail(\'' + oId + '\')">تفاصيل</button>';
 
+      // Dispute button for completed orders within 7 days
+      var disputeBadge = '';
+      var completedDate = o.completed_at || o.completedAt || (o.status === 'completed' ? (o.updated_at || o.date || o.created_at) : null);
+      if (o.status === 'completed' && isWithin7Days(completedDate)) {
+        var sellerId = U.escapeHtml(o.seller_id || o.sellerId || '');
+        if (o._dispute) {
+          disputeBadge = ' ' + getDisputeStatusBadge(o._dispute);
+        } else {
+          actions += '<button class="btn-sm btn-outline" onclick="openDispute(\'' + oId + '\', \'' + sellerId + '\')">&#9888; فتح نزاع</button>';
+        }
+      } else if (o.status === 'completed' && o._dispute) {
+        disputeBadge = ' ' + getDisputeStatusBadge(o._dispute);
+      }
+
       // Waybill badge
       var waybillBadge = '';
       if (o.waybillGenerated || o.waybill_generated) {
@@ -588,7 +659,7 @@
           '<td>' + o.qty + '</td>' +
           '<td style="font-weight:600;">' + U.formatCurrency(o.total) + '</td>' +
           '<td>' + oShippingMethod + waybillBadge + '</td>' +
-          '<td>' + U.statusLabel(o.status) + '</td>' +
+          '<td>' + U.statusLabel(o.status) + disputeBadge + '</td>' +
           '<td style="font-size:0.82rem; opacity:0.7;">' + oDate + '</td>' +
           '<td><div class="action-btns">' + actions + '</div></td>' +
         '</tr>';
@@ -1218,14 +1289,14 @@
         var products = await SAIDAT.products.getForSeller();
         currentUser.products = products || [];
       } catch(e) {
-        console.warn('Could not refresh products:', e);
+        U.log('warn', 'Could not refresh products:', e);
       }
 
       renderProducts();
       renderOverview();
       SAIDAT.ui.showToast('تم إلغاء المزاد بنجاح', 'success');
     } catch(e) {
-      console.error('cancelAuction error:', e);
+      U.log('error', 'cancelAuction error:', e);
       SAIDAT.ui.showToast('حدث خطأ غير متوقع', 'error');
     }
   }
@@ -1269,6 +1340,7 @@
   window.renderProducts = renderProducts;
   window.renderOrders = renderOrders;
   window.renderFinance = renderFinance;
+  window.openDispute = openDispute;
 
   // ===== تشغيل تلقائي =====
   if (document.readyState === 'loading') {

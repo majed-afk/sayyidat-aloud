@@ -22,7 +22,7 @@
         var res = await sb.from('products').select('*').eq('seller_id', id).order('created_at', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getForSeller error:', e);
+        U.log('error', 'getForSeller error:', e);
         return [];
       }
     },
@@ -44,7 +44,7 @@
           .order('created_at', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getAllProducts error:', e);
+        U.log('error', 'getAllProducts error:', e);
         return [];
       }
     },
@@ -64,7 +64,7 @@
           .order('created_at', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getAllAdmin error:', e);
+        U.log('error', 'getAllAdmin error:', e);
         return [];
       }
     },
@@ -81,12 +81,12 @@
       try {
         var res = await sb
           .from('products')
-          .select('*, profiles(store_name, first_name, last_name, verified, phone)')
+          .select('*, profiles(store_name, first_name, last_name, verified)')
           .eq('id', productId)
           .single();
         return res.data || null;
       } catch(e) {
-        console.error('getProduct error:', e);
+        U.log('error', 'getProduct error:', e);
         return null;
       }
     },
@@ -99,23 +99,23 @@
     add: async function(product) {
       var sb = U.getSupabase();
       if (!sb || !SAIDAT.auth.getAuthUser()) {
-        console.error('addProduct: no supabase client or no auth user');
+        U.log('error', 'addProduct: no supabase client or no auth user');
         return null;
       }
 
       try {
         product.seller_id = SAIDAT.auth.getAuthUser().id;
-        console.log('addProduct: inserting product:', product.name, 'approval:', product.approval_status);
+        U.log('log', 'addProduct: inserting product: ' + product.name + ' approval: ' + product.approval_status);
         var res = await sb.from('products').insert(product).select().single();
         if (res.error) {
-          console.error('addProduct DB error:', res.error.code, res.error.message, res.error.details);
+          U.log('error', 'addProduct DB error: ' + res.error.code + ' ' + res.error.message, res.error.details);
           SAIDAT.ui.showToast('خطأ في الحفظ: ' + res.error.message, 'error');
           return null;
         }
-        console.log('addProduct: saved successfully, id:', res.data.id);
+        U.log('log', 'addProduct: saved successfully, id:', res.data.id);
         return res.data;
       } catch(e) {
-        console.error('addProduct exception:', e);
+        U.log('error', 'addProduct exception:', e);
         return null;
       }
     },
@@ -134,7 +134,7 @@
         var res = await sb.from('products').update(updates).eq('id', productId);
         return !res.error;
       } catch(e) {
-        console.error('updateProduct error:', e);
+        U.log('error', 'updateProduct error:', e);
         return false;
       }
     },
@@ -152,7 +152,7 @@
         var res = await sb.from('products').delete().eq('id', productId);
         return !res.error;
       } catch(e) {
-        console.error('deleteProduct error:', e);
+        U.log('error', 'deleteProduct error:', e);
         return false;
       }
     }

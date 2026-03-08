@@ -33,11 +33,23 @@
     }
   }
 
+  // ===== Rate Limiting لمحاولات الدخول =====
+  var _loginAttempts = 0;
+  var _lockUntil = 0;
+
   // ===== معالجة تسجيل الدخول =====
   async function handleLogin(e) {
     e.preventDefault();
     var errEl = document.getElementById('loginError');
     errEl.style.display = 'none';
+
+    // فحص القفل المؤقت
+    if (Date.now() < _lockUntil) {
+      var remaining = Math.ceil((_lockUntil - Date.now()) / 60000);
+      errEl.textContent = 'تم قفل تسجيل الدخول مؤقتاً. حاول بعد ' + remaining + ' دقيقة';
+      errEl.style.display = 'block';
+      return false;
+    }
 
     var email = document.getElementById('loginEmail').value.trim();
     var password = document.getElementById('loginPassword').value;
@@ -56,9 +68,16 @@
       var result = await SAIDAT.auth.login(email, password);
 
       if (result.success) {
+        _loginAttempts = 0; // إعادة العداد عند النجاح
         window.location.href = 'dashboard.html';
       } else {
-        errEl.textContent = result.message;
+        _loginAttempts++;
+        if (_loginAttempts >= 5) {
+          _lockUntil = Date.now() + 900000; // قفل 15 دقيقة
+          errEl.textContent = 'تم تجاوز الحد المسموح. تم قفل تسجيل الدخول لمدة 15 دقيقة';
+        } else {
+          errEl.textContent = result.message + ' (محاولة ' + _loginAttempts + '/5)';
+        }
         errEl.style.display = 'block';
         document.getElementById('loginPassword').value = '';
         btn.classList.remove('loading');

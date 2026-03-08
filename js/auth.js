@@ -25,16 +25,16 @@
     init: async function() {
       var sb = U.getSupabase();
       if (!sb) {
-        console.warn('Auth: no Supabase client');
+        U.log('warn', 'Auth: no Supabase client');
         return;
       }
 
-      console.log('Auth: init started');
+      U.log('log', 'Auth: init started');
       var self = this;
 
       // onAuthStateChange يُطلق INITIAL_SESSION فوراً — نعتمد عليه
       sb.auth.onAuthStateChange(function(event, session) {
-        console.log('Auth event:', event, !!session);
+        U.log('log', 'Auth event:', event);
 
         if (event === 'SIGNED_OUT') {
           self._user = null;
@@ -53,7 +53,7 @@
             // نحمّل البروفايل مع timeout 5 ثوانٍ — ثم نحل الـ promise
             var profileTimeout = new Promise(function(r) { setTimeout(r, 5000); });
             Promise.race([self._loadProfile(), profileTimeout]).then(function() {
-              console.log('Auth: init complete, user:', !!self._user, 'profile:', !!self._profile);
+              U.log('log', 'Auth: init complete, user:' + !!self._user + ' profile:' + !!self._profile);
               if (self._initResolve) {
                 self._initResolve();
                 self._initResolve = null;
@@ -63,7 +63,7 @@
               }
             });
           } else {
-            console.log('Auth: init complete, no user');
+            U.log('log', 'Auth: init complete, no user');
             if (self._initResolve) {
               self._initResolve();
               self._initResolve = null;
@@ -89,7 +89,7 @@
       setTimeout(function() {
         if (!self._initDone) {
           self._initDone = true;
-          console.warn('Auth: init timeout — proceeding without user');
+          U.log('warn', 'Auth: init timeout — proceeding without user');
           if (self._initResolve) {
             self._initResolve();
             self._initResolve = null;
@@ -104,7 +104,7 @@
       var sb = U.getSupabase();
       if (!sb) return;
       try {
-        console.log('Auth: loading profile for', this._user.id);
+        U.log('log', 'Auth: loading profile for', this._user.id);
         var query = sb.from('profiles').select('*').eq('id', this._user.id).single();
 
         // timeout 5 ثوانٍ — لو الـ query علّق نكمل بدون بروفايل
@@ -115,12 +115,12 @@
         var res = await Promise.race([query, timeout]);
         if (res.data) {
           this._profile = res.data;
-          console.log('Auth: profile loaded, role:', res.data.role);
+          U.log('log', 'Auth: profile loaded, role:', res.data.role);
         } else if (res.error) {
-          console.warn('Auth: profile query error:', res.error.message);
+          U.log('warn', 'Auth: profile query error:', res.error.message);
         }
       } catch(e) {
-        console.warn('Auth: profile load error:', e.message);
+        U.log('warn', 'Auth: profile load error:', e.message);
       }
     },
 
@@ -261,7 +261,7 @@
     SAIDAT.auth._initResolve = resolve;
     function startInit() {
       SAIDAT.auth.init().catch(function(e) {
-        console.error('Auth init fatal:', e);
+        U.log('error', 'Auth init fatal:', e);
         resolve(); // حتى لو فشلت — نحل الـ promise
       });
     }

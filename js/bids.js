@@ -22,7 +22,7 @@
           .order('amount', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getBids error:', e);
+        U.log('error', 'getBids error:', e);
         return [];
       }
     },
@@ -44,7 +44,7 @@
           .maybeSingle();
         return res.data || null;
       } catch(e) {
-        console.error('getHighestBid error:', e);
+        U.log('error', 'getHighestBid error:', e);
         return null;
       }
     },
@@ -63,7 +63,7 @@
           .eq('status', 'active');
         return res.count || 0;
       } catch(e) {
-        console.error('getBidCount error:', e);
+        U.log('error', 'getBidCount error:', e);
         return 0;
       }
     },
@@ -86,7 +86,7 @@
         });
         return counts;
       } catch(e) {
-        console.error('getCountsForProducts error:', e);
+        U.log('error', 'getCountsForProducts error:', e);
         return {};
       }
     },
@@ -112,7 +112,7 @@
         });
         return highest;
       } catch(e) {
-        console.error('getHighestForProducts error:', e);
+        U.log('error', 'getHighestForProducts error:', e);
         return {};
       }
     },
@@ -124,7 +124,7 @@
     place: async function(bid) {
       var sb = U.getSupabase();
       if (!sb || !SAIDAT.auth.getAuthUser()) {
-        console.error('placeBid: no supabase or no auth');
+        U.log('error', 'placeBid: no supabase or no auth');
         return null;
       }
       try {
@@ -132,13 +132,13 @@
         bid.status = 'active';
         var res = await sb.from('bids').insert(bid).select().single();
         if (res.error) {
-          console.error('placeBid DB error:', res.error.message);
+          U.log('error', 'placeBid DB error:', res.error.message);
           return null;
         }
-        console.log('placeBid: success, id:', res.data.id);
+        U.log('log', 'placeBid: success, id:', res.data.id);
         return res.data;
       } catch(e) {
-        console.error('placeBid exception:', e);
+        U.log('error', 'placeBid exception:', e);
         return null;
       }
     },
@@ -151,7 +151,7 @@
     retract: async function(bidId) {
       var sb = U.getSupabase();
       if (!sb || !SAIDAT.auth.getAuthUser()) {
-        console.error('retractBid: no supabase or no auth');
+        U.log('error', 'retractBid: no supabase or no auth');
         return false;
       }
       try {
@@ -165,7 +165,7 @@
           .single();
 
         if (fetchRes.error || !fetchRes.data) {
-          console.error('retractBid: bid not found or not yours');
+          U.log('error', 'retractBid: bid not found or not yours');
           return false;
         }
 
@@ -176,7 +176,7 @@
         var retractWindow = SAIDAT.config.AUCTION.BID_RETRACT_WINDOW || 300000;
 
         if (elapsed > retractWindow) {
-          console.warn('retractBid: retract window expired');
+          U.log('warn', 'retractBid: retract window expired');
           return false;
         }
 
@@ -188,14 +188,14 @@
           .eq('bidder_id', SAIDAT.auth.getAuthUser().id);
 
         if (updateRes.error) {
-          console.error('retractBid DB error:', updateRes.error.message);
+          U.log('error', 'retractBid DB error:', updateRes.error.message);
           return false;
         }
 
-        console.log('retractBid: success, id:', bidId);
+        U.log('log', 'retractBid: success, id:', bidId);
         return true;
       } catch(e) {
-        console.error('retractBid exception:', e);
+        U.log('error', 'retractBid exception:', e);
         return false;
       }
     }

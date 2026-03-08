@@ -114,7 +114,7 @@
               SAIDAT.ui.showToast(result.warnings[0], 'warning');
             }
           } catch(err) {
-            console.warn('Image check failed:', err);
+            U.log('warn', 'Image check failed:', err);
           }
         }
 
@@ -347,7 +347,7 @@
       document.getElementById('auction-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch(e) {
-      console.error('publishAuction error:', e);
+      U.log('error', 'publishAuction error:', e);
       SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623 \u063a\u064a\u0631 \u0645\u062a\u0648\u0642\u0639 \u2014 \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649', 'error');
       if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; }
     }

@@ -22,7 +22,7 @@
         var res = await sb.from('transactions').select('*').eq('seller_id', id).order('created_at', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getTransactions error:', e);
+        U.log('error', 'getTransactions error:', e);
         return [];
       }
     },
@@ -40,7 +40,7 @@
         var res = await sb.from('transactions').insert(transaction).select().single();
         return res.data || null;
       } catch(e) {
-        console.error('addTransaction error:', e);
+        U.log('error', 'addTransaction error:', e);
         return null;
       }
     },
@@ -60,7 +60,7 @@
         var res = await sb.from('monthly_sales').select('*').eq('seller_id', id).order('month', { ascending: true });
         return res.data || [];
       } catch(e) {
-        console.error('getMonthlySales error:', e);
+        U.log('error', 'getMonthlySales error:', e);
         return [];
       }
     }

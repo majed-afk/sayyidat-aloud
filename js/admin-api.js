@@ -20,7 +20,7 @@
         var res = await sb.from('bids').select('*').eq('product_id', productId).order('amount', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getBids error:', e);
+        U.log('error', 'getBids error:', e);
         return [];
       }
     },
@@ -38,7 +38,7 @@
         var res = await sb.from('bids').insert(bid).select().single();
         return res.data || null;
       } catch(e) {
-        console.error('addBid error:', e);
+        U.log('error', 'addBid error:', e);
         return null;
       }
     },
@@ -59,7 +59,7 @@
         }
         return settings;
       } catch(e) {
-        console.error('getSettings error:', e);
+        U.log('error', 'getSettings error:', e);
         return {};
       }
     },
@@ -78,7 +78,7 @@
         var res = await sb.from('admin_settings').upsert({ key: key, value: value });
         return !res.error;
       } catch(e) {
-        console.error('setSetting error:', e);
+        U.log('error', 'setSetting error:', e);
         return false;
       }
     }

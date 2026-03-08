@@ -27,6 +27,9 @@
   var activeCategory = '\u0627\u0644\u0643\u0644';
   var activeOrigin = '\u0627\u0644\u0643\u0644';
   var activeVerified = '\u0627\u0644\u0643\u0644';
+  var activeListing = '\u0627\u0644\u0643\u0644';
+  var priceMin = 0;
+  var priceMax = 0;
   var searchQuery = '';
   var sortOrder = 'newest';
   var _marketTimerInterval = null;
@@ -36,6 +39,9 @@
   var resultsCount = document.getElementById('resultsCount');
   var searchInput = document.getElementById('searchInput');
   var sortSelect = document.getElementById('sortSelect');
+  var priceMinInput = document.getElementById('priceMin');
+  var priceMaxInput = document.getElementById('priceMax');
+  var priceApplyBtn = document.getElementById('priceApplyBtn');
 
   // ===== VERIFIED SVG =====
   var verifiedSVG = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>';
@@ -91,7 +97,7 @@
         }
       }
     } catch(e) {
-      console.warn('Supabase fetch failed, using fallback:', e);
+      U.log('warn', 'Supabase fetch failed, using fallback:', e);
     }
     // Fallback to hardcoded data
     products = fallbackProducts;
@@ -122,7 +128,7 @@
         }
       });
     } catch(e) {
-      console.warn('loadAuctionBidData error:', e);
+      U.log('warn', 'loadAuctionBidData error:', e);
     }
   }
 
@@ -161,21 +167,36 @@
         activeOrigin = value;
       } else if (filterType === 'verified') {
         activeVerified = value;
+      } else if (filterType === 'listing') {
+        activeListing = value;
       }
 
+      updateUrlParams();
       renderProducts();
     });
   });
 
-  // ===== SEARCH =====
-  searchInput.addEventListener('input', function() {
-    searchQuery = this.value.trim();
+  // ===== PRICE FILTER =====
+  if (priceApplyBtn) {
+    priceApplyBtn.addEventListener('click', function() {
+      priceMin = priceMinInput ? (Number(priceMinInput.value) || 0) : 0;
+      priceMax = priceMaxInput ? (Number(priceMaxInput.value) || 0) : 0;
+      updateUrlParams();
+      renderProducts();
+    });
+  }
+
+  // ===== SEARCH (debounced) =====
+  searchInput.addEventListener('input', U.debounce(function() {
+    searchQuery = searchInput.value.trim();
+    updateUrlParams();
     renderProducts();
-  });
+  }, 300));
 
   // ===== SORT =====
   sortSelect.addEventListener('change', function() {
     sortOrder = this.value;
+    updateUrlParams();
     renderProducts();
   });
 
@@ -185,6 +206,21 @@
       var matchCategory = activeCategory === '\u0627\u0644\u0643\u0644' || p.category === activeCategory;
       var matchOrigin = activeOrigin === '\u0627\u0644\u0643\u0644' || p.origin === activeOrigin;
       var matchVerified = activeVerified === '\u0627\u0644\u0643\u0644' || (activeVerified === '\u0645\u0648\u062b\u0642' && p.verified);
+
+      // فلتر نوع القائمة (سوق/مزاد)
+      var matchListing = true;
+      if (activeListing === 'market') {
+        matchListing = (p.listingType !== 'auction');
+      } else if (activeListing === 'auction') {
+        matchListing = (p.listingType === 'auction');
+      }
+
+      // فلتر السعر
+      var matchPrice = true;
+      var pPrice = (p.listingType === 'auction') ? (p._highestBid || p.startPrice || p.price) : p.price;
+      if (priceMin > 0) matchPrice = (pPrice >= priceMin);
+      if (matchPrice && priceMax > 0) matchPrice = (pPrice <= priceMax);
+
       var matchSearch = true;
       if (searchQuery) {
         var q = searchQuery.toLowerCase();
@@ -194,7 +230,7 @@
                       p.category.toLowerCase().includes(q) ||
                       p.seller.toLowerCase().includes(q);
       }
-      return matchCategory && matchOrigin && matchVerified && matchSearch;
+      return matchCategory && matchOrigin && matchVerified && matchListing && matchPrice && matchSearch;
     });
 
     // Sort
@@ -202,6 +238,16 @@
       filtered.sort(function(a, b) { return a.price - b.price; });
     } else if (sortOrder === 'price-desc') {
       filtered.sort(function(a, b) { return b.price - a.price; });
+    } else if (sortOrder === 'rating-desc') {
+      filtered.sort(function(a, b) { return (b.rating || 0) - (a.rating || 0); });
+    } else if (sortOrder === 'bids-desc') {
+      filtered.sort(function(a, b) { return (b._bidCount || 0) - (a._bidCount || 0); });
+    } else if (sortOrder === 'ending-soon') {
+      filtered.sort(function(a, b) {
+        var aEnd = a.auctionEndDate ? new Date(a.auctionEndDate).getTime() : Infinity;
+        var bEnd = b.auctionEndDate ? new Date(b.auctionEndDate).getTime() : Infinity;
+        return aEnd - bEnd;
+      });
     } else {
       filtered.sort(function(a, b) { return b.id - a.id; });
     }
@@ -321,10 +367,48 @@
     }, 60000);
   }
 
+  // ===== URL PERSISTENCE =====
+  function updateUrlParams() {
+    var params = new URLSearchParams();
+    if (activeCategory !== '\u0627\u0644\u0643\u0644') params.set('cat', activeCategory);
+    if (activeOrigin !== '\u0627\u0644\u0643\u0644') params.set('origin', activeOrigin);
+    if (activeVerified !== '\u0627\u0644\u0643\u0644') params.set('verified', activeVerified);
+    if (activeListing !== '\u0627\u0644\u0643\u0644') params.set('listing', activeListing);
+    if (searchQuery) params.set('q', searchQuery);
+    if (priceMin > 0) params.set('min', String(priceMin));
+    if (priceMax > 0) params.set('max', String(priceMax));
+    if (sortOrder !== 'newest') params.set('sort', sortOrder);
+    var qs = params.toString();
+    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+  }
+
+  function loadUrlParams() {
+    var params = new URLSearchParams(location.search);
+    if (params.get('cat')) activeCategory = params.get('cat');
+    if (params.get('origin')) activeOrigin = params.get('origin');
+    if (params.get('verified')) activeVerified = params.get('verified');
+    if (params.get('listing')) activeListing = params.get('listing');
+    if (params.get('q')) { searchQuery = params.get('q'); searchInput.value = searchQuery; }
+    if (params.get('min')) { priceMin = Number(params.get('min')); if (priceMinInput) priceMinInput.value = priceMin; }
+    if (params.get('max')) { priceMax = Number(params.get('max')); if (priceMaxInput) priceMaxInput.value = priceMax; }
+    if (params.get('sort')) { sortOrder = params.get('sort'); sortSelect.value = sortOrder; }
+
+    // Activate matching chips
+    ['category', 'origin', 'verified', 'listing'].forEach(function(f) {
+      var val = params.get(f === 'category' ? 'cat' : f);
+      if (val) {
+        document.querySelectorAll('.chip[data-filter="' + f + '"]').forEach(function(c) {
+          c.classList.toggle('active', c.dataset.value === val);
+        });
+      }
+    });
+  }
+
   // ===== MOBILE MENU =====
   U.initMobileMenu('mobileToggle', 'mobileMenu', 'open');
 
   // ===== INITIAL LOAD =====
+  loadUrlParams();
   loadProducts();
 
 })();

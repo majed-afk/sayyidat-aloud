@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#C19A6B">
   <title>السوق | صيدات العود</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,6 +87,19 @@
         <button class="chip active" data-filter="verified" data-value="الكل">الكل</button>
         <button class="chip" data-filter="verified" data-value="موثق">✓ تاجر موثق</button>
       </div>
+      <div class="filter-row">
+        <span class="filter-label">النوع</span>
+        <button class="chip active" data-filter="listing" data-value="الكل">الكل</button>
+        <button class="chip" data-filter="listing" data-value="market">🛒 سوق</button>
+        <button class="chip" data-filter="listing" data-value="auction">🔨 مزاد</button>
+      </div>
+      <div class="filter-row price-filter-row">
+        <span class="filter-label">السعر</span>
+        <input type="number" class="price-input" id="priceMin" placeholder="من" min="0">
+        <span class="price-sep">—</span>
+        <input type="number" class="price-input" id="priceMax" placeholder="إلى" min="0">
+        <button class="chip" id="priceApplyBtn">تطبيق</button>
+      </div>
       <div class="filter-bottom">
         <div class="sort-wrapper">
           <label for="sortSelect">الترتيب</label>
@@ -92,6 +107,9 @@
             <option value="newest">الأحدث</option>
             <option value="price-asc">الأقل سعراً</option>
             <option value="price-desc">الأعلى سعراً</option>
+            <option value="rating-desc">الأعلى تقييماً</option>
+            <option value="bids-desc">الأكثر مزايدات</option>
+            <option value="ending-soon">ينتهي قريباً</option>
           </select>
         </div>
         <span class="results-count" id="resultsCount">عرض 12 منتج</span>
@@ -160,6 +178,9 @@
 <script src="js/header.js?v=2"></script>
 <script src="js/ui.js?v=2"></script>
 <script src="js/bids.js?v=1"></script>
+<script src="js/notifications.js?v=1"></script>
+<script src="js/reviews.js?v=1"></script>
 <script src="js/market-app.js?v=3"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

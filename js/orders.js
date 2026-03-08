@@ -22,7 +22,7 @@
         var res = await sb.from('orders').select('*').eq('seller_id', id).order('created_at', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getOrders error:', e);
+        U.log('error', 'getOrders error:', e);
         return [];
       }
     },
@@ -39,7 +39,7 @@
         var res = await sb.from('orders').select('*').order('created_at', { ascending: false });
         return res.data || [];
       } catch(e) {
-        console.error('getAllOrders error:', e);
+        U.log('error', 'getAllOrders error:', e);
         return [];
       }
     },
@@ -56,12 +56,12 @@
       try {
         var res = await sb.from('orders').insert(order).select().single();
         if (res.error) {
-          console.error('addOrder:', res.error);
+          U.log('error', 'addOrder:', res.error);
           return null;
         }
         return res.data;
       } catch(e) {
-        console.error('addOrder error:', e);
+        U.log('error', 'addOrder error:', e);
         return null;
       }
     },
@@ -80,7 +80,7 @@
         var res = await sb.from('orders').update(updates).eq('id', orderId);
         return !res.error;
       } catch(e) {
-        console.error('updateOrder error:', e);
+        U.log('error', 'updateOrder error:', e);
         return false;
       }
     },
@@ -104,7 +104,7 @@
         });
         return !res.error;
       } catch(e) {
-        console.error('addHistory error:', e);
+        U.log('error', 'addHistory error:', e);
         return false;
       }
     },
@@ -126,7 +126,7 @@
           .order('created_at', { ascending: true });
         return res.data || [];
       } catch(e) {
-        console.error('getHistory error:', e);
+        U.log('error', 'getHistory error:', e);
         return [];
       }
     }

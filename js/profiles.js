@@ -66,7 +66,7 @@
         var res = await sb.from('profiles').update(updateObj).eq('id', targetId);
 
         if (res.error) {
-          console.error('Profile update error:', res.error);
+          U.log('error', 'Profile update error:', res.error);
           return false;
         }
 
@@ -77,7 +77,7 @@
         }
         return true;
       } catch(e) {
-        console.error('Profile update error:', e);
+        U.log('error', 'Profile update error:', e);
         return false;
       }
     },
@@ -98,7 +98,7 @@
           return SAIDAT.profiles.formatUser(p, null);
         });
       } catch(e) {
-        console.error('getAllUsers error:', e);
+        U.log('error', 'getAllUsers error:', e);
         return [];
       }
     },

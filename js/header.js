@@ -26,6 +26,19 @@
         var email = esc(user.email || '');
 
         desktopActions.innerHTML =
+          '<div class="notif-wrapper">' +
+            '<button class="notif-bell-btn" onclick="SAIDAT.header.toggleNotifications()">' +
+              '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>' +
+              '<span class="notif-badge" id="notifBadge" style="display:none;">0</span>' +
+            '</button>' +
+            '<div class="notif-dropdown" id="notifDropdown">' +
+              '<div class="notif-dropdown-header">' +
+                '<span>الإشعارات</span>' +
+                '<button onclick="SAIDAT.header.markAllNotifRead()">تحديد الكل كمقروء</button>' +
+              '</div>' +
+              '<div class="notif-list" id="notifList"><p style="padding:16px;text-align:center;color:#999;">لا توجد إشعارات</p></div>' +
+            '</div>' +
+          '</div>' +
           '<div class="user-menu-wrapper">' +
             '<button class="user-menu-btn" onclick="SAIDAT.header.toggleMenu()">' +
               '<span class="user-avatar-sm">' + initial + '</span>' +
@@ -62,17 +75,136 @@
     toggleMenu: function() {
       var dd = document.getElementById('userDropdown');
       if (dd) dd.classList.toggle('open');
+      // إغلاق الإشعارات لو مفتوحة
+      var nd = document.getElementById('notifDropdown');
+      if (nd) nd.classList.remove('open');
+    },
+
+    /**
+     * تبديل ظهور قائمة الإشعارات
+     */
+    toggleNotifications: function() {
+      var nd = document.getElementById('notifDropdown');
+      if (nd) {
+        nd.classList.toggle('open');
+        if (nd.classList.contains('open')) {
+          this.loadNotifications();
+        }
+      }
+      // إغلاق قائمة المستخدم لو مفتوحة
+      var dd = document.getElementById('userDropdown');
+      if (dd) dd.classList.remove('open');
+    },
+
+    /**
+     * تحميل الإشعارات وعرضها
+     */
+    loadNotifications: async function() {
+      if (!SAIDAT.notifications) return;
+      var list = document.getElementById('notifList');
+      if (!list) return;
+
+      var notifs = await SAIDAT.notifications.getUnread();
+      if (notifs.length === 0) {
+        list.innerHTML = '<p style="padding:16px;text-align:center;color:#999;font-size:0.85rem;">لا توجد إشعارات جديدة</p>';
+        return;
+      }
+
+      var html = '';
+      notifs.forEach(function(n) {
+        var timeAgo = SAIDAT.header._timeAgo(n.created_at);
+        html += '<a href="' + esc(n.link || '#') + '" class="notif-item' + (n.is_read ? '' : ' unread') + '" onclick="SAIDAT.header.readNotif(\'' + esc(n.id) + '\')">' +
+          '<div class="notif-title">' + esc(n.title) + '</div>' +
+          '<div class="notif-body">' + esc(n.body) + '</div>' +
+          '<div class="notif-time">' + esc(timeAgo) + '</div>' +
+        '</a>';
+      });
+      list.innerHTML = html;
+    },
+
+    /**
+     * تحديث عداد الإشعارات
+     */
+    refreshBadge: async function() {
+      if (!SAIDAT.notifications || !SAIDAT.auth.getAuthUser()) return;
+      var count = await SAIDAT.notifications.getUnreadCount();
+      var badge = document.getElementById('notifBadge');
+      if (badge) {
+        if (count > 0) {
+          badge.textContent = count > 9 ? '9+' : count;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    },
+
+    /**
+     * قراءة إشعار معين
+     */
+    readNotif: async function(id) {
+      if (SAIDAT.notifications) {
+        await SAIDAT.notifications.markRead(id);
+        this.refreshBadge();
+      }
+    },
+
+    /**
+     * تحديد الكل كمقروء
+     */
+    markAllNotifRead: async function() {
+      if (SAIDAT.notifications) {
+        await SAIDAT.notifications.markAllRead();
+        this.refreshBadge();
+        this.loadNotifications();
+      }
+    },
+
+    /**
+     * حساب الوقت المنقضي
+     */
+    _timeAgo: function(dateStr) {
+      var diff = Date.now() - new Date(dateStr).getTime();
+      var mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'الآن';
+      if (mins < 60) return 'منذ ' + mins + ' دقيقة';
+      var hours = Math.floor(mins / 60);
+      if (hours < 24) return 'منذ ' + hours + ' ساعة';
+      var days = Math.floor(hours / 24);
+      return 'منذ ' + days + ' يوم';
     }
   };
 
-  // إغلاق القائمة عند النقر خارجها
+  // إغلاق القوائم عند النقر خارجها
   document.addEventListener('click', function(e) {
     var dd = document.getElementById('userDropdown');
     var btn = e.target.closest('.user-menu-btn');
     if (dd && !btn && !e.target.closest('.user-dropdown')) {
       dd.classList.remove('open');
     }
+    var nd = document.getElementById('notifDropdown');
+    var nbtn = e.target.closest('.notif-bell-btn');
+    if (nd && !nbtn && !e.target.closest('.notif-dropdown')) {
+      nd.classList.remove('open');
+    }
   });
+
+  // تحديث عداد الإشعارات كل 30 ثانية
+  var _notifInterval = null;
+  function startNotifPolling() {
+    if (_notifInterval) clearInterval(_notifInterval);
+    SAIDAT.header.refreshBadge();
+    _notifInterval = setInterval(function() {
+      SAIDAT.header.refreshBadge();
+    }, 30000);
+  }
+
+  // بدء polling الإشعارات بعد تحميل Auth
+  setTimeout(function() {
+    if (SAIDAT.auth && SAIDAT.auth.getAuthUser()) {
+      startNotifPolling();
+    }
+  }, 3000);
 
   // ===== CSS للهيدر =====
   var style = document.createElement('style');
@@ -95,7 +227,22 @@
     '.dropdown-item:hover svg { opacity: 1; }' +
     '.dropdown-logout { color: #C0392B; }' +
     '.dropdown-logout:hover { background: #FDF2F2; color: #C0392B; }' +
-    '@media (max-width: 768px) { .user-name-sm { display: none; } .user-dropdown { left: auto; right: 0; min-width: 240px; } }';
+    '@media (max-width: 768px) { .user-name-sm { display: none; } .user-dropdown { left: auto; right: 0; min-width: 240px; } }' +
+    '.notif-wrapper { position: relative; display: flex; align-items: center; }' +
+    '.notif-bell-btn { position: relative; background: transparent; border: none; cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s; color: #2C1810; }' +
+    '.notif-bell-btn:hover { background: #FAF7F2; }' +
+    '.notif-badge { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; background: #DC2626; color: #fff; font-size: 0.7rem; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0 4px; }' +
+    '.notif-dropdown { position: absolute; top: calc(100% + 8px); left: 0; width: 320px; max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #E8DDD0; border-radius: 12px; box-shadow: 0 12px 40px rgba(44,24,16,0.15); opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.25s ease; z-index: 1100; }' +
+    '.notif-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }' +
+    '.notif-dropdown-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #E8DDD0; font-weight: 700; font-size: 0.9rem; }' +
+    '.notif-dropdown-header button { background: none; border: none; color: #C19A6B; cursor: pointer; font-size: 0.78rem; font-family: inherit; }' +
+    '.notif-item { display: block; padding: 12px 16px; border-bottom: 1px solid #f5f0eb; text-decoration: none; color: #2C1810; transition: background 0.2s; }' +
+    '.notif-item:hover { background: #FAF7F2; }' +
+    '.notif-item.unread { background: #FFF8F0; border-right: 3px solid #C19A6B; }' +
+    '.notif-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }' +
+    '.notif-body { font-size: 0.8rem; color: #666; margin-bottom: 4px; }' +
+    '.notif-time { font-size: 0.72rem; color: #999; }' +
+    '@media (max-width: 768px) { .notif-dropdown { left: auto; right: -40px; width: 290px; } }';
   document.head.appendChild(style);
 
   // التوافق العكسي

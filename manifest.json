@@ -1,0 +1,27 @@
+{
+  "name": "صيدات العود — منصة العود والبخور",
+  "short_name": "صيدات العود",
+  "description": "منصة سعودية متخصصة في بيع وشراء العود والبخور بالمزاد والسوق",
+  "start_url": "/market.html",
+  "display": "standalone",
+  "background_color": "#FDFBF7",
+  "theme_color": "#C19A6B",
+  "dir": "rtl",
+  "lang": "ar",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "lifestyle"]
+}

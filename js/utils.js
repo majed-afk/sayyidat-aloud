@@ -4,6 +4,49 @@ window.SAIDAT = window.SAIDAT || {};
 
 SAIDAT.utils = {
 
+  // ===== التسجيل المركزي =====
+
+  /**
+   * تسجيل رسائل — يطبع فقط في بيئة التطوير (localhost)
+   * @param {string} level - 'log' | 'warn' | 'error'
+   * @param {string} msg
+   * @param {*} [data]
+   */
+  log: function(level, msg, data) {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      if (data !== undefined) { console[level](msg, data); }
+      else { console[level](msg); }
+    }
+  },
+
+  // ===== Rate Limiting =====
+
+  /**
+   * Throttle — ينفذ الدالة مرة واحدة كل delay مللي ثانية
+   */
+  throttle: function(fn, delay) {
+    var last = 0;
+    return function() {
+      var now = Date.now();
+      if (now - last >= delay) {
+        last = now;
+        return fn.apply(this, arguments);
+      }
+    };
+  },
+
+  /**
+   * Debounce — ينتظر حتى يتوقف المستخدم عن الإدخال
+   */
+  debounce: function(fn, delay) {
+    var timer;
+    return function() {
+      var args = arguments, ctx = this;
+      clearTimeout(timer);
+      timer = setTimeout(function() { fn.apply(ctx, args); }, delay);
+    };
+  },
+
   // ===== الأمان =====
 
   /**
@@ -170,7 +213,7 @@ SAIDAT.utils = {
   getSupabase: function() {
     var sb = SUPA.getClient();
     if (!sb) {
-      console.warn('Supabase غير متوفر');
+      this.log('warn', 'Supabase غير متوفر');
     }
     return sb;
   },

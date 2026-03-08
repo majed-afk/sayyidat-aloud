@@ -22,7 +22,8 @@
     'products': '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a',
     'orders': '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0637\u0644\u0628\u0627\u062a',
     'finance': '\u0627\u0644\u0645\u0627\u0644\u064a\u0629',
-    'settings': '\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u0644\u0645\u0648\u0642\u0639'
+    'settings': '\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u0644\u0645\u0648\u0642\u0639',
+    'disputes': '\u0627\u0644\u0646\u0632\u0627\u0639\u0627\u062a'
   };
 
   // ===== STATUS CLASSES (for admin-specific badge rendering) =====
@@ -36,24 +37,24 @@
 
   // ===== INIT =====
   async function initAdmin() {
-    console.log('Admin: waiting for auth...');
+    U.log('log', 'Admin: waiting for auth...');
 
     // انتظار auth مع timeout
     var authTimeout = new Promise(function(resolve) { setTimeout(resolve, 10000); });
     await Promise.race([SAIDAT.auth.ready(), authTimeout]);
-    console.log('Admin: auth ready, isLoggedIn =', SAIDAT.auth.isLoggedIn(), 'isAdmin =', SAIDAT.auth.isAdmin());
+    U.log('log', 'Admin: auth ready, isLoggedIn=' + SAIDAT.auth.isLoggedIn() + ' isAdmin=' + SAIDAT.auth.isAdmin());
 
     var user = SAIDAT.auth.getCurrentUser();
 
     // لو ما في مستخدم — ننتظر ونعيد المحاولة
     if (!user || !SAIDAT.auth.isAdmin()) {
-      console.log('Admin: no admin yet, retrying in 3s...');
+      U.log('log', 'Admin: no admin yet, retrying in 3s...');
       await new Promise(function(r) { setTimeout(r, 3000); });
       user = SAIDAT.auth.getCurrentUser();
     }
 
     if (!user || !SAIDAT.auth.isAdmin()) {
-      console.warn('Admin: no admin user after retry → redirecting to login');
+      U.log('warn', 'Admin: no admin user after retry → redirecting to login');
       window.location.href = 'login.html';
       return;
     }
@@ -65,6 +66,7 @@
     renderProducts();
     renderOrders();
     renderFinance();
+    renderDisputes();
     await loadSettings();
 
     var hash = window.location.hash.replace('#', '');
@@ -83,16 +85,16 @@
       try {
         var pRes = await sb.from('products').select('*, profiles(first_name, last_name, store_name, id)').order('created_at', { ascending: false });
         if (pRes.error) {
-          console.error('Admin products query error:', pRes.error);
+          U.log('error', 'Admin products query error:', pRes.error);
           // Fallback: جلب بدون join في حال فشل الربط
           var fallback = await sb.from('products').select('*').order('created_at', { ascending: false });
           allProducts = (fallback.data || []);
         } else {
           allProducts = pRes.data || [];
         }
-        console.log('Admin loaded products:', allProducts.length);
+        U.log('log', 'Admin loaded products:', allProducts.length);
       } catch(e) {
-        console.error('Admin load products error:', e);
+        U.log('error', 'Admin load products error:', e);
         allProducts = [];
       }
 
@@ -100,7 +102,7 @@
         var oRes = await sb.from('orders').select('*, profiles!orders_seller_id_fkey(first_name, last_name, id)').order('created_at', { ascending: false });
         allOrders = oRes.data || [];
       } catch(e) {
-        console.error('Admin load orders error:', e);
+        U.log('error', 'Admin load orders error:', e);
         allOrders = [];
       }
 
@@ -108,7 +110,7 @@
         var tRes = await sb.from('transactions').select('*, profiles(first_name, last_name, id)').order('created_at', { ascending: false });
         allTransactions = tRes.data || [];
       } catch(e) {
-        console.error('Admin load transactions error:', e);
+        U.log('error', 'Admin load transactions error:', e);
         allTransactions = [];
       }
     }
@@ -868,17 +870,107 @@
       renderDashboard();
       SAIDAT.ui.showToast('\u062a\u0645 \u0625\u0646\u0647\u0627\u0621 \u0627\u0644\u0645\u0632\u0627\u062f' + (winnerId ? ' \u2014 \u062a\u0645 \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0641\u0627\u0626\u0632' : ' \u2014 \u0628\u062f\u0648\u0646 \u0641\u0627\u0626\u0632'), 'success');
     } catch(e) {
-      console.error('endAuction error:', e);
+      U.log('error', 'endAuction error:', e);
       SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623 \u063a\u064a\u0631 \u0645\u062a\u0648\u0642\u0639', 'error');
     }
   };
 
+  // ===== DISPUTES =====
+  async function renderDisputes() {
+    var container = document.getElementById('disputesBody');
+    if (!container) return;
+
+    var disputes = [];
+    try {
+      disputes = await SAIDAT.disputes.getAll();
+    } catch(e) {
+      U.log('error', 'renderDisputes error:', e);
+    }
+
+    if (disputes.length === 0) {
+      container.innerHTML = '<tr><td colspan="7"><div class="empty-state"><h3>\u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u0632\u0627\u0639\u0627\u062a</h3></div></td></tr>';
+      return;
+    }
+
+    var html = '';
+    disputes.forEach(function(d) {
+      var orderId = d.order_id ? U.escapeHtml(d.order_id) : '-';
+      var buyerName = d.buyer ? U.escapeHtml((d.buyer.first_name || '') + ' ' + (d.buyer.last_name || '')) : '-';
+      var sellerName = d.seller ? U.escapeHtml(d.seller.store_name || ((d.seller.first_name || '') + ' ' + (d.seller.last_name || ''))) : '-';
+      var reason = U.escapeHtml(d.reason || '');
+      var status = d.status || 'open';
+      var createdAt = U.escapeHtml(d.created_at || '');
+
+      var statusLabel = { 'open': '\u0645\u0641\u062a\u0648\u062d', 'resolved': '\u062a\u0645 \u0627\u0644\u062d\u0644', 'rejected': '\u0645\u0631\u0641\u0648\u0636' };
+      var statusCls = { 'open': 'status-processing', 'resolved': 'status-completed', 'rejected': 'status-cancelled' };
+      var badge = '<span class="status ' + (statusCls[status] || 'status-new') + '"><span class="status-dot"></span>' + U.escapeHtml(statusLabel[status] || status) + '</span>';
+
+      var actions = '';
+      if (status === 'open') {
+        actions = '<button class="btn btn-sm btn-success" onclick="resolveDispute(\'' + U.escapeHtml(d.id) + '\')">\u062d\u0644 \u0627\u0644\u0646\u0632\u0627\u0639</button>' +
+                  '<button class="btn btn-sm btn-danger" onclick="rejectDispute(\'' + U.escapeHtml(d.id) + '\')">\u0631\u0641\u0636</button>';
+      }
+
+      html +=
+        '<tr>' +
+          '<td style="font-size:0.82rem; direction:ltr; text-align:right;">' + orderId + '</td>' +
+          '<td>' + buyerName + '</td>' +
+          '<td>' + sellerName + '</td>' +
+          '<td style="max-width:200px;">' + reason + '</td>' +
+          '<td>' + badge + '</td>' +
+          '<td style="font-size:0.82rem; opacity:0.7;">' + createdAt + '</td>' +
+          '<td><div class="action-btns">' + actions + '</div></td>' +
+        '</tr>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  window.resolveDispute = async function(disputeId) {
+    var resolution = prompt('\u0642\u0631\u0627\u0631 \u0627\u0644\u062d\u0644:');
+    if (!resolution || !resolution.trim()) return;
+
+    var ok = await SAIDAT.disputes.resolve(disputeId, 'resolved', resolution.trim(), '');
+    if (ok) {
+      SAIDAT.ui.showToast('\u062a\u0645 \u062d\u0644 \u0627\u0644\u0646\u0632\u0627\u0639 \u0628\u0646\u062c\u0627\u062d', 'success');
+      renderDisputes();
+    } else {
+      SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
+    }
+  };
+
+  window.rejectDispute = async function(disputeId) {
+    var notes = prompt('\u0633\u0628\u0628 \u0627\u0644\u0631\u0641\u0636:');
+    if (!notes || !notes.trim()) return;
+
+    var ok = await SAIDAT.disputes.resolve(disputeId, 'rejected', '', notes.trim());
+    if (ok) {
+      SAIDAT.ui.showToast('\u062a\u0645 \u0631\u0641\u0636 \u0627\u0644\u0646\u0632\u0627\u0639', 'success');
+      renderDisputes();
+    } else {
+      SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
+    }
+  };
+
+  window.renderDisputes = renderDisputes;
+
   // ===== PRODUCT APPROVAL =====
   window.approveProduct = async function(productId) {
+    var product = allProducts.find(function(p) { return p.id === productId; });
     var ok = await SAIDAT.products.update(productId, { approval_status: 'approved', active: true });
     if (!ok) {
       SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
       return;
+    }
+    // Notify seller
+    if (SAIDAT.notifications && product) {
+      SAIDAT.notifications.create({
+        user_id: product.seller_id || (product.profiles && product.profiles.id),
+        type: 'product_approved',
+        title: '\u062a\u0645\u062a \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u0649 \u0645\u0646\u062a\u062c\u0643',
+        body: product.name || '',
+        link: 'product.html?id=' + product.id
+      });
     }
     await refreshData();
     renderProducts();
@@ -887,6 +979,7 @@
   };
 
   window.rejectProduct = async function(productId) {
+    var product = allProducts.find(function(p) { return p.id === productId; });
     var reason = prompt('\u0633\u0628\u0628 \u0627\u0644\u0631\u0641\u0636 (\u0627\u062e\u062a\u064a\u0627\u0631\u064a):') || '';
     var updates = { approval_status: 'rejected', active: false };
     if (reason) updates.rejection_reason = reason;
@@ -894,6 +987,16 @@
     if (!ok) {
       SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
       return;
+    }
+    // Notify seller
+    if (SAIDAT.notifications && product) {
+      SAIDAT.notifications.create({
+        user_id: product.seller_id || (product.profiles && product.profiles.id),
+        type: 'product_rejected',
+        title: '\u062a\u0645 \u0631\u0641\u0636 \u0645\u0646\u062a\u062c\u0643',
+        body: product.name || '',
+        link: 'product.html?id=' + product.id
+      });
     }
     await refreshData();
     renderProducts();

@@ -105,6 +105,44 @@ body {
   flex-shrink: 0;
 }
 
+/* Price Filter */
+.price-filter-row {
+  align-items: center;
+}
+
+.price-input {
+  width: 100px;
+  padding: 7px 12px;
+  border: 1.5px solid var(--border-taupe);
+  border-radius: var(--radius-btn);
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-deep);
+  background: var(--bg-white);
+  outline: none;
+  direction: ltr;
+  text-align: center;
+  transition: border-color 0.3s ease;
+  -moz-appearance: textfield;
+}
+
+.price-input::-webkit-inner-spin-button,
+.price-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.price-input:focus {
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 0 3px rgba(193, 154, 107, 0.12);
+}
+
+.price-sep {
+  color: var(--accent-amber-light);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
 .filter-bottom {
   display: flex;
   align-items: center;
@@ -407,6 +445,12 @@ body {
   }
 
   .filter-label {
+    font-size: 0.78rem;
+  }
+
+  .price-input {
+    width: 80px;
+    padding: 6px 8px;
     font-size: 0.78rem;
   }
 

@@ -35,16 +35,16 @@
     modelLoading = true;
     try {
       if (typeof nsfwjs === 'undefined') {
-        console.warn('NSFWJS not loaded — skipping content check');
+        SAIDAT.utils.log('warn', 'NSFWJS not loaded — skipping content check');
         modelLoading = false;
         return null;
       }
       model = await nsfwjs.load('https://cdn.jsdelivr.net/npm/nsfwjs@2/dist/model/', { size: 299 });
       modelReady = true;
-      console.log('ImageGuard: NSFW model loaded');
+      SAIDAT.utils.log('log', 'ImageGuard: NSFW model loaded');
       return model;
     } catch(e) {
-      console.warn('ImageGuard: Failed to load model:', e.message);
+      SAIDAT.utils.log('warn', 'ImageGuard: Failed to load model:', e.message);
       modelLoading = false;
       return null;
     }
@@ -94,7 +94,7 @@
       }
 
     } catch(e) {
-      console.warn('ImageGuard check error:', e);
+      SAIDAT.utils.log('warn', 'ImageGuard check error:', e);
       // في حالة الخطأ نسمح بالصورة — الأدمن يراجعها
       result.warnings.push('\u062a\u0639\u0630\u0651\u0631 \u0641\u062d\u0635 \u0627\u0644\u0635\u0648\u0631\u0629 \u062a\u0644\u0642\u0627\u0626\u064a\u0627\u064b');
     }

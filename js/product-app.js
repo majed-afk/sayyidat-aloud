@@ -99,6 +99,7 @@
           _isAuction = (product.listingType === 'auction');
 
           renderProduct();
+          renderReviews();
 
           if (_isAuction) {
             // فحص حالة المزاد قبل تهيئة الواجهة
@@ -125,7 +126,7 @@
         }
       }
     } catch(e) {
-      console.warn('Supabase fetch failed, using fallback:', e);
+      U.log('warn', 'Supabase fetch failed, using fallback:', e);
     }
 
     // Fallback to hardcoded
@@ -133,6 +134,7 @@
     product = fallbackProducts.find(function(p) { return p.id === numId; }) || fallbackProducts[0];
 
     renderProduct();
+    renderReviews();
     setupEventListeners();
   }
 
@@ -308,6 +310,17 @@
       } else if (authUser && product.winnerId && authUser.id === product.winnerId) {
         // Current user is the winner
         showWinnerPanel(_currentHighBid);
+
+          // إشعار للفائز
+          if (SAIDAT.notifications) {
+            SAIDAT.notifications.create({
+              user_id: SAIDAT.auth.getAuthUser().id,
+              type: 'auction_won',
+              title: 'مبروك! فزت بالمزاد',
+              body: 'فزت بمزاد ' + (product.name || 'المنتج') + ' بمبلغ ' + U.formatCurrency(_currentHighBid),
+              link: 'product.html?id=' + product.id
+            });
+          }
       } else if (authUser) {
         // Check if the highest bidder is the current user
         checkIfWinner(authUser);
@@ -417,11 +430,11 @@
         });
         if (ok) {
           product.auctionEndDate = newEndDate.toISOString();
-          console.log('Auto-extend: auction extended to', newEndDate.toISOString());
+          U.log('log', 'Auto-extend: auction extended to', newEndDate.toISOString());
           SAIDAT.ui.showToast('تم تمديد المزاد 5 دقائق تلقائياً', 'info');
         }
       } catch(e) {
-        console.error('Auto-extend error:', e);
+        U.log('error', 'Auto-extend error:', e);
       }
     }
   }
@@ -443,7 +456,7 @@
       renderBidInfo();
       renderBidHistory(bids);
     } catch(e) {
-      console.error('loadBidData error:', e);
+      U.log('error', 'loadBidData error:', e);
     }
   }
 
@@ -558,7 +571,7 @@
         SAIDAT.ui.showToast('لم يتم سحب المزايدة — ربما انتهت المهلة', 'error');
       }
     } catch(e) {
-      console.error('retractBid error:', e);
+      U.log('error', 'retractBid error:', e);
       SAIDAT.ui.showToast('حدث خطأ أثناء سحب المزايدة', 'error');
     }
   }
@@ -616,7 +629,7 @@
           if (freshData) {
             if (freshData.auction_end_date && freshData.auction_end_date !== product.auctionEndDate) {
               product.auctionEndDate = freshData.auction_end_date;
-              console.log('Polling: auction_end_date updated to', product.auctionEndDate);
+              U.log('log', 'Polling: auction_end_date updated to', product.auctionEndDate);
             }
             // فحص إذا تغيرت حالة المزاد (ألغاه التاجر أو أنهاه الأدمن)
             if (freshData.auction_status === 'cancelled') {
@@ -634,7 +647,7 @@
             }
           }
         } catch(e) {
-          console.warn('Polling: could not refresh product:', e);
+          U.log('warn', 'Polling: could not refresh product:', e);
         }
       }
     }, CFG.AUCTION.POLL_INTERVAL);
@@ -649,8 +662,15 @@
 
   // ===== SUBMIT BID =====
   var _bidSubmitting = false; // قفل لمنع الإرسال المزدوج
+  var _lastBidTime = 0;
 
   async function submitBid() {
+    // Rate Limiting — 5 ثواني بين كل مزايدة
+    if (Date.now() - _lastBidTime < 5000) {
+      alert('يرجى الانتظار 5 ثواني بين كل مزايدة');
+      return;
+    }
+
     // قفل — منع ضغطتين بنفس الوقت
     if (_bidSubmitting) return;
 
@@ -681,6 +701,7 @@
 
     // تفعيل القفل + تعطيل الزر
     _bidSubmitting = true;
+    _lastBidTime = Date.now();
     var submitBtn = document.getElementById('bidSubmitBtn');
     submitBtn.disabled = true;
     submitBtn.textContent = 'جاري الإرسال...';
@@ -711,7 +732,7 @@
             : (profile.store_name || 'مزايد');
         }
       } catch(e) {
-        console.warn('Could not load bidder profile:', e);
+        U.log('warn', 'Could not load bidder profile:', e);
       }
 
       // إرسال المزايدة
@@ -728,13 +749,34 @@
 
         // فحص التمديد التلقائي بعد نجاح المزايدة
         await checkAutoExtend();
+
+        // إشعار للمزايد السابق (تم تجاوز مزايدتك)
+        if (SAIDAT.notifications && freshHighest && freshHighest.bidder_id && freshHighest.bidder_id !== SAIDAT.auth.getAuthUser().id) {
+          SAIDAT.notifications.create({
+            user_id: freshHighest.bidder_id,
+            type: 'outbid',
+            title: 'تم تجاوز مزايدتك',
+            body: 'تم تقديم مزايدة أعلى على ' + (product.name || 'المنتج'),
+            link: 'product.html?id=' + product.id
+          });
+        }
+        // إشعار للبائع (مزايدة جديدة)
+        if (SAIDAT.notifications && product.sellerId) {
+          SAIDAT.notifications.create({
+            user_id: product.sellerId,
+            type: 'new_order',
+            title: 'مزايدة جديدة',
+            body: U.formatCurrency(amount) + ' على ' + (product.name || 'المنتج'),
+            link: 'product.html?id=' + product.id
+          });
+        }
       } else {
         // لو الـ DB trigger رفض (مزايدة أقل من الموجود)
         await loadBidData();
         SAIDAT.ui.showToast('لم تتم المزايدة — ربما سبقك أحد. حاول مرة أخرى', 'error');
       }
     } catch(e) {
-      console.error('submitBid error:', e);
+      U.log('error', 'submitBid error:', e);
       await loadBidData();
       SAIDAT.ui.showToast('حدث خطأ. حاول مرة أخرى', 'error');
     } finally {
@@ -794,6 +836,19 @@
     if (_countdownTimer) {
       clearInterval(_countdownTimer);
       _countdownTimer = null;
+    }
+  });
+
+  // ===== Visibility API — إيقاف polling عند إخفاء الصفحة =====
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      stopPolling();
+      if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+    } else {
+      if (!_auctionEnded && product && product.auctionEndDate) {
+        startPolling();
+        startCountdown();
+      }
     }
   });
 
@@ -1061,6 +1116,17 @@
       return;
     }
 
+    // إشعار للبائع (طلب جديد)
+    if (SAIDAT.notifications && product.sellerId) {
+      SAIDAT.notifications.create({
+        user_id: product.sellerId,
+        type: 'new_order',
+        title: 'طلب جديد!',
+        body: 'طلب جديد على ' + (product.name || 'المنتج'),
+        link: 'dashboard.html#orders'
+      });
+    }
+
     // لو مزاد → تحديث حالة المزاد إلى 'sold'
     if (_isAuction && product.id) {
       try {
@@ -1069,11 +1135,39 @@
           winner_id: user ? user.id : null
         });
       } catch(e) {
-        console.warn('Could not update auction status to sold:', e);
+        U.log('warn', 'Could not update auction status to sold:', e);
       }
     }
 
     document.getElementById('orderNumber').textContent = orderNum;
+
+    // إضافة زر طباعة الفاتورة في نافذة النجاح
+    var fullName = document.getElementById('fullName').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var city = document.getElementById('city').value.trim();
+    var existingInvoiceBtn = document.getElementById('invoicePrintBtn');
+    if (existingInvoiceBtn) existingInvoiceBtn.remove();
+    var invoiceBtn = document.createElement('button');
+    invoiceBtn.id = 'invoicePrintBtn';
+    invoiceBtn.className = 'btn btn-outline';
+    invoiceBtn.style.marginTop = '12px';
+    invoiceBtn.textContent = 'طباعة الفاتورة';
+    invoiceBtn.onclick = function() {
+      SAIDAT.invoice.print({
+        orderId: orderData.id,
+        productName: product.name || '',
+        price: subtotal,
+        shipping: shippingCost,
+        vat: vat,
+        total: total,
+        buyerName: fullName,
+        buyerPhone: phone,
+        buyerCity: city
+      });
+    };
+    var modalContent = document.querySelector('#successModal .success-state, #successModal .modal-content, #successModal > div');
+    if (modalContent) modalContent.appendChild(invoiceBtn);
+
     document.getElementById('successModal').classList.add('active');
   }
 
@@ -1083,6 +1177,171 @@
       document.getElementById('successModal').classList.remove('active');
     }
   });
+
+  // ===== REVIEWS SECTION =====
+  var _selectedRating = 0;
+
+  function setReviewRating(rating) {
+    _selectedRating = rating;
+    var stars = document.querySelectorAll('.star-selector span');
+    stars.forEach(function(star, i) {
+      if (i < rating) {
+        star.classList.add('active');
+      } else {
+        star.classList.remove('active');
+      }
+    });
+  }
+
+  async function renderReviews() {
+    if (!product || !product.id) return;
+    if (!SAIDAT.reviews) return;
+
+    // Find or create reviews container
+    var container = document.getElementById('reviewsSection');
+    if (!container) {
+      // Create the container after the product layout (inside step1)
+      var step1 = document.getElementById('step1');
+      if (!step1) return;
+      container = document.createElement('div');
+      container.id = 'reviewsSection';
+      container.className = 'reviews-section';
+      step1.appendChild(container);
+    }
+
+    // Fetch reviews
+    var reviews = [];
+    try {
+      reviews = await SAIDAT.reviews.getForProduct(product.id);
+    } catch(e) {
+      U.log('error', 'renderReviews: getForProduct error:', e);
+    }
+
+    var html = '<h3><svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" stroke="none"/></svg> التقييمات والمراجعات</h3>';
+
+    // Display existing reviews
+    if (reviews.length > 0) {
+      reviews.forEach(function(review) {
+        var profile = review.profiles || {};
+        var reviewerName = ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || profile.store_name || 'مستخدم';
+        var rating = review.rating || 0;
+        var starsHtml = '';
+        for (var s = 0; s < 5; s++) {
+          starsHtml += (s < rating) ? '\u2605' : '\u2606';
+        }
+        var dateStr = '';
+        if (review.created_at) {
+          var d = new Date(review.created_at);
+          dateStr = d.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        html += '<div class="review-card">' +
+          '<div class="review-header">' +
+            '<span class="review-author">' + esc(reviewerName) + '</span>' +
+            '<span class="review-date">' + esc(dateStr) + '</span>' +
+          '</div>' +
+          '<div class="review-stars">' + starsHtml + '</div>' +
+          (review.comment ? '<div class="review-comment">' + esc(review.comment) + '</div>' : '') +
+        '</div>';
+      });
+    } else {
+      html += '<div class="reviews-empty">لا توجد تقييمات لهذا المنتج حتى الآن</div>';
+    }
+
+    // Check if the current user can submit a review
+    var authUser = SAIDAT.auth ? SAIDAT.auth.getAuthUser() : null;
+    if (authUser) {
+      try {
+        // Find completed orders for this user on this product
+        var sb = U.getSupabase();
+        if (sb) {
+          var orderRes = await sb
+            .from('orders')
+            .select('id')
+            .eq('buyer_id', authUser.id)
+            .eq('product_id', product.id)
+            .eq('status', 'delivered');
+          var completedOrders = orderRes.data || [];
+
+          // Check each completed order to see if already reviewed
+          for (var i = 0; i < completedOrders.length; i++) {
+            var canReview = await SAIDAT.reviews.canReview(completedOrders[i].id);
+            if (canReview) {
+              // Show review form for this order
+              html += '<div class="review-form">' +
+                '<h4>أضف تقييمك</h4>' +
+                '<input type="hidden" id="reviewOrderId" value="' + esc(completedOrders[i].id) + '">' +
+                '<div class="star-selector">' +
+                  '<span onclick="setReviewRating(1)">&#9733;</span>' +
+                  '<span onclick="setReviewRating(2)">&#9733;</span>' +
+                  '<span onclick="setReviewRating(3)">&#9733;</span>' +
+                  '<span onclick="setReviewRating(4)">&#9733;</span>' +
+                  '<span onclick="setReviewRating(5)">&#9733;</span>' +
+                '</div>' +
+                '<textarea id="reviewComment" class="review-textarea" placeholder="شاركنا تجربتك مع هذا المنتج..."></textarea>' +
+                '<button class="review-submit-btn" onclick="submitReview()">' +
+                  '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/></svg>' +
+                  ' إرسال التقييم' +
+                '</button>' +
+              '</div>';
+              break; // Only show one form
+            }
+          }
+        }
+      } catch(e) {
+        U.log('warn', 'renderReviews: order check error:', e);
+      }
+    }
+
+    container.innerHTML = html;
+  }
+
+  async function submitReview() {
+    if (!SAIDAT.reviews || !product) return;
+
+    var authUser = SAIDAT.auth ? SAIDAT.auth.getAuthUser() : null;
+    if (!authUser) {
+      SAIDAT.ui.showToast('يجب تسجيل الدخول لإرسال التقييم', 'error');
+      return;
+    }
+
+    if (_selectedRating === 0) {
+      SAIDAT.ui.showToast('يرجى اختيار عدد النجوم', 'error');
+      return;
+    }
+
+    var commentEl = document.getElementById('reviewComment');
+    var comment = commentEl ? commentEl.value.trim() : '';
+
+    var orderIdEl = document.getElementById('reviewOrderId');
+    var orderId = orderIdEl ? orderIdEl.value : '';
+
+    if (!orderId) {
+      SAIDAT.ui.showToast('حدث خطأ — لم يتم العثور على الطلب', 'error');
+      return;
+    }
+
+    try {
+      var result = await SAIDAT.reviews.submit({
+        product_id: product.id,
+        order_id: orderId,
+        seller_id: product.sellerId || product.seller_id || '',
+        rating: _selectedRating,
+        comment: comment
+      });
+
+      if (result) {
+        SAIDAT.ui.showToast('تم إرسال تقييمك بنجاح!', 'success');
+        _selectedRating = 0;
+        await renderReviews(); // Re-render to show the new review
+      } else {
+        SAIDAT.ui.showToast('حدث خطأ أثناء إرسال التقييم', 'error');
+      }
+    } catch(e) {
+      U.log('error', 'submitReview error:', e);
+      SAIDAT.ui.showToast('حدث خطأ أثناء إرسال التقييم', 'error');
+    }
+  }
 
   // ===== EXPOSE TO WINDOW (for onclick handlers in HTML) =====
   window.goToStep = goToStep;
@@ -1095,6 +1354,8 @@
   window.buyNow = buyNow;
   window.retractBid = retractBid;
   window.completeAuctionPurchase = completeAuctionPurchase;
+  window.submitReview = submitReview;
+  window.setReviewRating = setReviewRating;
 
   // ===== INITIAL LOAD =====
   init();
