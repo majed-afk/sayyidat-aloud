@@ -1066,9 +1066,11 @@
     document.getElementById('balanceAmount').innerHTML = U.formatNumber(user.balance) + ' <span>ر.س</span>';
 
     // Calculate stats
+    var _now = new Date();
+    var _currentMonth = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0');
     var thisMonthSales = user.transactions.filter(function(t) {
       var d = t.date || t.created_at || '';
-      return t.type === 'sale' && d.startsWith('2026-02');
+      return t.type === 'sale' && d.startsWith(_currentMonth);
     }).reduce(function(sum, t) { return sum + t.amount; }, 0);
 
     var totalCommission = user.transactions.filter(function(t) {

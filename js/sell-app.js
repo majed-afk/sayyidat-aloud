@@ -94,9 +94,18 @@
 
   function handleImageUpload(files) {
     Array.from(files).forEach(function(file) {
-      if (uploadedImages.length >= MAX_IMAGES) return;
-      if (!file.type.startsWith('image/')) return;
-      if (file.size > MAX_SIZE) return;
+      if (uploadedImages.length >= MAX_IMAGES) {
+        SAIDAT.ui.showToast('الحد الأقصى ' + MAX_IMAGES + ' صور', 'warning');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        SAIDAT.ui.showToast('الملف "' + file.name + '" ليس صورة', 'error');
+        return;
+      }
+      if (file.size > MAX_SIZE) {
+        SAIDAT.ui.showToast('حجم الصورة يتجاوز 5 ميجابايت', 'error');
+        return;
+      }
 
       // فحص الصورة بالذكاء الاصطناعي
       var reader = new FileReader();
@@ -280,6 +289,7 @@
       if (!name) { SAIDAT.ui.showToast('\u0623\u062f\u062e\u0644 \u0627\u0633\u0645 \u0627\u0644\u0645\u0646\u062a\u062c', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; } return; }
       if (!category) { SAIDAT.ui.showToast('\u0627\u062e\u062a\u0631 \u0627\u0644\u062a\u0635\u0646\u064a\u0641', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; } return; }
       if (!startPrice || isNaN(Number(startPrice)) || Number(startPrice) <= 0) { SAIDAT.ui.showToast('\u0623\u062f\u062e\u0644 \u0633\u0639\u0631 \u0627\u0644\u0628\u062f\u0627\u064a\u0629', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = '\u0646\u0634\u0631 \u0627\u0644\u0645\u0632\u0627\u062f'; } return; }
+      if (!desc || desc.length < 10) { SAIDAT.ui.showToast('أدخل وصف المنتج (10 أحرف على الأقل)', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = 'نشر المزاد'; } return; }
 
       // 4. حساب تاريخ انتهاء المزاد
       var isOpenAuction = auctionTypeVal.includes('\u0639\u0631\u0648\u0636');

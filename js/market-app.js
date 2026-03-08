@@ -339,7 +339,7 @@
             '<span>' + safeSeller + '</span>' +
             verifiedHTML +
           '</div>' +
-          '<button class="card-btn"' + (isAuction ? ' style="background:#7C3AED;"' : '') + '>' + btnText + '</button>' +
+          '<span class="card-btn"' + (isAuction ? ' style="background:#7C3AED;"' : '') + '>' + btnText + '</span>' +
         '</div>' +
       '</a>';
     });

@@ -662,6 +662,7 @@
 
   // ===== SUBMIT BID =====
   var _bidSubmitting = false; // قفل لمنع الإرسال المزدوج
+  var _orderSubmitting = false; // قفل لمنع تكرار تأكيد الطلب
   var _lastBidTime = 0;
 
   async function submitBid() {
@@ -1083,19 +1084,33 @@
 
   // ===== CONFIRM ORDER =====
   async function confirmOrder() {
+    // قفل — منع ضغطتين بنفس الوقت
+    if (_orderSubmitting) return;
+
+    var user = SAIDAT.auth.getAuthUser();
+    if (!user) {
+      SAIDAT.ui.showToast('يجب تسجيل الدخول لإتمام الطلب', 'error');
+      setTimeout(function() { window.location.href = 'login.html'; }, 1500);
+      return;
+    }
+
+    _orderSubmitting = true;
+    var confirmBtn = document.querySelector('[onclick*="confirmOrder"]');
+    var _origBtnText = '';
+    if (confirmBtn) { _origBtnText = confirmBtn.textContent; confirmBtn.disabled = true; confirmBtn.textContent = 'جاري التنفيذ...'; }
+
+    try {
     var orderNum = 'SA-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 4).toUpperCase();
     var subtotal = product.price * quantity;
     var vat = (subtotal + shippingCost) * CFG.VAT_RATE;
     var total = subtotal + shippingCost + vat;
-
-    var user = SAIDAT.auth.getAuthUser();
 
     var orderData = {
       id: orderNum,
       seller_id: product.sellerId || product.seller_id,
       product_id: product.id,
       product_name: product.name,
-      buyer_id: user ? user.id : null,
+      buyer_id: user.id,
       buyer_name: document.getElementById('fullName').value.trim(),
       buyer_phone: document.getElementById('phone').value.trim(),
       buyer_city: document.getElementById('city').value.trim(),
@@ -1112,7 +1127,7 @@
 
     var saved = await SAIDAT.orders.add(orderData);
     if (!saved) {
-      alert('حدث خطأ أثناء حفظ الطلب. يرجى المحاولة مرة أخرى.');
+      SAIDAT.ui.showToast('حدث خطأ أثناء حفظ الطلب. يرجى المحاولة مرة أخرى.', 'error');
       return;
     }
 
@@ -1132,7 +1147,7 @@
       try {
         await SAIDAT.products.update(product.id, {
           auction_status: 'sold',
-          winner_id: user ? user.id : null
+          winner_id: user.id
         });
       } catch(e) {
         U.log('warn', 'Could not update auction status to sold:', e);
@@ -1169,6 +1184,10 @@
     if (modalContent) modalContent.appendChild(invoiceBtn);
 
     document.getElementById('successModal').classList.add('active');
+    } finally {
+      _orderSubmitting = false;
+      if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = _origBtnText || 'تأكيد الطلب'; }
+    }
   }
 
   // Close modal on overlay click

@@ -1021,31 +1021,7 @@ tbody tr:last-child td {
   margin-bottom: 8px;
 }
 
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #1A0F0A;
-  color: #fff;
-  padding: 14px 28px;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  font-weight: 500;
-  z-index: 2000;
-  opacity: 0;
-  transition: all 0.4s ease;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.toast.success { border-right: 4px solid #27AE60; }
-.toast.error { border-right: 4px solid #E74C3C; }
+/* Toast — moved to layout.css (global) */
 
 /* Mobile Hamburger (dashboard FAB) */
 .mobile-toggle {

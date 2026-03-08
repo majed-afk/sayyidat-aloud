@@ -69,6 +69,17 @@
 
       if (result.success) {
         _loginAttempts = 0; // إعادة العداد عند النجاح
+
+        // تذكرني — حفظ الإيميل في localStorage
+        var rememberEl = document.getElementById('rememberMe');
+        if (rememberEl && rememberEl.checked) {
+          localStorage.setItem('sa_remember', '1');
+          localStorage.setItem('sa_email', email);
+        } else {
+          localStorage.removeItem('sa_remember');
+          localStorage.removeItem('sa_email');
+        }
+
         window.location.href = 'dashboard.html';
       } else {
         _loginAttempts++;
@@ -186,6 +197,17 @@
       SAIDAT.ui.showToast('خطأ في تسجيل الدخول: ' + e.message, 'error');
     }
   }
+
+  // ===== تذكرني — تحميل الإيميل المحفوظ =====
+  (function loadRememberedEmail() {
+    if (localStorage.getItem('sa_remember') === '1') {
+      var savedEmail = localStorage.getItem('sa_email');
+      var emailInput = document.getElementById('loginEmail');
+      var rememberCheck = document.getElementById('rememberMe');
+      if (savedEmail && emailInput) emailInput.value = savedEmail;
+      if (rememberCheck) rememberCheck.checked = true;
+    }
+  })();
 
   // ===== كشف الدوال للـ onclick handlers =====
   window.switchTab = switchTab;

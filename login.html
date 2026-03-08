@@ -98,10 +98,10 @@
 
           <div class="form-row">
             <label class="remember-check">
-              <input type="checkbox" checked>
+              <input type="checkbox" id="rememberMe" checked>
               <span>تذكرني</span>
             </label>
-            <a href="#" class="forgot-link">نسيت كلمة المرور؟</a>
+            <a href="javascript:void(0)" class="forgot-link" onclick="SAIDAT.ui.showToast('هذه الخاصية قريباً', 'info')">نسيت كلمة المرور؟</a>
           </div>
 
           <button type="submit" class="btn btn-filled">تسجيل الدخول</button>
@@ -121,7 +121,7 @@
             </button>
           </div>
 
-          <p class="form-footer">ليس لديك حساب؟ <a href="#" onclick="switchTab('register')">أنشئ حساباً جديداً</a></p>
+          <p class="form-footer">ليس لديك حساب؟ <a href="javascript:void(0)" onclick="switchTab('register')">أنشئ حساباً جديداً</a></p>
         </form>
       </div>
 
@@ -177,7 +177,7 @@
 
           <label class="terms-check">
             <input type="checkbox" id="regTerms" required>
-            <span>أوافق على <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a> الخاصة بمنصة صيدات العود</span>
+            <span>أوافق على <a href="javascript:void(0)" onclick="SAIDAT.ui.showToast('صفحة الشروط قريباً', 'info')">شروط الاستخدام</a> و <a href="javascript:void(0)" onclick="SAIDAT.ui.showToast('صفحة الخصوصية قريباً', 'info')">سياسة الخصوصية</a> الخاصة بمنصة صيدات العود</span>
           </label>
 
           <button type="submit" class="btn btn-filled">إنشاء حساب</button>
@@ -197,7 +197,7 @@
             </button>
           </div>
 
-          <p class="form-footer">لديك حساب بالفعل؟ <a href="#" onclick="switchTab('login')">سجّل الدخول</a></p>
+          <p class="form-footer">لديك حساب بالفعل؟ <a href="javascript:void(0)" onclick="switchTab('login')">سجّل الدخول</a></p>
         </form>
       </div>
     </div>
