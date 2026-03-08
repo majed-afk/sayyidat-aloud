@@ -59,7 +59,7 @@
       auctionType: row.auction_type || 'timed',
       auctionEndDate: row.auction_end_date || null,
       auctionStartDate: row.auction_start_date || null,
-      auctionStatus: row.auction_status || 'active',
+      auctionStatus: row.auction_status || 'draft',
       buyNow: row.buy_now || 0,
       sellerPhone: profile.phone || '',
       // New auction feature fields
@@ -97,6 +97,9 @@
           _rawProduct = data;
           product = normalizeProduct(data);
           _isAuction = (product.listingType === 'auction');
+
+          // تنظيف المزادات المنتهية تلقائياً (fire-and-forget)
+          try { SAIDAT.products.autoEndExpired(); } catch(e) { /* silent */ }
 
           renderProduct();
           renderReviews();
@@ -622,16 +625,17 @@
 
       await loadBidData();
 
-      // تحديث auction_end_date من DB (للتمديد التلقائي)
-      if (product.autoExtend && product.id) {
+      // تحديث حالة المزاد من DB (لجميع المزادات — ليس فقط autoExtend)
+      if (product.id) {
         try {
           var freshData = await SAIDAT.products.getOne(product.id);
           if (freshData) {
-            if (freshData.auction_end_date && freshData.auction_end_date !== product.auctionEndDate) {
+            // تمديد تلقائي (فقط لمزادات autoExtend)
+            if (product.autoExtend && freshData.auction_end_date && freshData.auction_end_date !== product.auctionEndDate) {
               product.auctionEndDate = freshData.auction_end_date;
               U.log('log', 'Polling: auction_end_date updated to', product.auctionEndDate);
             }
-            // فحص إذا تغيرت حالة المزاد (ألغاه التاجر أو أنهاه الأدمن)
+            // فحص حالة المزاد (لجميع المزادات)
             if (freshData.auction_status === 'cancelled') {
               product.auctionStatus = 'cancelled';
               product.cancelReason = freshData.cancel_reason || '';
@@ -643,6 +647,12 @@
             } else if (freshData.auction_status === 'ended' && product.auctionStatus === 'live') {
               product.auctionStatus = 'ended';
               product.winnerId = freshData.winner_id || null;
+              handleAuctionEnd();
+            } else if (freshData.auction_status === 'sold') {
+              product.auctionStatus = 'sold';
+              _auctionEnded = true;
+              clearInterval(_countdownTimer);
+              stopPolling();
               handleAuctionEnd();
             }
           }
@@ -1142,15 +1152,15 @@
       });
     }
 
-    // لو مزاد → تحديث حالة المزاد إلى 'sold'
+    // لو مزاد → إكمال الشراء عبر RPC آمن (يحدث الحالة + يزيد عداد البائع)
     if (_isAuction && product.id) {
       try {
-        await SAIDAT.products.update(product.id, {
-          auction_status: 'sold',
-          winner_id: user.id
-        });
+        var rpcResult = await SAIDAT.products.completeAuctionPurchase(product.id, orderNum);
+        if (rpcResult && !rpcResult.success) {
+          U.log('warn', 'completeAuctionPurchase returned:', rpcResult.error);
+        }
       } catch(e) {
-        U.log('warn', 'Could not update auction status to sold:', e);
+        U.log('warn', 'Could not complete auction purchase:', e);
       }
     }
 

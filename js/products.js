@@ -155,6 +155,54 @@
         U.log('error', 'deleteProduct error:', e);
         return false;
       }
+    },
+
+    /**
+     * إكمال شراء مزاد عبر RPC آمن (SECURITY DEFINER)
+     * يتحقق من الفائز + يحدث الحالة + يزيد completed_auctions
+     * @param {string} productId
+     * @param {string} orderId
+     * @returns {Promise<object>}
+     */
+    completeAuctionPurchase: async function(productId, orderId) {
+      var sb = U.getSupabase();
+      if (!sb) return { success: false, error: 'no_client' };
+
+      try {
+        var res = await sb.rpc('complete_auction_purchase', {
+          p_product_id: productId,
+          p_order_id: orderId
+        });
+        if (res.error) {
+          U.log('error', 'completeAuctionPurchase RPC error:', res.error);
+          return { success: false, error: res.error.message };
+        }
+        return res.data || { success: false };
+      } catch(e) {
+        U.log('error', 'completeAuctionPurchase exception:', e);
+        return { success: false, error: e.message };
+      }
+    },
+
+    /**
+     * تنظيف المزادات المنتهية تلقائياً عبر RPC
+     * @returns {Promise<number>} عدد المزادات التي تم إنهاؤها
+     */
+    autoEndExpired: async function() {
+      var sb = U.getSupabase();
+      if (!sb) return 0;
+
+      try {
+        var res = await sb.rpc('auto_end_expired_auctions');
+        if (res.error) {
+          U.log('warn', 'autoEndExpired RPC error:', res.error);
+          return 0;
+        }
+        return res.data || 0;
+      } catch(e) {
+        U.log('warn', 'autoEndExpired exception:', e);
+        return 0;
+      }
     }
   };
 

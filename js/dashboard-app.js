@@ -399,13 +399,13 @@
       product.buyNow = parseFloat(document.getElementById('pmBuyNow').value) || 0;
       product.price = startPrice;
       product.auctionStatus = 'live';
-      product.auctionStartDate = new Date().toISOString().split('T')[0];
+      product.auctionStartDate = new Date().toISOString();
 
       // Calculate end date for timed auctions
       if (auctionType === 'timed') {
         var endDate = new Date();
         endDate.setDate(endDate.getDate() + product.auctionDuration);
-        product.auctionEndDate = endDate.toISOString().split('T')[0];
+        product.auctionEndDate = endDate.toISOString();
       } else {
         product.auctionEndDate = null;
       }

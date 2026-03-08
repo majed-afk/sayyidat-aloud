@@ -74,6 +74,7 @@
       auctionType: row.auction_type || 'timed',
       auctionEndDate: row.auction_end_date || null,
       buyNow: row.buy_now || 0,
+      auctionStatus: row.auction_status || '',
       // Will be filled by batch bid queries
       _bidCount: row._bidCount || 0,
       _highestBid: row._highestBid || 0
@@ -303,7 +304,15 @@
         } else {
           priceHTML = '<div class="card-price">\u064a\u0628\u062f\u0623 \u0645\u0646 ' + U.formatCurrency(p.startPrice) + '</div>';
         }
-        btnText = '\u0632\u0627\u064a\u062f \u0627\u0644\u0622\u0646';
+        // تغيير نص الزر حسب حالة المزاد
+        var aStatus = p.auctionStatus || '';
+        if (aStatus === 'sold') {
+          btnText = '\u0645\u0628\u0627\u0639';
+        } else if (aStatus === 'ended' || aStatus === 'cancelled') {
+          btnText = '\u0627\u0646\u062a\u0647\u0649';
+        } else {
+          btnText = '\u0632\u0627\u064a\u062f \u0627\u0644\u0622\u0646';
+        }
 
         // Mini countdown + bid count
         var miniTime = getMiniCountdown(p.auctionEndDate);
@@ -339,7 +348,7 @@
             '<span>' + safeSeller + '</span>' +
             verifiedHTML +
           '</div>' +
-          '<span class="card-btn"' + (isAuction ? ' style="background:#7C3AED;"' : '') + '>' + btnText + '</span>' +
+          '<span class="card-btn"' + (isAuction ? (aStatus === 'sold' || aStatus === 'ended' || aStatus === 'cancelled' ? ' style="background:#9CA3AF;cursor:default;"' : ' style="background:#7C3AED;"') : '') + '>' + btnText + '</span>' +
         '</div>' +
       '</a>';
     });

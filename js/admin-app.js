@@ -957,7 +957,20 @@
   // ===== PRODUCT APPROVAL =====
   window.approveProduct = async function(productId) {
     var product = allProducts.find(function(p) { return p.id === productId; });
-    var ok = await SAIDAT.products.update(productId, { approval_status: 'approved', active: true });
+    var updates = { approval_status: 'approved', active: true };
+
+    // إذا مزاد في حالة draft → ابدأه بتواريخ جديدة من لحظة الموافقة
+    if (product && product.listing_type === 'auction' && product.auction_status === 'draft') {
+      var now = new Date();
+      var duration = product.auction_duration || 3;
+      updates.auction_status = 'live';
+      updates.auction_start_date = now.toISOString();
+      if (product.auction_type !== 'until_sold') {
+        updates.auction_end_date = new Date(now.getTime() + duration * 86400000).toISOString();
+      }
+    }
+
+    var ok = await SAIDAT.products.update(productId, updates);
     if (!ok) {
       SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
       return;

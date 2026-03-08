@@ -327,6 +327,13 @@
       var isVerified = user.merchantVerified || user.sellerVerified;
       dbProduct.approval_status = isVerified ? 'approved' : 'pending';
 
+      // إذا بانتظار الموافقة → حالة draft بدون تواريخ (تُضبط عند الموافقة)
+      if (dbProduct.approval_status === 'pending') {
+        dbProduct.auction_status = 'draft';
+        dbProduct.auction_start_date = null;
+        dbProduct.auction_end_date = null;
+      }
+
       // 7. حفظ في Supabase
       var saved = await SAIDAT.products.add(dbProduct);
       if (!saved) {
