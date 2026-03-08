@@ -524,6 +524,7 @@
         '<td>' + approvalBadge + '</td>' +
         '<td><div class="table-actions">' +
         approvalActions +
+        (p.listing_type === 'auction' && p.auction_status === 'live' ? '<button class="btn btn-sm" style="background:#D97706;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.78rem;margin-left:4px" onclick="endAuction(\'' + U.escapeHtml(p.id) + '\')">\u23F9 \u0625\u0646\u0647\u0627\u0621 \u0627\u0644\u0645\u0632\u0627\u062f</button>' : '') +
         '<button class="btn btn-outline btn-sm" onclick="toggleProduct(\'' + U.escapeHtml(p.id) + '\')">' + (p.active ? '\u0625\u064a\u0642\u0627\u0641' : '\u062a\u0641\u0639\u064a\u0644') + '</button>' +
         '<button class="btn btn-danger btn-sm" onclick="removeProduct(\'' + U.escapeHtml(p.id) + '\')">\u0625\u0632\u0627\u0644\u0629</button>' +
         '</div></td>' +
@@ -835,6 +836,42 @@
   function emptyRow(cols) {
     return '<tr><td colspan="' + cols + '"><div class="empty-state"><svg viewBox="0 0 24 24" width="48" height="48" fill="#ccc"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg><h3>\u0644\u0627 \u062a\u0648\u062c\u062f \u0628\u064a\u0627\u0646\u0627\u062a</h3></div></td></tr>';
   }
+
+  // ===== إنهاء المزاد يدوياً (الأدمن) =====
+  window.endAuction = async function(productId) {
+    if (!confirm('\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f \u0645\u0646 \u0625\u0646\u0647\u0627\u0621 \u0647\u0630\u0627 \u0627\u0644\u0645\u0632\u0627\u062f\u061f')) return;
+
+    try {
+      // جلب أعلى مزايدة لتحديد الفائز
+      var winnerId = null;
+      if (SAIDAT.bids && typeof SAIDAT.bids.getHighest === 'function') {
+        var highest = await SAIDAT.bids.getHighest(productId);
+        if (highest && highest.bidder_id) {
+          winnerId = highest.bidder_id;
+        }
+      }
+
+      var updates = {
+        auction_status: 'ended',
+        cancelled_by: 'admin'
+      };
+      if (winnerId) updates.winner_id = winnerId;
+
+      var ok = await SAIDAT.products.update(productId, updates);
+      if (!ok) {
+        SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623 \u0623\u062b\u0646\u0627\u0621 \u0625\u0646\u0647\u0627\u0621 \u0627\u0644\u0645\u0632\u0627\u062f', 'error');
+        return;
+      }
+
+      await refreshData();
+      renderProducts();
+      renderDashboard();
+      SAIDAT.ui.showToast('\u062a\u0645 \u0625\u0646\u0647\u0627\u0621 \u0627\u0644\u0645\u0632\u0627\u062f' + (winnerId ? ' \u2014 \u062a\u0645 \u062a\u062d\u062f\u064a\u062f \u0627\u0644\u0641\u0627\u0626\u0632' : ' \u2014 \u0628\u062f\u0648\u0646 \u0641\u0627\u0626\u0632'), 'success');
+    } catch(e) {
+      console.error('endAuction error:', e);
+      SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623 \u063a\u064a\u0631 \u0645\u062a\u0648\u0642\u0639', 'error');
+    }
+  };
 
   // ===== PRODUCT APPROVAL =====
   window.approveProduct = async function(productId) {

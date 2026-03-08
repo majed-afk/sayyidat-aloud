@@ -9,9 +9,9 @@
 
   // ===== HARDCODED FALLBACK DATA =====
   var fallbackProducts = [
-    { id: 1, name: '\u0639\u0648\u062f \u0643\u0645\u0628\u0648\u062f\u064a \u0628\u0648\u0631\u0633\u0627\u062a \u0641\u0627\u062e\u0631', category: '\u0628\u062e\u0648\u0631', type: '\u0637\u0628\u064a\u0639\u064a', origin: '\u0643\u0645\u0628\u0648\u062f\u064a', weight: 50, unit: '\u062c\u0631\u0627\u0645', price: 285, rating: 4.8, seller: '\u0645\u062d\u0645\u062f \u0627\u0644\u0639\u062a\u064a\u0628\u064a', verified: true, image: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=600&h=500&fit=crop&q=80', description: '\u0639\u0648\u062f \u0643\u0645\u0628\u0648\u062f\u064a \u0641\u0627\u062e\u0631 \u0645\u0646 \u063a\u0627\u0628\u0627\u062a \u0628\u0648\u0631\u0633\u0627\u062a.' },
-    { id: 2, name: '\u062f\u0647\u0646 \u0639\u0648\u062f \u0647\u0646\u062f\u064a \u0623\u0633\u0627\u0645\u064a', category: '\u062f\u0647\u0646 \u0639\u0648\u062f', type: '\u0628\u064a\u0648\u0631', origin: '\u0647\u0646\u062f\u064a', weight: 1, unit: '\u062a\u0648\u0644\u0629', price: 650, rating: 4.9, seller: '\u0639\u0628\u062f\u0627\u0644\u0644\u0647 \u0627\u0644\u0634\u0645\u0631\u064a', verified: true, image: 'https://images.unsplash.com/photo-1594035910387-fea081d36b4c?w=600&h=500&fit=crop&q=80', description: '\u062f\u0647\u0646 \u0639\u0648\u062f \u0647\u0646\u062f\u064a \u0623\u0633\u0627\u0645\u064a \u0628\u064a\u0648\u0631.' },
-    { id: 3, name: '\u0628\u062e\u0648\u0631 \u0644\u0627\u0648\u0633\u064a \u062c\u0628\u0644\u064a', category: '\u0628\u062e\u0648\u0631', type: '\u0637\u0628\u064a\u0639\u064a', origin: '\u0644\u0627\u0648\u0633\u064a', weight: 30, unit: '\u062c\u0631\u0627\u0645', price: 195, rating: 4.7, seller: '\u062e\u0627\u0644\u062f \u0627\u0644\u062f\u0648\u0633\u0631\u064a', verified: false, image: 'https://images.unsplash.com/photo-1595535373192-fc8935bacd89?w=600&h=500&fit=crop&q=80', description: '\u0628\u062e\u0648\u0631 \u0644\u0627\u0648\u0633\u064a \u0645\u0646 \u0645\u0631\u062a\u0641\u0639\u0627\u062a \u0644\u0627\u0648\u0633 \u0627\u0644\u062c\u0628\u0644\u064a\u0629.' }
+    { id: 1, name: 'عود كمبودي بورسات فاخر', category: 'بخور', type: 'طبيعي', origin: 'كمبودي', weight: 50, unit: 'جرام', price: 285, rating: 4.8, seller: 'محمد العتيبي', verified: true, image: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=600&h=500&fit=crop&q=80', description: 'عود كمبودي فاخر من غابات بورسات.' },
+    { id: 2, name: 'دهن عود هندي أسامي', category: 'دهن عود', type: 'بيور', origin: 'هندي', weight: 1, unit: 'تولة', price: 650, rating: 4.9, seller: 'عبدالله الشمري', verified: true, image: 'https://images.unsplash.com/photo-1594035910387-fea081d36b4c?w=600&h=500&fit=crop&q=80', description: 'دهن عود هندي أسامي بيور.' },
+    { id: 3, name: 'بخور لاوسي جبلي', category: 'بخور', type: 'طبيعي', origin: 'لاوسي', weight: 30, unit: 'جرام', price: 195, rating: 4.7, seller: 'خالد الدوسري', verified: false, image: 'https://images.unsplash.com/photo-1595535373192-fc8935bacd89?w=600&h=500&fit=crop&q=80', description: 'بخور لاوسي من مرتفعات لاوس الجبلية.' }
   ];
 
   // ===== STATE =====
@@ -35,7 +35,7 @@
     if (row.seller && typeof row.seller === 'string') return row;
 
     var profile = row.profiles || {};
-    var sellerName = profile.store_name || ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || '\u062a\u0627\u062c\u0631';
+    var sellerName = profile.store_name || ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || 'تاجر';
 
     return {
       id: row.id,
@@ -61,7 +61,12 @@
       auctionStartDate: row.auction_start_date || null,
       auctionStatus: row.auction_status || 'active',
       buyNow: row.buy_now || 0,
-      sellerPhone: profile.phone || ''
+      sellerPhone: profile.phone || '',
+      // New auction feature fields
+      autoExtend: row.auto_extend || false,
+      winnerId: row.winner_id || null,
+      cancelReason: row.cancel_reason || '',
+      cancelledBy: row.cancelled_by || ''
     };
   }
 
@@ -81,9 +86,9 @@
             if (main) {
               main.innerHTML = '<div style="text-align:center;padding:80px 20px;">' +
                 '<div style="font-size:3rem;margin-bottom:16px">\u26A0\uFE0F</div>' +
-                '<h2 style="color:#2C1810;margin-bottom:8px">\u0647\u0630\u0627 \u0627\u0644\u0645\u0646\u062a\u062c \u063a\u064a\u0631 \u0645\u062a\u0627\u062d \u062d\u0627\u0644\u064a\u0627\u064b</h2>' +
-                '<p style="color:#4A2C1A;opacity:0.7">\u0627\u0644\u0645\u0646\u062a\u062c \u0628\u0627\u0646\u062a\u0638\u0627\u0631 \u0645\u0648\u0627\u0641\u0642\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629</p>' +
-                '<a href="market.html" style="display:inline-block;margin-top:20px;padding:10px 24px;background:#C19A6B;color:#fff;border-radius:8px;text-decoration:none">\u062a\u0635\u0641\u062d \u0627\u0644\u0633\u0648\u0642</a>' +
+                '<h2 style="color:#2C1810;margin-bottom:8px">هذا المنتج غير متاح حالياً</h2>' +
+                '<p style="color:#4A2C1A;opacity:0.7">المنتج بانتظار موافقة الإدارة</p>' +
+                '<a href="market.html" style="display:inline-block;margin-top:20px;padding:10px 24px;background:#C19A6B;color:#fff;border-radius:8px;text-decoration:none">تصفح السوق</a>' +
               '</div>';
             }
             return;
@@ -96,6 +101,19 @@
           renderProduct();
 
           if (_isAuction) {
+            // فحص حالة المزاد قبل تهيئة الواجهة
+            if (product.auctionStatus === 'cancelled') {
+              initAuctionUI();
+              showCancelledMessage();
+              return;
+            }
+            if (product.auctionStatus === 'ended' || product.auctionStatus === 'sold') {
+              initAuctionUI();
+              await loadBidData();
+              handleAuctionEnd();
+              return;
+            }
+
             initAuctionUI();
             await loadBidData();
             startCountdown();
@@ -143,12 +161,12 @@
     if (_isAuction) {
       document.getElementById('productPrice').textContent = U.formatNumber(product.startPrice);
       var vatNote = document.querySelector('.product-vat-note');
-      if (vatNote) vatNote.textContent = '\u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u0627\u0628\u062a\u062f\u0627\u0626\u064a \u0644\u0644\u0645\u0632\u0627\u062f';
+      if (vatNote) vatNote.textContent = 'السعر الابتدائي للمزاد';
     } else {
       document.getElementById('productPrice').textContent = U.formatNumber(product.price);
     }
 
-    document.title = product.name + ' | \u0635\u064a\u062f\u0627\u062a \u0627\u0644\u0639\u0648\u062f';
+    document.title = product.name + ' | صيدات العود';
   }
 
   // ===== AUCTION UI SETUP =====
@@ -177,7 +195,7 @@
     // Set start price
     var startPriceEl = document.getElementById('startPriceValue');
     if (startPriceEl) {
-      startPriceEl.textContent = U.formatNumber(product.startPrice) + ' \u0631.\u0633';
+      startPriceEl.textContent = U.formatNumber(product.startPrice) + ' ر.س';
     }
 
     // Check login for bid form
@@ -200,6 +218,210 @@
         buyNowCard.style.display = 'block';
         var buyNowPrice = document.getElementById('buyNowPrice');
         if (buyNowPrice) buyNowPrice.textContent = U.formatNumber(product.buyNow);
+      }
+    }
+  }
+
+  // ===== عرض رسالة الإلغاء =====
+  function showCancelledMessage() {
+    _auctionEnded = true;
+
+    // Update badge
+    var badge = document.getElementById('auctionStatusBadge');
+    if (badge) {
+      badge.classList.add('ended');
+      badge.style.background = '#6B7280';
+      badge.innerHTML = 'تم إلغاء المزاد';
+    }
+
+    // Hide bid form
+    var bidFormCard = document.querySelector('.bid-form-card');
+    if (bidFormCard) bidFormCard.style.display = 'none';
+
+    // Hide buy now
+    var buyNowCard = document.getElementById('buyNowCard');
+    if (buyNowCard) buyNowCard.style.display = 'none';
+
+    // Show cancellation message
+    var auctionPanel = document.getElementById('auctionPanel');
+    if (auctionPanel) {
+      var reason = product.cancelReason ? (' — السبب: ' + esc(product.cancelReason)) : '';
+      var cancelledByText = product.cancelledBy === 'admin' ? 'الإدارة' : 'التاجر';
+
+      var msgHTML = '<div class="auction-cancelled-msg" style="background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:24px;text-align:center;margin-top:16px;">' +
+        '<div style="font-size:2.5rem;margin-bottom:12px;">🚫</div>' +
+        '<h3 style="color:#DC2626;font-weight:700;margin-bottom:8px;">تم إلغاء هذا المزاد</h3>' +
+        '<p style="color:#991B1B;font-size:0.9rem;">ألغي بواسطة ' + cancelledByText + reason + '</p>' +
+        '<a href="market.html" class="btn btn-filled" style="margin-top:16px;display:inline-block;padding:10px 24px;background:#C19A6B;color:#fff;border-radius:8px;text-decoration:none;">تصفح السوق</a>' +
+      '</div>';
+
+      auctionPanel.insertAdjacentHTML('beforeend', msgHTML);
+    }
+
+    // Set countdown to zeros
+    var gridEl = document.getElementById('countdownGrid');
+    if (gridEl) {
+      gridEl.innerHTML = '<div style="text-align:center;width:100%;padding:8px 0;color:rgba(255,255,255,0.7);font-size:0.95rem;">تم إلغاء المزاد</div>';
+    }
+  }
+
+  // ===== معالجة انتهاء المزاد =====
+  function handleAuctionEnd() {
+    _auctionEnded = true;
+    clearInterval(_countdownTimer);
+    stopPolling();
+
+    // Set countdown to zeros
+    var cdDays = document.getElementById('cdDays');
+    if (cdDays) cdDays.textContent = '00';
+    var cdHours = document.getElementById('cdHours');
+    if (cdHours) cdHours.textContent = '00';
+    var cdMinutes = document.getElementById('cdMinutes');
+    if (cdMinutes) cdMinutes.textContent = '00';
+    var cdSeconds = document.getElementById('cdSeconds');
+    if (cdSeconds) cdSeconds.textContent = '00';
+
+    // Update badge
+    var badge = document.getElementById('auctionStatusBadge');
+    if (badge) {
+      badge.classList.add('ended');
+      badge.innerHTML = 'انتهى المزاد';
+    }
+
+    // Disable bid form
+    var submitBtn = document.getElementById('bidSubmitBtn');
+    if (submitBtn) submitBtn.disabled = true;
+    var bidInputEl = document.getElementById('bidAmount');
+    if (bidInputEl) bidInputEl.disabled = true;
+
+    // Hide buy now
+    var buyNowCard = document.getElementById('buyNowCard');
+    if (buyNowCard) buyNowCard.style.display = 'none';
+
+    // Check if current user is the winner
+    var authUser = SAIDAT.auth ? SAIDAT.auth.getAuthUser() : null;
+
+    if (_currentHighBid > 0) {
+      // There was at least one bid
+      if (product.auctionStatus === 'sold') {
+        showAuctionEndMessage('تم بيع هذا المنتج عبر المزاد');
+      } else if (authUser && product.winnerId && authUser.id === product.winnerId) {
+        // Current user is the winner
+        showWinnerPanel(_currentHighBid);
+      } else if (authUser) {
+        // Check if the highest bidder is the current user
+        checkIfWinner(authUser);
+      } else {
+        showAuctionEndMessage('انتهى المزاد — أعلى مزايدة: ' + U.formatNumber(_currentHighBid) + ' ر.س');
+      }
+    } else {
+      showAuctionEndMessage('انتهى المزاد بدون مزايدات');
+    }
+  }
+
+  // فحص إذا كان المستخدم الحالي هو الفائز
+  async function checkIfWinner(authUser) {
+    try {
+      var highest = await SAIDAT.bids.getHighest(product.id);
+      if (highest && highest.bidder_id === authUser.id) {
+        showWinnerPanel(highest.amount);
+      } else {
+        showAuctionEndMessage('انتهى المزاد — أعلى مزايدة: ' + U.formatNumber(_currentHighBid) + ' ر.س');
+      }
+    } catch(e) {
+      showAuctionEndMessage('انتهى المزاد — أعلى مزايدة: ' + U.formatNumber(_currentHighBid) + ' ر.س');
+    }
+  }
+
+  // ===== لوحة الفائز =====
+  function showWinnerPanel(amount) {
+    // Hide bid form
+    var bidFormCard = document.querySelector('.bid-form-card');
+    if (bidFormCard) bidFormCard.style.display = 'none';
+
+    var auctionPanel = document.getElementById('auctionPanel');
+    if (!auctionPanel) return;
+
+    var winnerHTML = '<div class="winner-panel" style="background:linear-gradient(135deg,#065F46,#059669);border-radius:12px;padding:28px;text-align:center;margin-top:16px;color:#fff;">' +
+      '<div style="font-size:2.5rem;margin-bottom:12px;">🎉</div>' +
+      '<h3 style="font-weight:800;font-size:1.3rem;margin-bottom:8px;">مبروك! أنت الفائز بالمزاد</h3>' +
+      '<p style="opacity:0.9;margin-bottom:4px;">مزايدتك الفائزة: <strong>' + U.formatNumber(amount) + ' ر.س</strong></p>' +
+      '<p style="opacity:0.7;font-size:0.85rem;margin-bottom:20px;">أكمل عملية الشراء الآن لتأكيد طلبك</p>' +
+      '<button onclick="completeAuctionPurchase(' + amount + ')" class="btn" style="background:#fff;color:#065F46;padding:14px 36px;border-radius:8px;font-weight:700;font-size:1rem;border:none;cursor:pointer;">' +
+        'أكمل الشراء' +
+      '</button>' +
+    '</div>';
+
+    auctionPanel.insertAdjacentHTML('beforeend', winnerHTML);
+  }
+
+  // ===== رسالة انتهاء المزاد (لغير الفائز) =====
+  function showAuctionEndMessage(msg) {
+    var bidFormCard = document.querySelector('.bid-form-card');
+    if (bidFormCard) bidFormCard.style.display = 'none';
+
+    var auctionPanel = document.getElementById('auctionPanel');
+    if (!auctionPanel) return;
+
+    var msgHTML = '<div class="auction-end-msg" style="background:var(--bg-beige);border:1px solid var(--border-taupe);border-radius:12px;padding:24px;text-align:center;margin-top:16px;">' +
+      '<div style="font-size:2rem;margin-bottom:12px;">⏰</div>' +
+      '<p style="color:var(--text-deep);font-weight:600;font-size:1rem;">' + esc(msg) + '</p>' +
+      '<a href="market.html" class="btn btn-filled" style="margin-top:16px;display:inline-block;padding:10px 24px;background:#C19A6B;color:#fff;border-radius:8px;text-decoration:none;">تصفح السوق</a>' +
+    '</div>';
+
+    auctionPanel.insertAdjacentHTML('beforeend', msgHTML);
+  }
+
+  // ===== إكمال شراء المزاد (الفائز) =====
+  function completeAuctionPurchase(winningAmount) {
+    // Switch product price to winning bid amount
+    product.price = winningAmount;
+    quantity = 1;
+
+    // Hide auction panel
+    var auctionPanel = document.getElementById('auctionPanel');
+    if (auctionPanel) auctionPanel.style.display = 'none';
+
+    // Show stepper section
+    var stepperSection = document.querySelector('.stepper-section');
+    if (stepperSection) stepperSection.style.display = '';
+
+    // Update the displayed price
+    document.getElementById('productPrice').textContent = U.formatNumber(winningAmount);
+    var vatNote = document.querySelector('.product-vat-note');
+    if (vatNote) vatNote.textContent = 'سعر المزايدة الفائزة';
+
+    // Setup event listeners for the purchase flow
+    setupEventListeners();
+
+    // Go directly to step 2 (address & shipping)
+    goToStep(2);
+
+    SAIDAT.ui.showToast('أكمل بيانات الشحن لإتمام الشراء', 'success');
+  }
+
+  // ===== التمديد التلقائي =====
+  async function checkAutoExtend() {
+    if (!product.autoExtend || !product.auctionEndDate) return;
+
+    var endDate = new Date(product.auctionEndDate);
+    var now = new Date();
+    var remaining = endDate - now;
+
+    // لو المزايدة في آخر 5 دقائق → مدّد 5 دقائق
+    if (remaining > 0 && remaining <= CFG.AUCTION.AUTO_EXTEND_THRESHOLD) {
+      var newEndDate = new Date(endDate.getTime() + CFG.AUCTION.AUTO_EXTEND_DURATION);
+      try {
+        var ok = await SAIDAT.products.update(product.id, {
+          auction_end_date: newEndDate.toISOString()
+        });
+        if (ok) {
+          product.auctionEndDate = newEndDate.toISOString();
+          console.log('Auto-extend: auction extended to', newEndDate.toISOString());
+          SAIDAT.ui.showToast('تم تمديد المزاد 5 دقائق تلقائياً', 'info');
+        }
+      } catch(e) {
+        console.error('Auto-extend error:', e);
       }
     }
   }
@@ -230,9 +452,9 @@
     var highEl = document.getElementById('highestBidValue');
     if (highEl) {
       if (_currentHighBid > 0) {
-        highEl.textContent = U.formatNumber(_currentHighBid) + ' \u0631.\u0633';
+        highEl.textContent = U.formatNumber(_currentHighBid) + ' ر.س';
       } else {
-        highEl.textContent = '\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0632\u0627\u064a\u062f\u0627\u062a';
+        highEl.textContent = 'لا توجد مزايدات';
       }
     }
 
@@ -242,7 +464,7 @@
       var minNext = _currentHighBid > 0
         ? _currentHighBid + (product.minBid || CFG.AUCTION.MIN_BID_DEFAULT)
         : product.startPrice;
-      minNextEl.textContent = U.formatNumber(minNext) + ' \u0631.\u0633';
+      minNextEl.textContent = U.formatNumber(minNext) + ' ر.س';
     }
 
     // Bid count
@@ -257,7 +479,7 @@
       var minAmount = _currentHighBid > 0
         ? _currentHighBid + (product.minBid || CFG.AUCTION.MIN_BID_DEFAULT)
         : product.startPrice;
-      hintEl.textContent = '\u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 \u0644\u0644\u0645\u0632\u0627\u064a\u062f\u0629: ' + U.formatNumber(minAmount) + ' \u0631.\u0633';
+      hintEl.textContent = 'الحد الأدنى للمزايدة: ' + U.formatNumber(minAmount) + ' ر.س';
     }
   }
 
@@ -266,27 +488,41 @@
     if (!listEl) return;
 
     if (!bids || bids.length === 0) {
-      listEl.innerHTML = '<p class="bid-empty-msg">\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0632\u0627\u064a\u062f\u0627\u062a \u062d\u062a\u0649 \u0627\u0644\u0622\u0646</p>';
+      listEl.innerHTML = '<p class="bid-empty-msg">لا توجد مزايدات حتى الآن</p>';
       return;
     }
 
+    var authUser = SAIDAT.auth ? SAIDAT.auth.getAuthUser() : null;
     var html = '';
+
     bids.forEach(function(bid, index) {
-      var bidderName = bid.bidder_name || '\u0645\u0632\u0627\u064a\u062f';
+      var bidderName = bid.bidder_name || 'مزايد';
       var initial = bidderName.charAt(0);
       var isTop = (index === 0);
       var timeAgo = getTimeAgo(bid.created_at);
+
+      // فحص هل يمكن سحب المزايدة (خلال 5 دقائق فقط ومن نفس المزايد)
+      var retractBtn = '';
+      if (!_auctionEnded && authUser && bid.bidder_id === authUser.id) {
+        var bidTime = new Date(bid.created_at);
+        var now = new Date();
+        var elapsed = now - bidTime;
+        if (elapsed <= CFG.AUCTION.BID_RETRACT_WINDOW) {
+          retractBtn = '<button class="bid-retract-btn" onclick="retractBid(\'' + esc(bid.id) + '\')" title="سحب المزايدة">&times;</button>';
+        }
+      }
 
       html += '<div class="bid-history-item' + (isTop ? ' top-bid' : '') + '">' +
         '<div class="bid-avatar">' + esc(initial) + '</div>' +
         '<div class="bid-details">' +
           '<div class="bid-bidder-name">' +
             esc(bidderName) +
-            (isTop ? ' <span class="bid-top-label">\u0627\u0644\u0623\u0639\u0644\u0649</span>' : '') +
+            (isTop ? ' <span class="bid-top-label">الأعلى</span>' : '') +
           '</div>' +
           '<div class="bid-time">' + esc(timeAgo) + '</div>' +
         '</div>' +
-        '<div class="bid-amount">' + U.formatNumber(bid.amount) + ' \u0631.\u0633</div>' +
+        '<div class="bid-amount">' + U.formatNumber(bid.amount) + ' ر.س</div>' +
+        retractBtn +
       '</div>';
     });
 
@@ -303,10 +539,28 @@
     var diffHr = Math.floor(diffMin / 60);
     var diffDay = Math.floor(diffHr / 24);
 
-    if (diffSec < 60) return '\u0627\u0644\u0622\u0646';
-    if (diffMin < 60) return '\u0645\u0646\u0630 ' + diffMin + ' \u062f\u0642\u064a\u0642\u0629';
-    if (diffHr < 24) return '\u0645\u0646\u0630 ' + diffHr + ' \u0633\u0627\u0639\u0629';
-    return '\u0645\u0646\u0630 ' + diffDay + ' \u064a\u0648\u0645';
+    if (diffSec < 60) return 'الآن';
+    if (diffMin < 60) return 'منذ ' + diffMin + ' دقيقة';
+    if (diffHr < 24) return 'منذ ' + diffHr + ' ساعة';
+    return 'منذ ' + diffDay + ' يوم';
+  }
+
+  // ===== سحب مزايدة =====
+  async function retractBid(bidId) {
+    if (!confirm('هل أنت متأكد من سحب مزايدتك؟')) return;
+
+    try {
+      var ok = await SAIDAT.bids.retract(bidId);
+      if (ok) {
+        SAIDAT.ui.showToast('تم سحب مزايدتك بنجاح', 'success');
+        await loadBidData();
+      } else {
+        SAIDAT.ui.showToast('لم يتم سحب المزايدة — ربما انتهت المهلة', 'error');
+      }
+    } catch(e) {
+      console.error('retractBid error:', e);
+      SAIDAT.ui.showToast('حدث خطأ أثناء سحب المزايدة', 'error');
+    }
   }
 
   // ===== COUNTDOWN =====
@@ -316,7 +570,7 @@
       if (product.auctionType === 'until_sold') {
         var gridEl = document.getElementById('countdownGrid');
         if (gridEl) {
-          gridEl.innerHTML = '<div style="text-align:center;width:100%;padding:8px 0;color:rgba(255,255,255,0.7);font-size:0.95rem;">\u0645\u0632\u0627\u062f \u0645\u0641\u062a\u0648\u062d \u2014 \u064a\u0646\u062a\u0647\u064a \u0628\u0627\u0644\u0628\u064a\u0639</div>';
+          gridEl.innerHTML = '<div style="text-align:center;width:100%;padding:8px 0;color:rgba(255,255,255,0.7);font-size:0.95rem;">مزاد مفتوح — ينتهي بالبيع</div>';
         }
       }
       return;
@@ -333,28 +587,7 @@
 
     if (diff <= 0) {
       // Auction ended
-      _auctionEnded = true;
-      clearInterval(_countdownTimer);
-      stopPolling();
-
-      document.getElementById('cdDays').textContent = '00';
-      document.getElementById('cdHours').textContent = '00';
-      document.getElementById('cdMinutes').textContent = '00';
-      document.getElementById('cdSeconds').textContent = '00';
-
-      // Update badge
-      var badge = document.getElementById('auctionStatusBadge');
-      if (badge) {
-        badge.classList.add('ended');
-        badge.innerHTML = '\u0627\u0646\u062a\u0647\u0649 \u0627\u0644\u0645\u0632\u0627\u062f';
-      }
-
-      // Disable bid form
-      var submitBtn = document.getElementById('bidSubmitBtn');
-      if (submitBtn) submitBtn.disabled = true;
-      var bidInput = document.getElementById('bidAmount');
-      if (bidInput) bidInput.disabled = true;
-
+      handleAuctionEnd();
       return;
     }
 
@@ -371,9 +604,38 @@
 
   // ===== POLLING =====
   function startPolling() {
-    _pollTimer = setInterval(function() {
-      if (!_auctionEnded) {
-        loadBidData();
+    _pollTimer = setInterval(async function() {
+      if (_auctionEnded) return;
+
+      await loadBidData();
+
+      // تحديث auction_end_date من DB (للتمديد التلقائي)
+      if (product.autoExtend && product.id) {
+        try {
+          var freshData = await SAIDAT.products.getOne(product.id);
+          if (freshData) {
+            if (freshData.auction_end_date && freshData.auction_end_date !== product.auctionEndDate) {
+              product.auctionEndDate = freshData.auction_end_date;
+              console.log('Polling: auction_end_date updated to', product.auctionEndDate);
+            }
+            // فحص إذا تغيرت حالة المزاد (ألغاه التاجر أو أنهاه الأدمن)
+            if (freshData.auction_status === 'cancelled') {
+              product.auctionStatus = 'cancelled';
+              product.cancelReason = freshData.cancel_reason || '';
+              product.cancelledBy = freshData.cancelled_by || '';
+              _auctionEnded = true;
+              clearInterval(_countdownTimer);
+              stopPolling();
+              showCancelledMessage();
+            } else if (freshData.auction_status === 'ended' && product.auctionStatus === 'live') {
+              product.auctionStatus = 'ended';
+              product.winnerId = freshData.winner_id || null;
+              handleAuctionEnd();
+            }
+          }
+        } catch(e) {
+          console.warn('Polling: could not refresh product:', e);
+        }
       }
     }, CFG.AUCTION.POLL_INTERVAL);
   }
@@ -386,21 +648,26 @@
   }
 
   // ===== SUBMIT BID =====
+  var _bidSubmitting = false; // قفل لمنع الإرسال المزدوج
+
   async function submitBid() {
+    // قفل — منع ضغطتين بنفس الوقت
+    if (_bidSubmitting) return;
+
     if (_auctionEnded) {
-      SAIDAT.ui.showToast('\u0627\u0644\u0645\u0632\u0627\u062f \u0627\u0646\u062a\u0647\u0649', 'error');
+      SAIDAT.ui.showToast('المزاد انتهى', 'error');
       return;
     }
 
     var authUser = SAIDAT.auth ? SAIDAT.auth.getAuthUser() : null;
     if (!authUser) {
-      SAIDAT.ui.showToast('\u064a\u062c\u0628 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0644\u0644\u0645\u0632\u0627\u064a\u062f\u0629', 'error');
+      SAIDAT.ui.showToast('يجب تسجيل الدخول للمزايدة', 'error');
       return;
     }
 
     // Prevent self-bidding
     if (product.sellerId && product.sellerId === authUser.id) {
-      SAIDAT.ui.showToast('\u0644\u0627 \u064a\u0645\u0643\u0646\u0643 \u0627\u0644\u0645\u0632\u0627\u064a\u062f\u0629 \u0639\u0644\u0649 \u0645\u0646\u062a\u062c\u0643', 'error');
+      SAIDAT.ui.showToast('لا يمكنك المزايدة على منتجك', 'error');
       return;
     }
 
@@ -408,39 +675,46 @@
     var amount = parseFloat(bidInput.value);
 
     if (isNaN(amount) || amount <= 0) {
-      SAIDAT.ui.showToast('\u0623\u062f\u062e\u0644 \u0645\u0628\u0644\u063a \u0635\u062d\u064a\u062d', 'error');
+      SAIDAT.ui.showToast('أدخل مبلغ صحيح', 'error');
       return;
     }
 
-    // Validate minimum
-    var minRequired = _currentHighBid > 0
-      ? _currentHighBid + (product.minBid || CFG.AUCTION.MIN_BID_DEFAULT)
-      : product.startPrice;
-
-    if (amount < minRequired) {
-      SAIDAT.ui.showToast('\u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 \u0644\u0644\u0645\u0632\u0627\u064a\u062f\u0629: ' + U.formatNumber(minRequired) + ' \u0631.\u0633', 'error');
-      return;
-    }
-
-    // Get bidder name from profile (use auth.getRawProfile which is already loaded)
-    var bidderName = '\u0645\u0632\u0627\u064a\u062f';
-    try {
-      var profile = SAIDAT.auth.getRawProfile();
-      if (profile) {
-        bidderName = profile.first_name
-          ? (profile.first_name + ' ' + (profile.last_name || '')).trim()
-          : (profile.store_name || '\u0645\u0632\u0627\u064a\u062f');
-      }
-    } catch(e) {
-      console.warn('Could not load bidder profile:', e);
-    }
-
-    // Disable button during submit
+    // تفعيل القفل + تعطيل الزر
+    _bidSubmitting = true;
     var submitBtn = document.getElementById('bidSubmitBtn');
     submitBtn.disabled = true;
-    submitBtn.textContent = '\u062c\u0627\u0631\u064a \u0627\u0644\u0625\u0631\u0633\u0627\u0644...';
+    submitBtn.textContent = 'جاري الإرسال...';
 
     try {
+      // إعادة جلب أعلى مزايدة من DB قبل الإرسال (حماية من Race Condition)
+      var freshHighest = await SAIDAT.bids.getHighest(product.id);
+      var freshHighBid = freshHighest ? freshHighest.amount : 0;
+      var minRequired = freshHighBid > 0
+        ? freshHighBid + (product.minBid || CFG.AUCTION.MIN_BID_DEFAULT)
+        : product.startPrice;
+
+      if (amount < minRequired) {
+        // شخص زايد قبلك! نحدّث الشاشة
+        _currentHighBid = freshHighBid;
+        await loadBidData();
+        SAIDAT.ui.showToast('شخص زايد قبلك! الحد الأدنى الآن: ' + U.formatNumber(minRequired) + ' ر.س', 'error');
+        return;
+      }
+
+      // Get bidder name from profile
+      var bidderName = 'مزايد';
+      try {
+        var profile = SAIDAT.auth.getRawProfile();
+        if (profile) {
+          bidderName = profile.first_name
+            ? (profile.first_name + ' ' + (profile.last_name || '')).trim()
+            : (profile.store_name || 'مزايد');
+        }
+      } catch(e) {
+        console.warn('Could not load bidder profile:', e);
+      }
+
+      // إرسال المزايدة
       var result = await SAIDAT.bids.place({
         product_id: product.id,
         bidder_name: bidderName,
@@ -448,31 +722,39 @@
       });
 
       if (result) {
-        SAIDAT.ui.showToast('\u062a\u0645 \u062a\u0642\u062f\u064a\u0645 \u0645\u0632\u0627\u064a\u062f\u062a\u0643 \u0628\u0646\u062c\u0627\u062d!', 'success');
+        SAIDAT.ui.showToast('تم تقديم مزايدتك بنجاح!', 'success');
         bidInput.value = '';
-        await loadBidData(); // Refresh immediately
+        await loadBidData(); // تحديث فوري
+
+        // فحص التمديد التلقائي بعد نجاح المزايدة
+        await checkAutoExtend();
       } else {
-        SAIDAT.ui.showToast('\u0641\u0634\u0644 \u062a\u0642\u062f\u064a\u0645 \u0627\u0644\u0645\u0632\u0627\u064a\u062f\u0629. \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649', 'error');
+        // لو الـ DB trigger رفض (مزايدة أقل من الموجود)
+        await loadBidData();
+        SAIDAT.ui.showToast('لم تتم المزايدة — ربما سبقك أحد. حاول مرة أخرى', 'error');
       }
     } catch(e) {
       console.error('submitBid error:', e);
-      SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623. \u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649', 'error');
+      await loadBidData();
+      SAIDAT.ui.showToast('حدث خطأ. حاول مرة أخرى', 'error');
     } finally {
+      // فك القفل + تفعيل الزر
+      _bidSubmitting = false;
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/></svg> \u0632\u0627\u064a\u062f \u0627\u0644\u0622\u0646';
+      submitBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/></svg> زايد الآن';
     }
   }
 
   // ===== BUY NOW =====
   function buyNow() {
     if (_auctionEnded) {
-      SAIDAT.ui.showToast('\u0627\u0644\u0645\u0632\u0627\u062f \u0627\u0646\u062a\u0647\u0649', 'error');
+      SAIDAT.ui.showToast('المزاد انتهى', 'error');
       return;
     }
 
     var authUser = SAIDAT.auth ? SAIDAT.auth.getAuthUser() : null;
     if (!authUser) {
-      SAIDAT.ui.showToast('\u064a\u062c\u0628 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0644\u0644\u0634\u0631\u0627\u0621', 'error');
+      SAIDAT.ui.showToast('يجب تسجيل الدخول للشراء', 'error');
       return;
     }
 
@@ -495,7 +777,7 @@
     // Update the displayed price to buy_now
     document.getElementById('productPrice').textContent = U.formatNumber(product.buyNow);
     var vatNote = document.querySelector('.product-vat-note');
-    if (vatNote) vatNote.textContent = '\u0633\u0639\u0631 \u0627\u0644\u0634\u0631\u0627\u0621 \u0627\u0644\u0641\u0648\u0631\u064a';
+    if (vatNote) vatNote.textContent = 'سعر الشراء الفوري';
 
     // Setup event listeners for the purchase flow
     setupEventListeners();
@@ -503,7 +785,7 @@
     // Go directly to step 2 (address & shipping)
     goToStep(2);
 
-    SAIDAT.ui.showToast('\u0623\u0643\u0645\u0644 \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0634\u062d\u0646 \u0644\u0625\u062a\u0645\u0627\u0645 \u0627\u0644\u0634\u0631\u0627\u0621', 'success');
+    SAIDAT.ui.showToast('أكمل بيانات الشحن لإتمام الشراء', 'success');
   }
 
   // ===== CLEANUP =====
@@ -725,7 +1007,7 @@
     var tabbyContainer = document.getElementById('tabbyBreakdown');
     tabbyContainer.innerHTML = '';
     var perTabby = total / 4;
-    var tabbyLabels = ['\u0627\u0644\u064a\u0648\u0645', '\u0628\u0639\u062f \u0634\u0647\u0631', '\u0628\u0639\u062f \u0634\u0647\u0631\u064a\u0646', '\u0628\u0639\u062f 3 \u0623\u0634\u0647\u0631'];
+    var tabbyLabels = ['اليوم', 'بعد شهر', 'بعد شهرين', 'بعد 3 أشهر'];
     for (var i = 0; i < 4; i++) {
       tabbyContainer.innerHTML += '<div class="installment-item"><div class="inst-num">' + tabbyLabels[i] + '</div><div class="inst-amount">' + U.formatCurrencyDecimal(perTabby) + '</div></div>';
     }
@@ -734,11 +1016,11 @@
     document.getElementById('tamara30Day').textContent = U.formatCurrencyDecimal(total);
 
     var perTamara = total / 3;
-    document.getElementById('tamara3Inst').textContent = U.formatCurrencyDecimal(perTamara) + ' / \u0634\u0647\u0631';
+    document.getElementById('tamara3Inst').textContent = U.formatCurrencyDecimal(perTamara) + ' / شهر';
 
     var tamaraContainer = document.getElementById('tamaraBreakdown');
     tamaraContainer.innerHTML = '';
-    var tamaraLabels = ['\u0627\u0644\u064a\u0648\u0645', '\u0628\u0639\u062f \u0634\u0647\u0631', '\u0628\u0639\u062f \u0634\u0647\u0631\u064a\u0646'];
+    var tamaraLabels = ['اليوم', 'بعد شهر', 'بعد شهرين'];
     for (var j = 0; j < 3; j++) {
       tamaraContainer.innerHTML += '<div class="installment-item"><div class="inst-num">' + tamaraLabels[j] + '</div><div class="inst-amount">' + U.formatCurrencyDecimal(perTamara) + '</div></div>';
     }
@@ -779,6 +1061,18 @@
       return;
     }
 
+    // لو مزاد → تحديث حالة المزاد إلى 'sold'
+    if (_isAuction && product.id) {
+      try {
+        await SAIDAT.products.update(product.id, {
+          auction_status: 'sold',
+          winner_id: user ? user.id : null
+        });
+      } catch(e) {
+        console.warn('Could not update auction status to sold:', e);
+      }
+    }
+
     document.getElementById('orderNumber').textContent = orderNum;
     document.getElementById('successModal').classList.add('active');
   }
@@ -799,6 +1093,8 @@
   window.confirmOrder = confirmOrder;
   window.submitBid = submitBid;
   window.buyNow = buyNow;
+  window.retractBid = retractBid;
+  window.completeAuctionPurchase = completeAuctionPurchase;
 
   // ===== INITIAL LOAD =====
   init();

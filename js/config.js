@@ -39,9 +39,12 @@ SAIDAT.config = {
 
   // ثوابت المزاد
   AUCTION: {
-    POLL_INTERVAL: 7000,
+    POLL_INTERVAL: 3000,
     MIN_BID_DEFAULT: 10,
-    COUNTDOWN_UPDATE: 1000
+    COUNTDOWN_UPDATE: 1000,
+    AUTO_EXTEND_THRESHOLD: 300000,  // 5 دقائق بالمللي ثانية
+    AUTO_EXTEND_DURATION: 300000,   // تمديد 5 دقائق
+    BID_RETRACT_WINDOW: 300000     // 5 دقائق لسحب المزايدة
   },
 
   // تسميات أنواع المزادات
@@ -110,6 +113,10 @@ SAIDAT.config = {
     cancelReason: 'cancel_reason',
     orderId: 'order_id',
     bidderName: 'bidder_name',
-    bidderId: 'bidder_id'
+    bidderId: 'bidder_id',
+    autoExtend: 'auto_extend',
+    cancelReason: 'cancel_reason',
+    cancelledBy: 'cancelled_by',
+    winnerId: 'winner_id'
   }
 };

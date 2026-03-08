@@ -8,7 +8,7 @@
   SAIDAT.bids = {
 
     /**
-     * جلب مزايدات منتج معين (مرتبة من الأعلى)
+     * جلب مزايدات منتج معين (مرتبة من الأعلى — نشطة فقط)
      */
     getForProduct: async function(productId) {
       var sb = U.getSupabase();
@@ -18,6 +18,7 @@
           .from('bids')
           .select('*')
           .eq('product_id', productId)
+          .eq('status', 'active')
           .order('amount', { ascending: false });
         return res.data || [];
       } catch(e) {
@@ -27,7 +28,7 @@
     },
 
     /**
-     * جلب أعلى مزايدة لمنتج
+     * جلب أعلى مزايدة لمنتج (نشطة فقط)
      */
     getHighest: async function(productId) {
       var sb = U.getSupabase();
@@ -37,6 +38,7 @@
           .from('bids')
           .select('*')
           .eq('product_id', productId)
+          .eq('status', 'active')
           .order('amount', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -48,7 +50,7 @@
     },
 
     /**
-     * جلب عدد المزايدات لمنتج
+     * جلب عدد المزايدات لمنتج (نشطة فقط)
      */
     getCount: async function(productId) {
       var sb = U.getSupabase();
@@ -57,7 +59,8 @@
         var res = await sb
           .from('bids')
           .select('id', { count: 'exact', head: true })
-          .eq('product_id', productId);
+          .eq('product_id', productId)
+          .eq('status', 'active');
         return res.count || 0;
       } catch(e) {
         console.error('getBidCount error:', e);
@@ -66,7 +69,7 @@
     },
 
     /**
-     * جلب عدد المزايدات لعدة منتجات (batch — للسوق)
+     * جلب عدد المزايدات لعدة منتجات (batch — للسوق) — نشطة فقط
      */
     getCountsForProducts: async function(productIds) {
       var sb = U.getSupabase();
@@ -75,7 +78,8 @@
         var res = await sb
           .from('bids')
           .select('product_id')
-          .in('product_id', productIds);
+          .in('product_id', productIds)
+          .eq('status', 'active');
         var counts = {};
         (res.data || []).forEach(function(bid) {
           counts[bid.product_id] = (counts[bid.product_id] || 0) + 1;
@@ -88,7 +92,7 @@
     },
 
     /**
-     * جلب أعلى مزايدة لعدة منتجات (batch — للسوق)
+     * جلب أعلى مزايدة لعدة منتجات (batch — للسوق) — نشطة فقط
      */
     getHighestForProducts: async function(productIds) {
       var sb = U.getSupabase();
@@ -98,6 +102,7 @@
           .from('bids')
           .select('product_id, amount')
           .in('product_id', productIds)
+          .eq('status', 'active')
           .order('amount', { ascending: false });
         var highest = {};
         (res.data || []).forEach(function(bid) {
@@ -124,6 +129,7 @@
       }
       try {
         bid.bidder_id = SAIDAT.auth.getAuthUser().id;
+        bid.status = 'active';
         var res = await sb.from('bids').insert(bid).select().single();
         if (res.error) {
           console.error('placeBid DB error:', res.error.message);
@@ -134,6 +140,63 @@
       } catch(e) {
         console.error('placeBid exception:', e);
         return null;
+      }
+    },
+
+    /**
+     * سحب مزايدة (soft delete — تحويل status إلى 'retracted')
+     * يسمح فقط خلال 5 دقائق من وقت المزايدة
+     * @param {string} bidId
+     */
+    retract: async function(bidId) {
+      var sb = U.getSupabase();
+      if (!sb || !SAIDAT.auth.getAuthUser()) {
+        console.error('retractBid: no supabase or no auth');
+        return false;
+      }
+      try {
+        // جلب المزايدة للتحقق من المهلة
+        var fetchRes = await sb
+          .from('bids')
+          .select('*')
+          .eq('id', bidId)
+          .eq('bidder_id', SAIDAT.auth.getAuthUser().id)
+          .eq('status', 'active')
+          .single();
+
+        if (fetchRes.error || !fetchRes.data) {
+          console.error('retractBid: bid not found or not yours');
+          return false;
+        }
+
+        // فحص المهلة (5 دقائق)
+        var bidTime = new Date(fetchRes.data.created_at);
+        var now = new Date();
+        var elapsed = now - bidTime;
+        var retractWindow = SAIDAT.config.AUCTION.BID_RETRACT_WINDOW || 300000;
+
+        if (elapsed > retractWindow) {
+          console.warn('retractBid: retract window expired');
+          return false;
+        }
+
+        // تحديث الحالة
+        var updateRes = await sb
+          .from('bids')
+          .update({ status: 'retracted' })
+          .eq('id', bidId)
+          .eq('bidder_id', SAIDAT.auth.getAuthUser().id);
+
+        if (updateRes.error) {
+          console.error('retractBid DB error:', updateRes.error.message);
+          return false;
+        }
+
+        console.log('retractBid: success, id:', bidId);
+        return true;
+      } catch(e) {
+        console.error('retractBid exception:', e);
+        return false;
       }
     }
   };

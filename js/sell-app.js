@@ -309,7 +309,8 @@
         image_url: uploadedImages[0] || SAIDAT.config.DEFAULT_IMAGE,
         active: true,
         stock: 1,
-        free_shipping: freeShip
+        free_shipping: freeShip,
+        auto_extend: !isOpenAuction && document.getElementById('autoExtend').checked
       };
 
       // 6. تحديد حالة الموافقة

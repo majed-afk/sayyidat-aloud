@@ -1595,6 +1595,44 @@ body {
   padding: 24px 0;
 }
 
+/* Bid Retract Button */
+.bid-retract-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #FECACA;
+  background: #FEF2F2;
+  color: #DC2626;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.bid-retract-btn:hover {
+  background: #DC2626;
+  color: #fff;
+  border-color: #DC2626;
+  transform: scale(1.1);
+}
+
+/* Winner Panel */
+.winner-panel {
+  animation: fadeSlideIn 0.5s ease-out;
+}
+
+/* Auction Cancelled / End Messages */
+.auction-cancelled-msg,
+.auction-end-msg {
+  animation: fadeSlideIn 0.4s ease-out;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .payment-layout {

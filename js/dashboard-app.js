@@ -226,6 +226,7 @@
           '<td><div class="action-btns">' +
             '<button class="btn btn-sm btn-outline" onclick="editProduct(\'' + U.escapeHtml(p.id) + '\')">تعديل</button>' +
             '<button class="btn btn-sm ' + (p.active ? 'btn-warning' : 'btn-success') + '" onclick="toggleProduct(\'' + U.escapeHtml(p.id) + '\')">' + (p.active ? 'إيقاف' : 'تفعيل') + '</button>' +
+            (listingType === 'auction' && auctionStatus === 'live' ? '<button class="btn btn-sm btn-danger" onclick="cancelAuction(\'' + U.escapeHtml(p.id) + '\')">إلغاء المزاد</button>' : '') +
             '<button class="btn btn-sm btn-danger" onclick="deleteProduct(\'' + U.escapeHtml(p.id) + '\')">حذف</button>' +
           '</div></td>' +
         '</tr>';
@@ -1193,12 +1194,49 @@
     SAIDAT.ui.showToast('تم حفظ التغييرات بنجاح', 'success');
   }
 
+  // ===== إلغاء المزاد (التاجر) =====
+  async function cancelAuction(productId) {
+    var reason = prompt('سبب إلغاء المزاد (اختياري):') || '';
+
+    if (!confirm('هل أنت متأكد من إلغاء هذا المزاد؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+
+    try {
+      var ok = await SAIDAT.products.update(productId, {
+        auction_status: 'cancelled',
+        cancel_reason: reason,
+        cancelled_by: 'seller',
+        active: false
+      });
+
+      if (!ok) {
+        SAIDAT.ui.showToast('حدث خطأ أثناء إلغاء المزاد', 'error');
+        return;
+      }
+
+      // إعادة تحميل المنتجات
+      try {
+        var products = await SAIDAT.products.getForSeller();
+        currentUser.products = products || [];
+      } catch(e) {
+        console.warn('Could not refresh products:', e);
+      }
+
+      renderProducts();
+      renderOverview();
+      SAIDAT.ui.showToast('تم إلغاء المزاد بنجاح', 'success');
+    } catch(e) {
+      console.error('cancelAuction error:', e);
+      SAIDAT.ui.showToast('حدث خطأ غير متوقع', 'error');
+    }
+  }
+
   // ===== كشف الدوال للـ HTML onclick handlers =====
   window.switchSection = function(s) { SAIDAT.ui.switchSection(s, SECTION_TITLES); };
   window.toggleSidebar = SAIDAT.ui.toggleSidebar;
   window.saveProduct = saveProduct;
   window.deleteProduct = deleteProduct;
   window.toggleProduct = toggleProduct;
+  window.cancelAuction = cancelAuction;
   window.openProductModal = openProductModal;
   window.editProduct = editProduct;
   window.showOrderDetail = showOrderDetail;
