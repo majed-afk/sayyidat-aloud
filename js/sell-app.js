@@ -35,6 +35,29 @@
   var currentStep = 1;
   var uploadedImages = [];
 
+  // ===== STEP VALIDATION =====
+  function validateStep(step) {
+    if (step === 1) {
+      var name = document.getElementById('productName').value.trim();
+      var category = document.getElementById('category').value;
+      var price = document.getElementById('startPrice').value;
+      if (!name) { SAIDAT.ui.showToast('أدخل اسم المنتج', 'error'); return false; }
+      if (!category) { SAIDAT.ui.showToast('اختر التصنيف', 'error'); return false; }
+      if (!price || Number(price) <= 0) { SAIDAT.ui.showToast('أدخل سعر البداية', 'error'); return false; }
+      return true;
+    }
+    if (step === 2) {
+      if (uploadedImages.length === 0) { SAIDAT.ui.showToast('أضف صورة واحدة على الأقل', 'error'); return false; }
+      return true;
+    }
+    if (step === 3) {
+      var desc = document.getElementById('description').value.trim();
+      if (!desc || desc.length < 10) { SAIDAT.ui.showToast('أدخل وصف المنتج (10 أحرف على الأقل)', 'error'); return false; }
+      return true;
+    }
+    return true;
+  }
+
   function goToStep(step) {
     document.getElementById('step-' + currentStep).classList.remove('active');
 
@@ -393,6 +416,7 @@
   // ===== EXPOSE TO WINDOW (for onclick handlers in HTML) =====
   window.onCategoryChange = onCategoryChange;
   window.goToStep = goToStep;
+  window.validateStep = validateStep;
   window.handleImageUpload = handleImageUpload;
   window.removeImage = removeImage;
   window.toggleAuctionType = toggleAuctionType;

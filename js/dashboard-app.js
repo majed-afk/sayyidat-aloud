@@ -226,6 +226,7 @@
           '<td><div class="action-btns">' +
             '<button class="btn btn-sm btn-outline" onclick="editProduct(\'' + U.escapeHtml(p.id) + '\')">تعديل</button>' +
             '<button class="btn btn-sm ' + (p.active ? 'btn-warning' : 'btn-success') + '" onclick="toggleProduct(\'' + U.escapeHtml(p.id) + '\')">' + (p.active ? 'إيقاف' : 'تفعيل') + '</button>' +
+            (listingType === 'auction' && auctionStatus === 'live' && auctionType === 'مزاد مفتوح (عروض)' ? '<button class="btn btn-sm btn-success" onclick="showOffers(\'' + U.escapeHtml(p.id) + '\')">اختيار فائز</button>' : '') +
             (listingType === 'auction' && auctionStatus === 'live' ? '<button class="btn btn-sm btn-danger" onclick="cancelAuction(\'' + U.escapeHtml(p.id) + '\')">إلغاء المزاد</button>' : '') +
             '<button class="btn btn-sm btn-danger" onclick="deleteProduct(\'' + U.escapeHtml(p.id) + '\')">حذف</button>' +
           '</div></td>' +
@@ -416,12 +417,6 @@
         product.bids = (existing && existing.bids) ? existing.bids : [];
       } else {
         product.bids = [];
-        // Add mock bids for demo
-        product.bids.push(
-          { bidder: 'عبدالرحمن السالم', amount: startPrice, date: new Date().toISOString() },
-          { bidder: 'فيصل العمري', amount: startPrice + minBid, date: new Date().toISOString() },
-          { bidder: 'سعود الدوسري', amount: startPrice + (minBid * 2), date: new Date().toISOString() }
-        );
       }
     } else {
       var price = parseFloat(document.getElementById('pmPrice').value);
@@ -695,46 +690,38 @@
     SAIDAT.orders.update(orderId, { status: newStatus });
     SAIDAT.orders.addHistory(orderId, newStatus, statusNotes[newStatus] || 'تم تحديث الحالة');
 
-    // If completed, add transaction
+    // If completed, record transaction via secure RPC
     if (newStatus === 'completed') {
       var commission = order.total * CFG.COMMISSION_RATE;
 
-      var saleTx = {
-        type: 'sale',
-        amount: order.total,
-        date: new Date().toISOString().split('T')[0],
-        ref: order.id,
-        status: 'completed',
-        description: 'بيع: ' + (order.productName || order.product_name) + ' × ' + order.qty
-      };
-      var commTx = {
-        type: 'commission',
-        amount: -commission,
-        date: new Date().toISOString().split('T')[0],
-        ref: order.id,
-        status: 'completed',
-        description: 'عمولة المنصة ' + (CFG.COMMISSION_RATE * 100) + '%'
-      };
+      // استخدام RPC بدل الإدراج المباشر (الذي يفشل بسبب RLS admin-only)
+      var sb = U.getSupabase();
+      if (sb) {
+        try {
+          var rpcResult = await sb.rpc('record_sale_transaction', {
+            p_order_id: order.id,
+            p_amount: order.total,
+            p_commission_rate: CFG.COMMISSION_RATE
+          });
+          if (rpcResult.error) {
+            U.log('error', 'record_sale_transaction RPC error:', rpcResult.error);
+          } else {
+            U.log('log', 'Transaction recorded:', rpcResult.data);
+          }
+        } catch(e) {
+          U.log('error', 'record_sale_transaction exception:', e);
+        }
+      }
 
-      currentUser.transactions.unshift(
-        Object.assign({ id: 't_' + Date.now() }, saleTx),
-        Object.assign({ id: 't_' + (Date.now() + 1) }, commTx)
-      );
-
-      // Persist transactions to Supabase
-      SAIDAT.transactions.add(U.camelToSnake(saleTx));
-      SAIDAT.transactions.add(U.camelToSnake(commTx));
-
+      // تحديث المتغيرات المحلية للعرض الفوري
       currentUser.balance += (order.total - commission);
       currentUser.totalSales += order.qty;
       currentUser.totalRevenue += order.total;
 
-      // Persist profile updates
-      SAIDAT.profiles.update({
-        balance: currentUser.balance,
-        totalSales: currentUser.totalSales,
-        totalRevenue: currentUser.totalRevenue
-      });
+      currentUser.transactions.unshift(
+        { id: 't_' + Date.now(), type: 'sale', amount: order.total - commission, date: new Date().toISOString(), ref: order.id, status: 'completed', description: 'بيع: ' + (order.productName || order.product_name) },
+        { id: 't_' + (Date.now() + 1), type: 'commission', amount: -commission, date: new Date().toISOString(), ref: order.id, status: 'completed', description: 'عمولة المنصة ' + (CFG.COMMISSION_RATE * 100) + '%' }
+      );
     }
 
     renderOrders();
@@ -1303,6 +1290,81 @@
     }
   }
 
+  // ===== عروض مفتوحة: اختيار فائز =====
+  async function showOffers(productId) {
+    var sb = U.getSupabase();
+    if (!sb) return;
+
+    try {
+      var res = await sb.from('bids')
+        .select('*, profiles(first_name, last_name, store_name)')
+        .eq('product_id', productId)
+        .eq('status', 'active')
+        .order('amount', { ascending: false });
+
+      if (res.error || !res.data || res.data.length === 0) {
+        SAIDAT.ui.showToast('لا توجد عروض على هذا المزاد بعد', 'info');
+        return;
+      }
+
+      var bids = res.data;
+      var html = '<div style="max-height:400px;overflow-y:auto;">';
+      html += '<table style="width:100%;border-collapse:collapse;">';
+      html += '<tr style="background:#F5F0EB;"><th style="padding:8px;text-align:right;">المزايد</th><th style="padding:8px;text-align:right;">المبلغ</th><th style="padding:8px;text-align:center;">إجراء</th></tr>';
+
+      bids.forEach(function(bid) {
+        var bidderName = bid.profiles ? U.escapeHtml((bid.profiles.store_name || bid.profiles.first_name || '') + ' ' + (bid.profiles.last_name || '')) : 'مزايد';
+        html += '<tr style="border-bottom:1px solid #E8DDD0;">' +
+          '<td style="padding:8px;">' + bidderName + '</td>' +
+          '<td style="padding:8px;font-weight:600;">' + U.formatCurrency(bid.amount) + '</td>' +
+          '<td style="padding:8px;text-align:center;"><button class="btn btn-sm btn-success" onclick="acceptOfferFromList(\'' + U.escapeHtml(productId) + '\',\'' + U.escapeHtml(bid.bidder_id) + '\')">قبول</button></td>' +
+          '</tr>';
+      });
+
+      html += '</table></div>';
+
+      // عرض في modal بسيط
+      var modal = document.createElement('div');
+      modal.id = 'offersModal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      modal.innerHTML = '<div style="background:white;border-radius:16px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow:auto;">' +
+        '<h3 style="margin:0 0 16px;text-align:right;">العروض المقدمة</h3>' +
+        html +
+        '<button class="btn btn-outline" onclick="document.getElementById(\'offersModal\').remove()" style="margin-top:16px;width:100%;">إغلاق</button>' +
+        '</div>';
+      document.body.appendChild(modal);
+    } catch(e) {
+      U.log('error', 'showOffers error:', e);
+      SAIDAT.ui.showToast('حدث خطأ في تحميل العروض', 'error');
+    }
+  }
+
+  async function acceptOfferFromList(productId, bidderId) {
+    if (!confirm('هل أنت متأكد من قبول هذا العرض؟ سيتم إنهاء المزاد وتعيين هذا المزايد كفائز.')) return;
+
+    try {
+      var result = await SAIDAT.products.acceptOffer(productId, bidderId);
+      if (result && result.success) {
+        SAIDAT.ui.showToast('تم قبول العرض وإنهاء المزاد', 'success');
+        var modal = document.getElementById('offersModal');
+        if (modal) modal.remove();
+
+        // إعادة تحميل المنتجات
+        try {
+          var products = await SAIDAT.products.getForSeller();
+          currentUser.products = products || [];
+        } catch(e) { /* silent */ }
+        renderProducts();
+        renderOverview();
+      } else {
+        SAIDAT.ui.showToast('فشل قبول العرض: ' + (result.error || 'خطأ غير معروف'), 'error');
+      }
+    } catch(e) {
+      U.log('error', 'acceptOffer error:', e);
+      SAIDAT.ui.showToast('حدث خطأ غير متوقع', 'error');
+    }
+  }
+
   // ===== كشف الدوال للـ HTML onclick handlers =====
   window.switchSection = function(s) { SAIDAT.ui.switchSection(s, SECTION_TITLES); };
   window.toggleSidebar = SAIDAT.ui.toggleSidebar;
@@ -1310,6 +1372,8 @@
   window.deleteProduct = deleteProduct;
   window.toggleProduct = toggleProduct;
   window.cancelAuction = cancelAuction;
+  window.showOffers = showOffers;
+  window.acceptOfferFromList = acceptOfferFromList;
   window.openProductModal = openProductModal;
   window.editProduct = editProduct;
   window.showOrderDetail = showOrderDetail;

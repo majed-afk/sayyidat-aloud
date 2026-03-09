@@ -279,7 +279,7 @@
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-filled" onclick="goToStep(2)">التالي ←</button>
+          <button class="btn btn-filled" onclick="if(validateStep(1)) goToStep(2)">التالي ←</button>
         </div>
       </div>
 
@@ -302,7 +302,7 @@
 
         <div class="form-actions">
           <button class="btn btn-outline" onclick="goToStep(1)">→ السابق</button>
-          <button class="btn btn-filled" onclick="goToStep(3)">التالي ←</button>
+          <button class="btn btn-filled" onclick="if(validateStep(2)) goToStep(3)">التالي ←</button>
         </div>
       </div>
 
@@ -390,7 +390,7 @@
 
         <div class="form-actions">
           <button class="btn btn-outline" onclick="goToStep(2)">→ السابق</button>
-          <button class="btn btn-filled" onclick="goToStep(4)">معاينة المزاد ←</button>
+          <button class="btn btn-filled" onclick="if(validateStep(3)) goToStep(4)">معاينة المزاد ←</button>
         </div>
       </div>
 

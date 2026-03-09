@@ -4,6 +4,10 @@
 -- يجب تنفيذه في Supabase SQL Editor بعد 10_improvements.sql
 -- يعالج 10 مشاكل أمنية/وظيفية في نظام المزاد
 
+-- ===== القسم 0: إضافة عمود buyer_id لجدول orders =====
+-- مطلوب قبل القسم 4 (RLS policies تعتمد عليه)
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS buyer_id UUID REFERENCES profiles(id);
+
 -- ===== القسم 1: إنهاء المزادات المنتهية تلقائياً [Issue 1] =====
 -- يُستدعى عبر sb.rpc('auto_end_expired_auctions') عند تحميل أي صفحة منتج
 -- Supabase Free لا يدعم pg_cron، فالحل: cleanup عند كل زيارة

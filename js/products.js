@@ -185,6 +185,29 @@
     },
 
     /**
+     * قبول عرض في مزاد مفتوح (البائع يختار فائز)
+     */
+    acceptOffer: async function(productId, bidderId) {
+      var sb = U.getSupabase();
+      if (!sb) return { success: false, error: 'no_client' };
+
+      try {
+        var res = await sb.rpc('accept_offer', {
+          p_product_id: productId,
+          p_bidder_id: bidderId
+        });
+        if (res.error) {
+          U.log('error', 'acceptOffer RPC error:', res.error);
+          return { success: false, error: res.error.message };
+        }
+        return res.data || { success: false };
+      } catch(e) {
+        U.log('error', 'acceptOffer exception:', e);
+        return { success: false, error: e.message };
+      }
+    },
+
+    /**
      * تنظيف المزادات المنتهية تلقائياً عبر RPC
      * @returns {Promise<number>} عدد المزادات التي تم إنهاؤها
      */
