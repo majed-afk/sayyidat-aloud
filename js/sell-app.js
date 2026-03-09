@@ -39,11 +39,11 @@
   function validateStep(step) {
     if (step === 1) {
       var name = document.getElementById('productName').value.trim();
-      var category = document.getElementById('category').value;
-      var price = document.getElementById('startPrice').value;
+      var category = document.getElementById('productCategory').value;
+      var desc = document.getElementById('productDesc').value.trim();
       if (!name) { SAIDAT.ui.showToast('أدخل اسم المنتج', 'error'); return false; }
       if (!category) { SAIDAT.ui.showToast('اختر التصنيف', 'error'); return false; }
-      if (!price || Number(price) <= 0) { SAIDAT.ui.showToast('أدخل سعر البداية', 'error'); return false; }
+      if (!desc || desc.length < 10) { SAIDAT.ui.showToast('أدخل وصف المنتج (10 أحرف على الأقل)', 'error'); return false; }
       return true;
     }
     if (step === 2) {
@@ -51,8 +51,8 @@
       return true;
     }
     if (step === 3) {
-      var desc = document.getElementById('description').value.trim();
-      if (!desc || desc.length < 10) { SAIDAT.ui.showToast('أدخل وصف المنتج (10 أحرف على الأقل)', 'error'); return false; }
+      var price = document.getElementById('startPrice').value;
+      if (!price || Number(price) <= 0) { SAIDAT.ui.showToast('أدخل سعر البداية', 'error'); return false; }
       return true;
     }
     return true;
