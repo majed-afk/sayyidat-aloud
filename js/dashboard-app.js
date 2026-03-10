@@ -228,7 +228,7 @@
           '<td><div class="action-btns">' +
             '<button class="btn btn-sm btn-outline" onclick="editProduct(\'' + U.escapeHtml(p.id) + '\')">تعديل</button>' +
             '<button class="btn btn-sm ' + (p.active ? 'btn-warning' : 'btn-success') + '" onclick="toggleProduct(\'' + U.escapeHtml(p.id) + '\')">' + (p.active ? 'إيقاف' : 'تفعيل') + '</button>' +
-            (listingType === 'auction' && auctionStatus === 'live' && auctionType === 'مزاد مفتوح (عروض)' ? '<button class="btn btn-sm btn-success" onclick="showOffers(\'' + U.escapeHtml(p.id) + '\')">اختيار فائز</button>' : '') +
+            (listingType === 'auction' && auctionStatus === 'live' && auctionType === 'until_sold' ? '<button class="btn btn-sm btn-success" onclick="showOffers(\'' + U.escapeHtml(p.id) + '\')">اختيار فائز</button>' : '') +
             (listingType === 'auction' && auctionStatus === 'live' ? '<button class="btn btn-sm btn-danger" onclick="cancelAuction(\'' + U.escapeHtml(p.id) + '\')">إلغاء المزاد</button>' : '') +
             '<button class="btn btn-sm btn-danger" onclick="deleteProduct(\'' + U.escapeHtml(p.id) + '\')">حذف</button>' +
           '</div></td>' +
@@ -673,7 +673,7 @@
     renderOrders();
   }
 
-  function updateOrderStatus(orderId, newStatus) {
+  async function updateOrderStatus(orderId, newStatus) {
     var order = currentUser.orders.find(function(o) { return o.id === orderId; });
     if (!order) return;
 
@@ -1102,7 +1102,7 @@
     SAIDAT.ui.closeModal('withdrawModal');
   }
 
-  function submitWithdraw() {
+  async function submitWithdraw() {
     var amount = parseFloat(document.getElementById('withdrawAmount').value);
     if (!amount || amount < CFG.MIN_WITHDRAWAL) {
       SAIDAT.ui.showToast('الحد الأدنى للسحب ' + CFG.MIN_WITHDRAWAL + ' ر.س', 'error');
@@ -1117,28 +1117,54 @@
       return;
     }
 
-    currentUser.balance -= amount;
+    // استخدام RPC آمن بدل INSERT المباشر المحظور بـ RLS
+    var sb = U.getSupabase();
+    if (!sb) return;
 
-    var withdrawTx = {
-      id: 't_' + Date.now(),
-      type: 'withdrawal',
-      amount: -amount,
-      date: new Date().toISOString().split('T')[0],
-      ref: 'W-' + Math.floor(Math.random() * 999 + 1).toString().padStart(3, '0'),
-      status: 'completed',
-      description: 'سحب إلى ' + currentUser.bankName
-    };
+    try {
+      var res = await sb.rpc('record_withdrawal', {
+        p_amount: amount,
+        p_bank_name: currentUser.bankName || ''
+      });
 
-    currentUser.transactions.unshift(withdrawTx);
+      if (res.error) {
+        U.log('error', 'record_withdrawal RPC error:', res.error.message);
+        SAIDAT.ui.showToast('فشل طلب السحب: ' + res.error.message, 'error');
+        return;
+      }
 
-    // Persist
-    SAIDAT.transactions.add(U.camelToSnake(withdrawTx));
-    SAIDAT.profiles.update({ balance: currentUser.balance });
+      if (res.data && !res.data.success) {
+        var errMap = {
+          'insufficient_balance': 'الرصيد غير كافٍ',
+          'no_iban': 'يجب إضافة الآيبان أولاً',
+          'invalid_amount': 'مبلغ غير صالح'
+        };
+        SAIDAT.ui.showToast(errMap[res.data.error] || 'فشل طلب السحب', 'error');
+        return;
+      }
 
-    renderFinance();
-    renderOverview();
-    closeWithdrawModal();
-    SAIDAT.ui.showToast('تم طلب السحب بنجاح - سيتم التحويل خلال 1-3 أيام عمل', 'success');
+      // تحديث الرصيد المحلي من استجابة السيرفر
+      currentUser.balance = res.data.new_balance;
+
+      // إضافة المعاملة للعرض المحلي
+      currentUser.transactions.unshift({
+        id: 't_' + Date.now(),
+        type: 'withdrawal',
+        amount: -amount,
+        date: new Date().toISOString().split('T')[0],
+        ref: 'W-' + Math.floor(Math.random() * 999 + 1).toString().padStart(3, '0'),
+        status: 'pending',
+        description: 'سحب إلى ' + currentUser.bankName
+      });
+
+      renderFinance();
+      renderOverview();
+      closeWithdrawModal();
+      SAIDAT.ui.showToast('تم طلب السحب بنجاح - سيتم التحويل خلال 1-3 أيام عمل', 'success');
+    } catch(e) {
+      U.log('error', 'record_withdrawal exception:', e);
+      SAIDAT.ui.showToast('حدث خطأ في طلب السحب', 'error');
+    }
   }
 
   // ===== PROFILE =====

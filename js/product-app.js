@@ -799,7 +799,7 @@
   }
 
   // ===== BUY NOW =====
-  function buyNow() {
+  async function buyNow() {
     if (_auctionEnded) {
       SAIDAT.ui.showToast('المزاد انتهى', 'error');
       return;
@@ -809,6 +809,32 @@
     if (!authUser) {
       SAIDAT.ui.showToast('يجب تسجيل الدخول للشراء', 'error');
       return;
+    }
+
+    // ★ استدعاء RPC لتعيين الفائز وإنهاء المزاد قبل الدخول في مسار الشراء
+    var sb = U.getSupabase();
+    if (sb) {
+      try {
+        var rpcResult = await sb.rpc('buy_now_auction', { p_product_id: product.id });
+        if (rpcResult.error) {
+          SAIDAT.ui.showToast('فشل الشراء الفوري: ' + rpcResult.error.message, 'error');
+          return;
+        }
+        if (rpcResult.data && !rpcResult.data.success) {
+          var errMap = {
+            'not_auction': 'المنتج ليس مزاداً',
+            'auction_not_live': 'المزاد غير نشط',
+            'no_buy_now_price': 'لا يوجد سعر شراء فوري',
+            'cannot_buy_own': 'لا يمكنك شراء منتجك'
+          };
+          SAIDAT.ui.showToast(errMap[rpcResult.data.error] || 'فشل الشراء الفوري', 'error');
+          return;
+        }
+      } catch(e) {
+        U.log('error', 'buy_now_auction exception:', e);
+        SAIDAT.ui.showToast('حدث خطأ أثناء الشراء الفوري', 'error');
+        return;
+      }
     }
 
     // Switch product price to buy_now price and quantity = 1

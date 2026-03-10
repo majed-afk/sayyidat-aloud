@@ -77,7 +77,7 @@ CREATE POLICY "notifications_delete_own" ON notifications
 CREATE TABLE IF NOT EXISTS reviews (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   reviewer_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   seller_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
@@ -157,7 +157,7 @@ CREATE TRIGGER trg_bid_rate_limit
 -- ============ 6) جدول النزاعات ============
 CREATE TABLE IF NOT EXISTS disputes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  order_id UUID NOT NULL REFERENCES orders(id),
+  order_id TEXT NOT NULL REFERENCES orders(id),
   buyer_id UUID NOT NULL REFERENCES profiles(id),
   seller_id UUID NOT NULL REFERENCES profiles(id),
   reason TEXT NOT NULL,
