@@ -688,9 +688,9 @@
       note: statusNotes[newStatus] || 'تم تحديث الحالة'
     });
 
-    // Persist to Supabase
-    SAIDAT.orders.update(orderId, { status: newStatus });
-    SAIDAT.orders.addHistory(orderId, newStatus, statusNotes[newStatus] || 'تم تحديث الحالة');
+    // Persist to Supabase (★ await لضمان اكتمال التحديث قبل RPC)
+    await SAIDAT.orders.update(orderId, { status: newStatus });
+    await SAIDAT.orders.addHistory(orderId, newStatus, statusNotes[newStatus] || 'تم تحديث الحالة');
 
     // If completed, record transaction via secure RPC
     if (newStatus === 'completed') {

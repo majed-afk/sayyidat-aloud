@@ -596,18 +596,25 @@
     _countdownTimer = setInterval(updateCountdown, CFG.AUCTION.COUNTDOWN_UPDATE);
   }
 
-  function updateCountdown() {
+  async function updateCountdown() {
     var endDate = new Date(product.auctionEndDate);
     var now = new Date();
     var diff = endDate - now;
 
     if (diff <= 0) {
-      // Auction ended — sync with DB first
+      // ★ وقف الفاصل فوراً لمنع إعادة الدخول أثناء await
+      clearInterval(_countdownTimer);
+      _countdownTimer = null;
+
+      // مزامنة DB أولاً ثم تحديث UI
       var sb = U.getSupabase();
       if (sb) {
-        sb.rpc('auto_end_expired_auctions').then(function() {
+        try {
+          await sb.rpc('auto_end_expired_auctions');
           U.log('log', 'auto_end_expired_auctions triggered on countdown end');
-        }).catch(function() {});
+        } catch(e) {
+          U.log('warn', 'auto_end_expired_auctions failed:', e);
+        }
       }
       handleAuctionEnd();
       return;

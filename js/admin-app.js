@@ -718,9 +718,14 @@
       var seller = allUsers.find(function(u) { return u.id === t.seller_id; });
       var bankName = seller ? U.escapeHtml(seller.bankName || '\u2014') : '\u2014';
 
-      var statusBdg = t.status === 'completed'
-        ? '<span class="status status-completed"><span class="status-dot"></span>\u0645\u0643\u062a\u0645\u0644</span>'
-        : '<span class="status status-pending-withdrawal"><span class="status-dot"></span>\u0645\u0639\u0644\u0651\u0642</span>';
+      var statusBdg;
+      if (t.status === 'completed') {
+        statusBdg = '<span class="status status-completed"><span class="status-dot"></span>\u0645\u0643\u062a\u0645\u0644</span>';
+      } else if (t.status === 'cancelled') {
+        statusBdg = '<span class="status status-cancelled"><span class="status-dot"></span>\u0645\u0631\u0641\u0648\u0636</span>';
+      } else {
+        statusBdg = '<span class="status status-pending-withdrawal"><span class="status-dot"></span>\u0645\u0639\u0644\u0651\u0642</span>';
+      }
       var actions = t.status === 'pending'
         ? '<div class="table-actions">' +
           '<button class="btn btn-success btn-sm" onclick="approveWithdrawal(\'' + U.escapeHtml(t.id) + '\')">\u0645\u0648\u0627\u0641\u0642\u0629</button>' +
@@ -744,9 +749,16 @@
     var sb = U.getSupabase();
     if (!sb) return;
     try {
-      var res = await sb.from('transactions').update({ status: 'completed' }).eq('id', txnId);
+      // ★ استخدام RPC الذري بدل UPDATE المباشر
+      var res = await sb.rpc('approve_withdrawal', { p_txn_id: txnId, p_approve: true });
       if (res.error) {
+        U.log('error', 'approve_withdrawal RPC error:', res.error);
         SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
+        return;
+      }
+      if (res.data && !res.data.success) {
+        U.log('error', 'approve_withdrawal failed:', res.data.error);
+        SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623: ' + (res.data.error || ''), 'error');
         return;
       }
     } catch(e) {
@@ -764,21 +776,18 @@
     var sb = U.getSupabase();
     if (!sb) return;
 
-    // Find the transaction to get seller_id and amount for balance refund
-    var txn = allTransactions.find(function(t) { return t.id === txnId; });
-    if (!txn) return;
-
     try {
-      // Update transaction status
-      await sb.from('transactions').update({ status: 'rejected' }).eq('id', txnId);
-
-      // Refund balance to seller
-      if (txn.seller_id && txn.amount) {
-        var seller = allUsers.find(function(u) { return u.id === txn.seller_id; });
-        if (seller) {
-          var newBalance = (seller.balance || 0) + Math.abs(txn.amount);
-          await SAIDAT.profiles.update({ id: txn.seller_id, balance: newBalance });
-        }
+      // ★ استخدام RPC الذري: يرفض السحب ويعيد المبلغ في عملية واحدة
+      var res = await sb.rpc('approve_withdrawal', { p_txn_id: txnId, p_approve: false });
+      if (res.error) {
+        U.log('error', 'reject_withdrawal RPC error:', res.error);
+        SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
+        return;
+      }
+      if (res.data && !res.data.success) {
+        U.log('error', 'reject_withdrawal failed:', res.data.error);
+        SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623: ' + (res.data.error || ''), 'error');
+        return;
       }
     } catch(e) {
       SAIDAT.ui.showToast('\u062d\u062f\u062b \u062e\u0637\u0623', 'error');
