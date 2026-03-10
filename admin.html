@@ -80,6 +80,10 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
           <span>النزاعات</span>
         </a>
+        <a class="nav-item" data-section="support" onclick="switchSection('support')">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+          <span>تذاكر الدعم</span>
+        </a>
 
         <div class="nav-section-title">الإعدادات</div>
         <a class="nav-item" data-section="settings" onclick="switchSection('settings')">
@@ -335,6 +339,49 @@
           </div>
         </div>
 
+        <!-- ===== قسم تذاكر الدعم ===== -->
+        <div class="section-panel" id="section-support">
+          <div class="tabs" id="adminSupportTabs" style="margin-bottom: 16px;">
+            <button class="tab-btn active" data-tab="all" onclick="filterAdminTickets('all')">الكل <span class="count" id="adminTicketCountAll">0</span></button>
+            <button class="tab-btn" data-tab="open" onclick="filterAdminTickets('open')">مفتوحة <span class="count" id="adminTicketCountOpen">0</span></button>
+            <button class="tab-btn" data-tab="in_progress" onclick="filterAdminTickets('in_progress')">قيد المعالجة <span class="count" id="adminTicketCountProgress">0</span></button>
+            <button class="tab-btn" data-tab="resolved" onclick="filterAdminTickets('resolved')">تم الحل <span class="count" id="adminTicketCountResolved">0</span></button>
+            <button class="tab-btn" data-tab="closed" onclick="filterAdminTickets('closed')">مغلقة <span class="count" id="adminTicketCountClosed">0</span></button>
+          </div>
+          <div class="table-card">
+            <div class="table-header">
+              <span class="table-title">إدارة تذاكر الدعم</span>
+              <div style="display:flex;gap:8px;">
+                <input type="text" class="form-input" id="ticketSearchInput" placeholder="بحث بالرقم أو الموضوع..." style="width:200px;height:32px;font-size:0.82rem;" oninput="renderAdminTickets()">
+                <select class="form-select" id="ticketPriorityFilter" style="width:140px;height:32px;font-size:0.82rem;" onchange="renderAdminTickets()">
+                  <option value="all">جميع الأولويات</option>
+                  <option value="urgent">عاجلة</option>
+                  <option value="high">عالية</option>
+                  <option value="normal">عادية</option>
+                  <option value="low">منخفضة</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>رقم التذكرة</th>
+                    <th>المستخدم</th>
+                    <th>التصنيف</th>
+                    <th>الموضوع</th>
+                    <th>الأولوية</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="adminTicketsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- ===== القسم 6: إعدادات الموقع ===== -->
         <div class="section-panel" id="section-settings">
           <div class="settings-card">
@@ -417,6 +464,18 @@
     </div>
   </div>
 
+  <!-- Admin Ticket Detail Modal -->
+  <div class="modal-overlay" id="adminTicketModal">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 id="adminTicketTitle">تفاصيل التذكرة</h2>
+        <button class="modal-close" onclick="closeModal('adminTicketModal')">&#10005;</button>
+      </div>
+      <div class="modal-body" id="adminTicketBody"></div>
+      <div class="modal-footer" id="adminTicketFooter"></div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -435,7 +494,8 @@
   <script src="js/notifications.js?v=1"></script>
   <script src="js/reviews.js?v=1"></script>
   <script src="js/disputes.js?v=1"></script>
-  <script src="js/admin-app.js?v=6"></script>
+  <script src="js/support.js?v=1"></script>
+  <script src="js/admin-app.js?v=7"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

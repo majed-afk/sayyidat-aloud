@@ -68,6 +68,11 @@
         المالية
       </button>
 
+      <button class="nav-item" data-section="support" onclick="switchSection('support')">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+        الدعم الفني
+      </button>
+
       <div class="nav-section-label" style="margin-top: 12px">الإعدادات</div>
 
       <button class="nav-item" data-section="profile" onclick="switchSection('profile')">
@@ -243,6 +248,40 @@
               <tbody id="transactionsBody">
                 <!-- Filled by JS -->
               </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- SUPPORT SECTION                -->
+      <!-- ============================== -->
+      <div class="section-panel" id="section-support">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">تذاكر الدعم الفني</span>
+            <button class="btn btn-primary btn-sm" onclick="openNewTicketModal()">+ تذكرة جديدة</button>
+          </div>
+          <div class="tabs" style="margin: 0 16px 16px;">
+            <button class="tab-btn active" data-tab="all" onclick="filterTickets('all')">الكل <span class="count" id="ticketCountAll">0</span></button>
+            <button class="tab-btn" data-tab="open" onclick="filterTickets('open')">مفتوحة <span class="count" id="ticketCountOpen">0</span></button>
+            <button class="tab-btn" data-tab="in_progress" onclick="filterTickets('in_progress')">قيد المعالجة <span class="count" id="ticketCountProgress">0</span></button>
+            <button class="tab-btn" data-tab="resolved" onclick="filterTickets('resolved')">تم الحل <span class="count" id="ticketCountResolved">0</span></button>
+            <button class="tab-btn" data-tab="closed" onclick="filterTickets('closed')">مغلقة <span class="count" id="ticketCountClosed">0</span></button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم التذكرة</th>
+                  <th>التصنيف</th>
+                  <th>الموضوع</th>
+                  <th>الحالة</th>
+                  <th>التاريخ</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="supportTicketsBody"></tbody>
             </table>
           </div>
         </div>
@@ -686,6 +725,58 @@
   </div>
 </div>
 
+<!-- ===== NEW TICKET MODAL ===== -->
+<div class="modal-overlay" id="newTicketModal">
+  <div class="modal" style="max-width: 560px;">
+    <div class="modal-header">
+      <h2>تذكرة دعم جديدة</h2>
+      <button class="modal-close" onclick="closeNewTicketModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">التصنيف <span class="required-star">*</span></label>
+        <select class="form-select" id="ticketCategory">
+          <option value="">اختر التصنيف</option>
+          <option value="order_issue">مشكلة في الطلب</option>
+          <option value="payment_issue">مشكلة في الدفع</option>
+          <option value="product_complaint">شكوى منتج</option>
+          <option value="account_issue">مشكلة في الحساب</option>
+          <option value="technical_issue">مشكلة تقنية</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم الطلب <span style="opacity:0.5">(اختياري)</span></label>
+        <input type="text" class="form-input" id="ticketOrderId" placeholder="مثال: SA-847291">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الموضوع <span class="required-star">*</span></label>
+        <input type="text" class="form-input" id="ticketSubject" placeholder="اكتب عنوان مختصر للمشكلة">
+      </div>
+      <div class="form-group">
+        <label class="form-label">وصف المشكلة <span class="required-star">*</span></label>
+        <textarea class="form-textarea" id="ticketDescription" rows="4" placeholder="اشرح المشكلة بالتفصيل..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="submitNewTicket()">إرسال التذكرة</button>
+      <button class="btn btn-outline" onclick="closeNewTicketModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TICKET DETAIL MODAL ===== -->
+<div class="modal-overlay" id="ticketDetailModal">
+  <div class="modal" style="max-width: 640px;">
+    <div class="modal-header">
+      <h2 id="ticketDetailTitle">تفاصيل التذكرة</h2>
+      <button class="modal-close" onclick="closeTicketDetail()">&#10005;</button>
+    </div>
+    <div class="modal-body" id="ticketDetailBody"></div>
+    <div class="modal-footer" id="ticketDetailFooter"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -706,8 +797,9 @@
 <script src="js/notifications.js?v=1"></script>
 <script src="js/reviews.js?v=1"></script>
 <script src="js/disputes.js?v=1"></script>
+<script src="js/support.js?v=1"></script>
 <script src="js/invoice.js?v=1"></script>
-<script src="js/dashboard-app.js?v=6"></script>
+<script src="js/dashboard-app.js?v=7"></script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

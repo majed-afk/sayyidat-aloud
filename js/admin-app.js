@@ -23,7 +23,8 @@
     'orders': '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0637\u0644\u0628\u0627\u062a',
     'finance': '\u0627\u0644\u0645\u0627\u0644\u064a\u0629',
     'settings': '\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u0644\u0645\u0648\u0642\u0639',
-    'disputes': '\u0627\u0644\u0646\u0632\u0627\u0639\u0627\u062a'
+    'disputes': '\u0627\u0644\u0646\u0632\u0627\u0639\u0627\u062a',
+    'support': '\u062a\u0630\u0627\u0643\u0631 \u0627\u0644\u062f\u0639\u0645'
   };
 
   // ===== STATUS CLASSES (for admin-specific badge rendering) =====
@@ -67,6 +68,7 @@
     renderOrders();
     renderFinance();
     renderDisputes();
+    renderAdminTickets();
     await loadSettings();
 
     var hash = window.location.hash.replace('#', '');
@@ -1025,6 +1027,234 @@
     });
     renderProducts();
   };
+
+  // ===== نظام تذاكر الدعم (أدمن) =====
+  var allAdminTickets = [];
+  var adminTicketFilter = 'all';
+  var currentAdminTicketId = null;
+
+  async function renderAdminTickets() {
+    if (!SAIDAT.support) return;
+    try {
+      allAdminTickets = await SAIDAT.support.getAll();
+    } catch(e) {
+      allAdminTickets = [];
+    }
+    renderAdminTicketTable();
+  }
+
+  function renderAdminTicketTable() {
+    var tbody = document.getElementById('adminTicketsBody');
+    if (!tbody) return;
+
+    // عدادات
+    var counts = { all: allAdminTickets.length, open: 0, in_progress: 0, resolved: 0, closed: 0 };
+    allAdminTickets.forEach(function(t) { if (counts[t.status] !== undefined) counts[t.status]++; });
+    var ce = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; };
+    ce('adminTicketCountAll', counts.all);
+    ce('adminTicketCountOpen', counts.open);
+    ce('adminTicketCountProgress', counts.in_progress);
+    ce('adminTicketCountResolved', counts.resolved);
+    ce('adminTicketCountClosed', counts.closed);
+
+    // فلتر حالة
+    var filtered = adminTicketFilter === 'all' ? allAdminTickets :
+      allAdminTickets.filter(function(t) { return t.status === adminTicketFilter; });
+
+    // فلتر أولوية
+    var priorityFilter = document.getElementById('ticketPriorityFilter');
+    var pf = priorityFilter ? priorityFilter.value : 'all';
+    if (pf !== 'all') {
+      filtered = filtered.filter(function(t) { return t.priority === pf; });
+    }
+
+    // بحث
+    var searchInput = document.getElementById('ticketSearchInput');
+    var searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    if (searchVal) {
+      filtered = filtered.filter(function(t) {
+        return (t.ticket_number && t.ticket_number.toLowerCase().indexOf(searchVal) !== -1) ||
+               (t.subject && t.subject.toLowerCase().indexOf(searchVal) !== -1);
+      });
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;opacity:0.5;">لا توجد تذاكر</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(function(t) {
+      var date = new Date(t.created_at).toLocaleDateString('ar-SA');
+      var userName = t.user ? (t.user.first_name + ' ' + t.user.last_name) : '—';
+      return '<tr>' +
+        '<td><strong>' + U.escapeHtml(t.ticket_number) + '</strong></td>' +
+        '<td>' + U.escapeHtml(userName) + '</td>' +
+        '<td>' + U.escapeHtml(SAIDAT.support.categoryLabel(t.category)) + '</td>' +
+        '<td>' + U.escapeHtml(t.subject) + '</td>' +
+        '<td>' + SAIDAT.support.priorityBadge(t.priority) + '</td>' +
+        '<td>' + SAIDAT.support.statusBadge(t.status) + '</td>' +
+        '<td>' + date + '</td>' +
+        '<td><button class="btn btn-outline btn-sm" onclick="openAdminTicket(\'' + t.id + '\')">معالجة</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  window.filterAdminTickets = function(filter) {
+    adminTicketFilter = filter;
+    document.querySelectorAll('#adminSupportTabs .tab-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === filter);
+    });
+    renderAdminTicketTable();
+  };
+
+  window.openAdminTicket = async function(ticketId) {
+    currentAdminTicketId = ticketId;
+    var ticket = await SAIDAT.support.getById(ticketId);
+    var messages = await SAIDAT.support.getMessages(ticketId);
+    if (!ticket) { SAIDAT.ui.showToast('تعذّر تحميل التذكرة', 'error'); return; }
+
+    var titleEl = document.getElementById('adminTicketTitle');
+    if (titleEl) titleEl.textContent = 'تذكرة ' + ticket.ticket_number;
+
+    var body = document.getElementById('adminTicketBody');
+    var footer = document.getElementById('adminTicketFooter');
+
+    var userName = ticket.user ? (ticket.user.first_name + ' ' + ticket.user.last_name) : '—';
+    var storeName = ticket.user && ticket.user.store_name ? ticket.user.store_name : '';
+
+    // أدوات التحكم
+    var html = '<div style="display:flex;gap:12px;margin-bottom:16px;">' +
+      '<div class="form-group" style="flex:1;">' +
+        '<label class="form-label">الحالة</label>' +
+        '<select class="form-select" id="adminTicketStatusSelect" onchange="changeTicketStatus(\'' + ticketId + '\', this.value)">' +
+          '<option value="open"' + (ticket.status === 'open' ? ' selected' : '') + '>مفتوحة</option>' +
+          '<option value="in_progress"' + (ticket.status === 'in_progress' ? ' selected' : '') + '>قيد المعالجة</option>' +
+          '<option value="resolved"' + (ticket.status === 'resolved' ? ' selected' : '') + '>تم الحل</option>' +
+          '<option value="closed"' + (ticket.status === 'closed' ? ' selected' : '') + '>مغلقة</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="form-group" style="flex:1;">' +
+        '<label class="form-label">الأولوية</label>' +
+        '<select class="form-select" id="adminTicketPrioritySelect" onchange="changeTicketPriority(\'' + ticketId + '\', this.value)">' +
+          '<option value="low"' + (ticket.priority === 'low' ? ' selected' : '') + '>منخفضة</option>' +
+          '<option value="normal"' + (ticket.priority === 'normal' ? ' selected' : '') + '>عادية</option>' +
+          '<option value="high"' + (ticket.priority === 'high' ? ' selected' : '') + '>عالية</option>' +
+          '<option value="urgent"' + (ticket.priority === 'urgent' ? ' selected' : '') + '>عاجلة</option>' +
+        '</select>' +
+      '</div>' +
+      '</div>';
+
+    // معلومات التذكرة
+    html += '<div class="ticket-info-box">' +
+      '<div><strong>المستخدم:</strong> ' + U.escapeHtml(userName) + (storeName ? ' (' + U.escapeHtml(storeName) + ')' : '') + '</div>' +
+      '<div><strong>التصنيف:</strong> ' + U.escapeHtml(SAIDAT.support.categoryLabel(ticket.category)) + '</div>' +
+      '<div><strong>التاريخ:</strong> ' + new Date(ticket.created_at).toLocaleString('ar-SA') + '</div>' +
+      (ticket.order_id ? '<div><strong>رقم الطلب:</strong> ' + U.escapeHtml(ticket.order_id) + '</div>' : '') +
+      '<div style="grid-column:1/-1"><strong>الموضوع:</strong> ' + U.escapeHtml(ticket.subject) + '</div>' +
+      '<div style="grid-column:1/-1"><strong>الوصف:</strong> ' + U.escapeHtml(ticket.description) + '</div>' +
+      '</div>';
+
+    // سلسلة الرسائل
+    if (messages.length > 0) {
+      html += '<div class="ticket-thread">';
+      messages.forEach(function(m) {
+        var isAdmin = m.is_admin;
+        var senderName = isAdmin ? 'الدعم الفني' :
+          (m.sender ? (m.sender.first_name + ' ' + m.sender.last_name) : 'المستخدم');
+        var time = new Date(m.created_at).toLocaleString('ar-SA');
+        html += '<div class="ticket-msg ' + (isAdmin ? 'ticket-msg-admin' : 'ticket-msg-user') + '">' +
+          '<div class="ticket-msg-sender">' + U.escapeHtml(senderName) + '</div>' +
+          '<div class="ticket-msg-text">' + U.escapeHtml(m.message) + '</div>' +
+          '<div class="ticket-msg-time">' + time + '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p style="text-align:center;opacity:0.5;margin:16px 0;">لا توجد ردود بعد</p>';
+    }
+
+    body.innerHTML = html;
+
+    // نموذج رد الأدمن
+    if (ticket.status !== 'closed') {
+      footer.innerHTML = '<div class="ticket-reply-form">' +
+        '<textarea class="form-textarea" id="adminReplyText" rows="2" placeholder="اكتب ردك للمستخدم..."></textarea>' +
+        '<button class="btn btn-primary" onclick="submitAdminReply(\'' + ticketId + '\')">إرسال</button>' +
+        '</div>';
+    } else {
+      footer.innerHTML = '<p style="text-align:center;opacity:0.5;">هذه التذكرة مغلقة</p>';
+    }
+
+    SAIDAT.ui.openModal('adminTicketModal');
+  };
+
+  window.changeTicketStatus = async function(ticketId, newStatus) {
+    var ok = await SAIDAT.support.updateStatus(ticketId, newStatus);
+    if (ok) {
+      SAIDAT.ui.showToast('تم تحديث الحالة', 'success');
+      renderAdminTickets();
+      // إشعار المستخدم
+      try {
+        var ticket = allAdminTickets.find(function(t) { return t.id === ticketId; });
+        if (ticket && SAIDAT.notifications) {
+          SAIDAT.notifications.create({
+            user_id: ticket.user_id,
+            type: 'ticket_status',
+            title: 'تحديث حالة التذكرة',
+            body: ticket.ticket_number + ' — ' + (SAIDAT.support.STATUS_LABELS[newStatus] || newStatus),
+            link: 'dashboard#support'
+          });
+        }
+      } catch(e) { U.log('warn', 'notify user status error:', e); }
+    } else {
+      SAIDAT.ui.showToast('حدث خطأ', 'error');
+    }
+  };
+
+  window.changeTicketPriority = async function(ticketId, newPriority) {
+    var ok = await SAIDAT.support.updatePriority(ticketId, newPriority);
+    if (ok) {
+      SAIDAT.ui.showToast('تم تحديث الأولوية', 'success');
+      renderAdminTickets();
+    } else {
+      SAIDAT.ui.showToast('حدث خطأ', 'error');
+    }
+  };
+
+  window.submitAdminReply = async function(ticketId) {
+    var textarea = document.getElementById('adminReplyText');
+    var message = textarea ? textarea.value.trim() : '';
+    if (!message) { SAIDAT.ui.showToast('اكتب رسالة الرد', 'error'); return; }
+
+    var result = await SAIDAT.support.addMessage(ticketId, message, true);
+    if (result) {
+      SAIDAT.ui.showToast('تم إرسال الرد', 'success');
+      // إشعار المستخدم
+      try {
+        var ticket = allAdminTickets.find(function(t) { return t.id === ticketId; });
+        if (ticket && SAIDAT.notifications) {
+          SAIDAT.notifications.create({
+            user_id: ticket.user_id,
+            type: 'ticket_reply',
+            title: 'رد على تذكرتك',
+            body: ticket.ticket_number + ' — ' + ticket.subject,
+            link: 'dashboard#support'
+          });
+        }
+      } catch(e) { U.log('warn', 'notify user reply error:', e); }
+      // تحديث الحالة لقيد المعالجة تلقائياً
+      var t = allAdminTickets.find(function(t) { return t.id === ticketId; });
+      if (t && t.status === 'open') {
+        await SAIDAT.support.updateStatus(ticketId, 'in_progress');
+      }
+      window.openAdminTicket(ticketId); // إعادة تحميل المحادثة
+      renderAdminTickets();
+    } else {
+      SAIDAT.ui.showToast('حدث خطأ أثناء إرسال الرد', 'error');
+    }
+  };
+
+  window.renderAdminTickets = renderAdminTickets;
 
   // ===== HASH CHANGE =====
   window.addEventListener('hashchange', function() {
