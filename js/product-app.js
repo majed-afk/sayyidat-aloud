@@ -602,7 +602,13 @@
     var diff = endDate - now;
 
     if (diff <= 0) {
-      // Auction ended
+      // Auction ended — sync with DB first
+      var sb = U.getSupabase();
+      if (sb) {
+        sb.rpc('auto_end_expired_auctions').then(function() {
+          U.log('log', 'auto_end_expired_auctions triggered on countdown end');
+        }).catch(function() {});
+      }
       handleAuctionEnd();
       return;
     }
@@ -1315,7 +1321,7 @@
             .select('id')
             .eq('buyer_id', authUser.id)
             .eq('product_id', product.id)
-            .eq('status', 'delivered');
+            .eq('status', 'completed');
           var completedOrders = orderRes.data || [];
 
           // Check each completed order to see if already reviewed

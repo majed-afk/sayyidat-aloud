@@ -1,8 +1,8 @@
 -- ===== Fix: حل مشكلة "Database error saving new user" =====
 -- شغّل هذا في SQL Editor
 
--- 1. مسح المستخدمين القدام اللي فشل تسجيلهم
-DELETE FROM auth.users;
+-- ⚠️ تمت إزالة DELETE FROM auth.users — خطر تشغيلي كبير
+-- كانت موجودة هنا للتطوير فقط ولا يجب تشغيلها على الإنتاج
 
 -- 2. حذف الـ trigger القديم
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
