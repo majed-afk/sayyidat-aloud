@@ -34,7 +34,9 @@ SAIDAT.config = {
   TYPE_LABELS: {
     sale: 'بيع',
     commission: 'عمولة',
-    withdrawal: 'سحب'
+    withdrawal: 'سحب',
+    shipping: 'شحن',
+    shipping_refund: 'استرجاع شحن'
   },
 
   // ثوابت المزاد
@@ -116,6 +118,9 @@ SAIDAT.config = {
     bidderId: 'bidder_id',
     autoExtend: 'auto_extend',
     cancelledBy: 'cancelled_by',
-    winnerId: 'winner_id'
+    winnerId: 'winner_id',
+    awbNumber: 'awb_number',
+    shipmentState: 'shipment_state',
+    paymentMethod: 'payment_method'
   }
 };

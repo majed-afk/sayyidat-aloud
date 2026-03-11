@@ -697,15 +697,58 @@
         <label class="form-label">اسم شركة الشحن</label>
         <input type="text" class="form-input" id="waybillCustomCarrier" placeholder="أدخل اسم شركة الشحن">
       </div>
-      <div class="form-group">
-        <label class="form-label">رقم التتبع</label>
-        <input type="text" class="form-input" id="waybillTracking" placeholder="أدخل رقم التتبع" style="direction: ltr; text-align: left;">
+
+      <!-- ===== قسم SMSA التلقائي (يظهر عند اختيار smsa) ===== -->
+      <div id="smsaInfoGroup" style="display:none;">
+        <div style="background:rgba(193,154,107,0.1); border:1px solid rgba(193,154,107,0.3); border-radius:8px; padding:16px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span>تكلفة الشحن:</span>
+            <strong id="smsaShippingCost" style="color:#C19A6B;">25 ر.س</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span>رصيدك الحالي:</span>
+            <strong id="smsaCurrentBalance">0 ر.س</strong>
+          </div>
+        </div>
+        <div id="smsaBalanceWarning" style="display:none; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.3); border-radius:8px; padding:12px; margin-bottom:16px; color:#f87171; text-align:center;">
+          رصيدك غير كافٍ لتغطية تكلفة الشحن. أضف رصيداً أولاً.
+        </div>
+        <button class="btn btn-primary" id="smsaGenerateBtn" onclick="generateSMSAWaybill()" style="width:100%; margin-bottom:8px;">
+          <span id="smsaBtnText">إصدار بوليصة SMSA تلقائياً</span>
+          <span id="smsaBtnSpinner" style="display:none;">جارٍ الإصدار...</span>
+        </button>
       </div>
-      <!-- Waybill Preview (printable area) -->
+
+      <!-- ===== نتيجة SMSA (تظهر بعد النجاح) ===== -->
+      <div id="smsaResultGroup" style="display:none;">
+        <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:8px; padding:16px; margin-bottom:16px; text-align:center;">
+          <div style="font-size:1.5rem; margin-bottom:8px;">&#10003;</div>
+          <div style="margin-bottom:4px;">تم إصدار البوليصة بنجاح</div>
+          <div style="font-size:1.1rem; font-weight:700; direction:ltr;" id="smsaAwbDisplay"></div>
+        </div>
+        <div id="smsaPdfContainer" style="margin-bottom:16px;"></div>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <button class="btn btn-primary" onclick="printSMSALabel()" style="flex:1;">طباعة البوليصة</button>
+          <button class="btn btn-outline" onclick="downloadSMSALabel()" style="flex:1;">تحميل PDF</button>
+        </div>
+        <button class="btn" onclick="cancelSMSAShipment()" style="width:100%; background:rgba(220,38,38,0.15); color:#f87171; border:1px solid rgba(220,38,38,0.3);">
+          إلغاء الشحنة واسترجاع التكلفة
+        </button>
+      </div>
+
+      <!-- ===== قسم يدوي (يظهر لغير SMSA) ===== -->
+      <div id="manualTrackingGroup">
+        <div class="form-group">
+          <label class="form-label">رقم التتبع</label>
+          <input type="text" class="form-input" id="waybillTracking" placeholder="أدخل رقم التتبع" style="direction: ltr; text-align: left;">
+        </div>
+      </div>
+
+      <!-- Waybill Preview (printable area — يدوي فقط) -->
       <div class="waybill-preview" id="waybillPreview"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary" onclick="saveAndPrintWaybill()">حفظ وطباعة البوليصة</button>
+    <div class="modal-footer" id="waybillManualFooter">
+      <button class="btn btn-primary" id="waybillSaveBtn" onclick="saveAndPrintWaybill()">حفظ وطباعة البوليصة</button>
       <button class="btn btn-outline" onclick="closeWaybillModal()">إلغاء</button>
     </div>
   </div>
@@ -836,7 +879,7 @@
   </div>
 </div>
 
-<script src="js/dashboard-app.js?v=12"></script>
+<script src="js/dashboard-app.js?v=13"></script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

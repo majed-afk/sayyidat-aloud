@@ -11,6 +11,8 @@
   // ===== حالة التطبيق =====
   var currentUser = null;
   var currentOrderFilter = 'all';
+  var _shippingCostStandard = 25;
+  var _smsaPdfBase64 = null;
 
   // عناوين الأقسام
   var SECTION_TITLES = {
@@ -67,6 +69,7 @@
     }
 
     updateSidebar();
+    loadShippingCost();
     renderOverview();
     renderProducts();
     renderOrders();
@@ -931,6 +934,18 @@
     document.getElementById('waybillOrderId').value = orderId;
     var order = currentUser.orders.find(function(o) { return o.id === orderId; });
     if (!order) return;
+
+    // Reset SMSA sections
+    document.getElementById('smsaInfoGroup').style.display = 'none';
+    document.getElementById('smsaResultGroup').style.display = 'none';
+    document.getElementById('smsaPdfContainer').innerHTML = '';
+    var btnText = document.getElementById('smsaBtnText');
+    var btnSpinner = document.getElementById('smsaBtnSpinner');
+    if (btnText) btnText.style.display = '';
+    if (btnSpinner) btnSpinner.style.display = 'none';
+    var genBtn = document.getElementById('smsaGenerateBtn');
+    if (genBtn) { genBtn.disabled = false; genBtn.style.opacity = '1'; }
+
     document.getElementById('waybillCarrier').value = order.carrier || '';
     document.getElementById('waybillTracking').value = order.trackingNumber || order.tracking_number || '';
     var carrierVal = order.carrier;
@@ -938,7 +953,10 @@
     if (carrierVal === 'other' && (order.carrierName || order.carrier_name)) {
       document.getElementById('waybillCustomCarrier').value = order.carrierName || order.carrier_name;
     }
-    updateWaybillPreview();
+
+    // Trigger carrier change to handle SMSA vs manual display
+    onWaybillCarrierChange();
+
     SAIDAT.ui.openModal('waybillModal');
   }
 
@@ -947,9 +965,40 @@
   }
 
   function onWaybillCarrierChange() {
-    document.getElementById('customCarrierGroup').style.display =
-      document.getElementById('waybillCarrier').value === 'other' ? 'block' : 'none';
-    updateWaybillPreview();
+    var carrier = document.getElementById('waybillCarrier').value;
+    var isSMSA = carrier === 'smsa';
+
+    // Toggle visibility: SMSA auto vs manual
+    document.getElementById('customCarrierGroup').style.display = carrier === 'other' ? 'block' : 'none';
+    document.getElementById('smsaInfoGroup').style.display = isSMSA ? 'block' : 'none';
+    document.getElementById('smsaResultGroup').style.display = 'none';
+    document.getElementById('manualTrackingGroup').style.display = isSMSA ? 'none' : 'block';
+    document.getElementById('waybillPreview').style.display = isSMSA ? 'none' : 'block';
+    document.getElementById('waybillManualFooter').style.display = isSMSA ? 'none' : 'flex';
+
+    if (isSMSA) {
+      // Show shipping cost + balance
+      var cost = _shippingCostStandard || 25;
+      document.getElementById('smsaShippingCost').textContent = cost + ' ر.س';
+      var balance = currentUser ? currentUser.balance : 0;
+      document.getElementById('smsaCurrentBalance').textContent = U.formatNumber(balance) + ' ر.س';
+
+      var canAfford = balance >= cost;
+      document.getElementById('smsaBalanceWarning').style.display = canAfford ? 'none' : 'block';
+      document.getElementById('smsaGenerateBtn').disabled = !canAfford;
+      document.getElementById('smsaGenerateBtn').style.opacity = canAfford ? '1' : '0.5';
+
+      // Check if already has AWB
+      var orderId = document.getElementById('waybillOrderId').value;
+      var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+      if (order && order.awb_number && order.shipment_state === 'finalized') {
+        document.getElementById('smsaInfoGroup').style.display = 'none';
+        document.getElementById('smsaResultGroup').style.display = 'block';
+        document.getElementById('smsaAwbDisplay').textContent = order.awb_number;
+      }
+    } else {
+      updateWaybillPreview();
+    }
   }
 
   function updateWaybillPreview() {
@@ -1054,6 +1103,189 @@
     // Update preview then print
     updateWaybillPreview();
     setTimeout(function() { window.print(); }, 300);
+  }
+
+  // ===== SMSA FUNCTIONS =====
+
+  async function _smsaApiCall(action, orderId) {
+    var sb = U.getSupabase();
+    if (!sb) throw new Error('غير مصرّح');
+    var session = (await sb.auth.getSession()).data.session;
+    if (!session) throw new Error('غير مصرّح');
+
+    var res = await fetch('/api/smsa', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify({ action: action, orderId: orderId })
+    });
+    var data = await res.json();
+    return data;
+  }
+
+  async function generateSMSAWaybill() {
+    var orderId = document.getElementById('waybillOrderId').value;
+    if (!orderId) return;
+
+    var btn = document.getElementById('smsaGenerateBtn');
+    var btnText = document.getElementById('smsaBtnText');
+    var btnSpinner = document.getElementById('smsaBtnSpinner');
+
+    // ★ Double-click guard (UI)
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btnText.style.display = 'none';
+    btnSpinner.style.display = '';
+
+    try {
+      // Step 1: Create shipment (reserve → SMSA → commit)
+      var result = await _smsaApiCall('createShipment', orderId);
+      if (!result.success) {
+        SAIDAT.ui.showToast(result.error || 'فشل إصدار البوليصة', 'error');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btnText.style.display = '';
+        btnSpinner.style.display = 'none';
+        return;
+      }
+
+      var awbNumber = result.awbNumber;
+      if (result.warning) {
+        SAIDAT.ui.showToast(result.warning, 'warning');
+      }
+
+      // Step 2: Get PDF (separate call)
+      _smsaPdfBase64 = null;
+      try {
+        var pdfResult = await _smsaApiCall('getPDF', orderId);
+        if (pdfResult.success && pdfResult.pdfBase64) {
+          _smsaPdfBase64 = pdfResult.pdfBase64;
+          var iframe = '<iframe src="data:application/pdf;base64,' + pdfResult.pdfBase64 + '" style="width:100%;height:300px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;" frameborder="0"></iframe>';
+          document.getElementById('smsaPdfContainer').innerHTML = iframe;
+        }
+      } catch(pdfErr) {
+        U.log('error', 'PDF fetch failed:', pdfErr);
+      }
+
+      // Show result
+      document.getElementById('smsaInfoGroup').style.display = 'none';
+      document.getElementById('smsaResultGroup').style.display = 'block';
+      document.getElementById('smsaAwbDisplay').textContent = awbNumber;
+
+      // Update local order data
+      var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+      if (order) {
+        order.awb_number = awbNumber;
+        order.carrier = 'smsa';
+        order.carrier_name = 'SMSA Express';
+        order.waybill_generated = true;
+        order.shipment_state = 'finalized';
+        order.tracking_number = awbNumber;
+      }
+
+      // Refresh orders + finance
+      renderOrders();
+      renderFinance();
+      SAIDAT.ui.showToast('تم إصدار بوليصة SMSA بنجاح: ' + awbNumber, 'success');
+
+    } catch(err) {
+      U.log('error', 'generateSMSAWaybill error:', err);
+      SAIDAT.ui.showToast('حدث خطأ غير متوقع. حاول مرة أخرى', 'error');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btnText.style.display = '';
+      btnSpinner.style.display = 'none';
+    }
+  }
+
+  async function cancelSMSAShipment() {
+    var orderId = document.getElementById('waybillOrderId').value;
+    if (!orderId) return;
+
+    if (!confirm('هل تريد إلغاء الشحنة واسترجاع تكلفة الشحن؟')) return;
+
+    try {
+      SAIDAT.ui.showToast('جارٍ إلغاء الشحنة...', 'info');
+      var result = await _smsaApiCall('cancelShipment', orderId);
+
+      if (!result.success) {
+        SAIDAT.ui.showToast(result.error || 'فشل إلغاء الشحنة', 'error');
+        return;
+      }
+
+      if (result.warning) {
+        SAIDAT.ui.showToast(result.warning, 'warning');
+      }
+
+      // Update local
+      var order = currentUser.orders.find(function(o) { return o.id === orderId; });
+      if (order) {
+        order.awb_number = '';
+        order.carrier = '';
+        order.carrier_name = '';
+        order.waybill_generated = false;
+        order.shipment_state = 'cancelled';
+      }
+      if (result.refunded && currentUser) {
+        currentUser.balance = (currentUser.balance || 0) + result.refunded;
+      }
+
+      // Reset UI
+      document.getElementById('smsaResultGroup').style.display = 'none';
+      document.getElementById('smsaInfoGroup').style.display = 'block';
+      document.getElementById('smsaPdfContainer').innerHTML = '';
+      _smsaPdfBase64 = null;
+      onWaybillCarrierChange();
+
+      renderOrders();
+      renderFinance();
+      SAIDAT.ui.showToast('تم إلغاء الشحنة واسترجاع ' + (result.refunded || 0) + ' ر.س', 'success');
+
+    } catch(err) {
+      U.log('error', 'cancelSMSAShipment error:', err);
+      SAIDAT.ui.showToast('حدث خطأ أثناء الإلغاء', 'error');
+    }
+  }
+
+  function printSMSALabel() {
+    if (_smsaPdfBase64) {
+      var win = window.open('', '_blank');
+      win.document.write('<html><body style="margin:0;"><embed width="100%" height="100%" src="data:application/pdf;base64,' + _smsaPdfBase64 + '" type="application/pdf" /></body></html>');
+      win.document.close();
+      setTimeout(function() { win.print(); }, 500);
+    } else {
+      SAIDAT.ui.showToast('لا يوجد ملف PDF للطباعة', 'error');
+    }
+  }
+
+  function downloadSMSALabel() {
+    if (_smsaPdfBase64) {
+      var awb = document.getElementById('smsaAwbDisplay').textContent || 'smsa-label';
+      var link = document.createElement('a');
+      link.href = 'data:application/pdf;base64,' + _smsaPdfBase64;
+      link.download = 'SMSA-' + awb + '.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      SAIDAT.ui.showToast('لا يوجد ملف PDF للتحميل', 'error');
+    }
+  }
+
+  async function loadShippingCost() {
+    try {
+      var sb = U.getSupabase();
+      if (!sb) return;
+      var res = await sb.from('admin_settings').select('value').eq('key', 'shipping_standard').single();
+      if (res.data && res.data.value) {
+        _shippingCostStandard = parseFloat(res.data.value) || 25;
+      }
+    } catch(e) {
+      U.log('error', 'loadShippingCost error:', e);
+    }
   }
 
   // ===== FINANCE =====
@@ -1431,6 +1663,10 @@
   window.closeWaybillModal = closeWaybillModal;
   window.onWaybillCarrierChange = onWaybillCarrierChange;
   window.saveAndPrintWaybill = saveAndPrintWaybill;
+  window.generateSMSAWaybill = generateSMSAWaybill;
+  window.cancelSMSAShipment = cancelSMSAShipment;
+  window.printSMSALabel = printSMSALabel;
+  window.downloadSMSALabel = downloadSMSALabel;
   window.openWithdrawModal = openWithdrawModal;
   window.closeWithdrawModal = closeWithdrawModal;
   window.submitWithdraw = submitWithdraw;

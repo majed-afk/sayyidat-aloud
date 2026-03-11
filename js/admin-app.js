@@ -802,13 +802,20 @@
   // ===== SETTINGS =====
   async function loadSettings() {
     var settings = await SAIDAT.admin.getSettings();
-    document.getElementById('settingSiteName').value = settings.siteName || settings.site_name || '\u0635\u064a\u062f\u0627\u062a \u0627\u0644\u0639\u0648\u062f';
+    document.getElementById('settingSiteName').value = settings.siteName || settings.site_name || 'صيدات العود';
     document.getElementById('settingContactEmail').value = settings.contactEmail || settings.contact_email || 'info@saidat.com';
     document.getElementById('settingCommission').value = settings.commissionRate || settings.commission_rate || 5;
     if (settings.terms) document.getElementById('settingTerms').value = settings.terms;
     if (settings.returnPolicy || settings.return_policy) {
       document.getElementById('settingReturnPolicy').value = settings.returnPolicy || settings.return_policy;
     }
+    // ★ أسعار الشحن
+    document.getElementById('settingShippingStandard').value = settings.shipping_standard || settings.shippingStandard || 25;
+    document.getElementById('settingShippingExpress').value = settings.shipping_express || settings.shippingExpress || 45;
+    document.getElementById('settingShippingSameDay').value = settings.shipping_same_day || settings.shippingSameDay || 75;
+
+    // ★ تحميل سجل المصالحة
+    loadReconcileLog();
   }
   window.loadSettings = loadSettings;
 
@@ -825,7 +832,64 @@
     await SAIDAT.admin.setSetting('terms', terms);
     await SAIDAT.admin.setSetting('return_policy', returnPolicy);
 
-    SAIDAT.ui.showToast('\u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0628\u0646\u062c\u0627\u062d', 'success');
+    // ★ حفظ أسعار الشحن
+    var shippingStandard = parseFloat(document.getElementById('settingShippingStandard').value) || 25;
+    var shippingExpress = parseFloat(document.getElementById('settingShippingExpress').value) || 45;
+    var shippingSameDay = parseFloat(document.getElementById('settingShippingSameDay').value) || 75;
+    await SAIDAT.admin.setSetting('shipping_standard', String(shippingStandard));
+    await SAIDAT.admin.setSetting('shipping_express', String(shippingExpress));
+    await SAIDAT.admin.setSetting('shipping_same_day', String(shippingSameDay));
+
+    SAIDAT.ui.showToast('تم حفظ الإعدادات بنجاح', 'success');
+  };
+
+  // ===== سجل المصالحة (Reconciliation) =====
+  async function loadReconcileLog() {
+    var container = document.getElementById('reconcileList');
+    if (!container) return;
+    try {
+      var sb = SAIDAT.utils.getSupabase();
+      if (!sb) { container.innerHTML = 'غير متصل'; return; }
+      var res = await sb.from('shipment_reconcile_log').select('*').eq('resolved', false).order('failure_time', { ascending: false }).limit(20);
+      if (res.error || !res.data || res.data.length === 0) {
+        container.innerHTML = '<div style="padding:12px; color:#4ade80;">لا توجد شحنات تحتاج مراجعة</div>';
+        return;
+      }
+      var html = '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
+        '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1);">' +
+        '<th style="padding:8px; text-align:right;">الطلب</th>' +
+        '<th style="padding:8px; text-align:right;">AWB</th>' +
+        '<th style="padding:8px; text-align:right;">السبب</th>' +
+        '<th style="padding:8px; text-align:right;">الوقت</th>' +
+        '<th style="padding:8px; text-align:center;">إجراء</th>' +
+        '</tr></thead><tbody>';
+      res.data.forEach(function(r) {
+        var time = r.failure_time ? new Date(r.failure_time).toLocaleString('ar-SA') : '';
+        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">' +
+          '<td style="padding:8px;">' + SAIDAT.utils.escapeHtml(r.order_id || '') + '</td>' +
+          '<td style="padding:8px; direction:ltr;">' + SAIDAT.utils.escapeHtml(r.awb_number || '') + '</td>' +
+          '<td style="padding:8px;">' + SAIDAT.utils.escapeHtml(r.failure_reason || '') + '</td>' +
+          '<td style="padding:8px; font-size:0.8rem;">' + time + '</td>' +
+          '<td style="padding:8px; text-align:center;"><button class="btn btn-sm" onclick="resolveReconcile(' + r.id + ')" style="font-size:0.75rem; padding:4px 10px;">تم</button></td>' +
+          '</tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    } catch(e) {
+      container.innerHTML = 'خطأ في التحميل';
+    }
+  }
+
+  window.resolveReconcile = async function(id) {
+    try {
+      var sb = SAIDAT.utils.getSupabase();
+      if (!sb) return;
+      await sb.from('shipment_reconcile_log').update({ resolved: true, resolved_at: new Date().toISOString() }).eq('id', id);
+      SAIDAT.ui.showToast('تم تحديث السجل', 'success');
+      loadReconcileLog();
+    } catch(e) {
+      SAIDAT.ui.showToast('خطأ في التحديث', 'error');
+    }
   };
 
   // ===== MODALS =====
