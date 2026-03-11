@@ -1,21 +1,10 @@
-// ===== api/smsa.js — SMSA Express SOAP Proxy — صيدات العود =====
+// ===== api/smsa.js — SMSA Express REST Proxy — صيدات العود =====
 // Vercel Serverless Function — POST only, JWT verified, server-side data fetch
 // Reserve/Commit pattern — no client data for shipments
+// Uses SMSA REST API (JSON) — https://track.smsaexpress.com/SecomRestWebApi
 
-var SMSA_URL = 'https://track.smsaexpress.com/SECOM/SMSAwebService.asmx';
-var SMSA_NS  = 'http://track.smsaexpress.com/secom/';
-var TIMEOUT  = 45000;
-
-// ===== XML Escaping (mandatory for all user text) =====
-function escapeXml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
+var SMSA_REST_BASE = 'https://track.smsaexpress.com/SecomRestWebApi';
+var TIMEOUT = 45000;
 
 // ===== Input Normalization =====
 function normalizePhone(phone) {
@@ -29,39 +18,58 @@ function normalizeText(str, maxLen) {
   return (str || '').trim().substring(0, maxLen || 100);
 }
 
-// ===== SOAP Envelope Builder =====
-function buildSoapEnvelope(method, bodyXml) {
-  return '<?xml version="1.0" encoding="utf-8"?>' +
-    '<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
-    'xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
-    'xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">' +
-    '<soap:Body>' + bodyXml + '</soap:Body>' +
-    '</soap:Envelope>';
-}
+// ===== SMSA REST Client =====
+async function smsaRestRequest(method, path, options) {
+  options = options || {};
+  var url = SMSA_REST_BASE + path;
 
-// ===== SOAP Request =====
-async function soapRequest(method, bodyXml) {
-  var envelope = buildSoapEnvelope(method, bodyXml);
+  // Append query params for GET requests
+  if (options.query) {
+    var params = Object.keys(options.query)
+      .map(function(k) { return encodeURIComponent(k) + '=' + encodeURIComponent(options.query[k]); })
+      .join('&');
+    url += '?' + params;
+  }
+
   var controller = new AbortController();
   var timer = setTimeout(function() { controller.abort(); }, TIMEOUT);
 
   try {
-    var res = await fetch(SMSA_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/xml; charset=utf-8',
-        'SOAPAction': SMSA_NS + method
-      },
-      body: envelope,
+    var fetchOptions = {
+      method: method,
       signal: controller.signal
-    });
+    };
+
+    if (method === 'POST' && options.body) {
+      fetchOptions.headers = { 'Content-Type': 'application/json' };
+      fetchOptions.body = JSON.stringify(options.body);
+    }
+
+    var res = await fetch(url, fetchOptions);
     clearTimeout(timer);
 
     if (!res.ok) {
       return { success: false, error: 'smsa_http_' + res.status };
     }
+
+    // For getPDF — return raw bytes as base64
+    if (options.rawResponse) {
+      var buffer = await res.arrayBuffer();
+      var base64 = Buffer.from(buffer).toString('base64');
+      return { success: true, data: base64 };
+    }
+
+    // Check content type
+    var contentType = res.headers.get('content-type') || '';
+
+    if (contentType.indexOf('application/json') !== -1) {
+      var json = await res.json();
+      return { success: true, data: json };
+    }
+
+    // Plain text response (addship returns AWB string)
     var text = await res.text();
-    return { success: true, body: text };
+    return { success: true, data: text };
   } catch (e) {
     clearTimeout(timer);
     if (e.name === 'AbortError') {
@@ -69,13 +77,6 @@ async function soapRequest(method, bodyXml) {
     }
     return { success: false, error: 'network_error' };
   }
-}
-
-// ===== Parse SOAP Response =====
-function extractTag(xml, tag) {
-  var re = new RegExp('<' + tag + '>(.*?)</' + tag + '>', 's');
-  var m = xml.match(re);
-  return m ? m[1] : '';
 }
 
 // ===== Supabase Helpers =====
@@ -213,7 +214,7 @@ async function handleCreateShipment(callerId, body) {
     return { status: 200, body: { success: true, awbNumber: order.awb_number, note: 'already_done' } };
   }
 
-  // 5. ★ Call SMSA addShip — NO DB LOCK held
+  // 5. ★ Call SMSA REST addship — NO DB LOCK held
   var passKey = process.env.SMSA_PASS_KEY;
   var shipperName = process.env.SMSA_SHIPPER_NAME || 'صيدات العود';
   var shipperPhone = process.env.SMSA_SHIPPER_PHONE || '';
@@ -222,47 +223,46 @@ async function handleCreateShipment(callerId, body) {
 
   var codAmount = order.payment_method === 'cod' ? (order.total || 0) : 0;
 
-  var addShipXml =
-    '<addShip xmlns="' + SMSA_NS + '">' +
-    '<passKey>' + escapeXml(passKey) + '</passKey>' +
-    '<refNo>' + escapeXml(orderId) + '</refNo>' +
-    '<sentDate>' + new Date().toISOString().split('T')[0] + '</sentDate>' +
-    '<idNo></idNo>' +
-    '<cName>' + escapeXml(normalizeText(order.buyer_name, 60)) + '</cName>' +
-    '<cntry>SA</cntry>' +
-    '<cCity>' + escapeXml(normalizeText(order.buyer_city, 30)) + '</cCity>' +
-    '<cZip></cZip>' +
-    '<cPOBox></cPOBox>' +
-    '<cMobile>' + escapeXml(normalizePhone(order.buyer_phone)) + '</cMobile>' +
-    '<cTel1>' + escapeXml(normalizePhone(order.buyer_phone)) + '</cTel1>' +
-    '<cTel2></cTel2>' +
-    '<cAddr1>' + escapeXml(normalizeText(order.buyer_district, 60)) + '</cAddr1>' +
-    '<cAddr2>' + escapeXml(normalizeText(order.buyer_street, 60)) + '</cAddr2>' +
-    '<shipType>DLV</shipType>' +
-    '<PCs>1</PCs>' +
-    '<cEmail></cEmail>' +
-    '<carrValue>0</carrValue>' +
-    '<carrCurr>SAR</carrCurr>' +
-    '<codAmt>' + codAmount + '</codAmt>' +
-    '<weight>1</weight>' +
-    '<custVal>0</custVal>' +
-    '<custCurr>SAR</custCurr>' +
-    '<insrAmt>0</insrAmt>' +
-    '<insrCurr>SAR</insrCurr>' +
-    '<itemDesc>' + escapeXml(normalizeText(order.product_name, 50)) + '</itemDesc>' +
-    '<sName>' + escapeXml(shipperName) + '</sName>' +
-    '<sContact>' + escapeXml(shipperName) + '</sContact>' +
-    '<sAddr1>' + escapeXml(shipperAddr) + '</sAddr1>' +
-    '<sAddr2></sAddr2>' +
-    '<sCity>' + escapeXml(shipperCity) + '</sCity>' +
-    '<sPhone>' + escapeXml(shipperPhone) + '</sPhone>' +
-    '<sCntry>SA</sCntry>' +
-    '<prefDelvDate></prefDelvDate>' +
-    '<gpsPoints></gpsPoints>' +
-    '<ShortCode></ShortCode>' +
-    '</addShip>';
+  var shipBody = {
+    passkey:      passKey,
+    refno:        orderId,
+    sentDate:     new Date().toISOString().split('T')[0],
+    idNo:         '',
+    cName:        normalizeText(order.buyer_name, 60),
+    cntry:        'SA',
+    cCity:        normalizeText(order.buyer_city, 30),
+    cZip:         '',
+    cPOBox:       '',
+    cMobile:      normalizePhone(order.buyer_phone),
+    cTel1:        normalizePhone(order.buyer_phone),
+    cTel2:        '',
+    cAddr1:       normalizeText(order.buyer_district, 60),
+    cAddr2:       normalizeText(order.buyer_street, 60),
+    cEmail:       '',
+    shipType:     'DLV',
+    PCs:          '1',
+    carrValue:    '0',
+    carrCurr:     'SAR',
+    codAmt:       String(codAmount),
+    weight:       '1',
+    custVal:      '0',
+    custCurr:     'SAR',
+    insrAmt:      '0',
+    insrCurr:     'SAR',
+    itemDesc:     normalizeText(order.product_name, 50),
+    sName:        shipperName,
+    sContact:     shipperName,
+    sAddr1:       shipperAddr,
+    sAddr2:       '',
+    sCity:        shipperCity,
+    sPhone:       shipperPhone,
+    sCntry:       'SA',
+    prefDelvDate: '',
+    gpsPoints:    '',
+    shortCode:    ''
+  };
 
-  var smsaRes = await soapRequest('addShip', addShipXml);
+  var smsaRes = await smsaRestRequest('POST', '/api/addship', { body: shipBody });
 
   if (!smsaRes.success) {
     // ★ ROLLBACK — SMSA failed, refund balance
@@ -276,8 +276,13 @@ async function handleCreateShipment(callerId, body) {
     return { status: 502, body: { success: false, error: errMsg } };
   }
 
-  // Parse AWB number
-  var awbNumber = extractTag(smsaRes.body, 'addShipResult');
+  // Parse AWB number from REST response (plain string)
+  var awbNumber = (typeof smsaRes.data === 'string') ? smsaRes.data.trim() : '';
+  // .NET Web API may wrap string responses in quotes
+  if (awbNumber.startsWith('"') && awbNumber.endsWith('"')) {
+    awbNumber = awbNumber.slice(1, -1);
+  }
+
   if (!awbNumber || awbNumber.length < 5) {
     // SMSA returned invalid/empty AWB — rollback
     await supabaseRpc('rollback_shipping', {
@@ -337,29 +342,27 @@ async function handleGetPDF(callerId, body) {
     return { status: 400, body: { success: false, error: 'لا توجد بوليصة لهذا الطلب' } };
   }
 
-  // Call SMSA getPDF
-  var pdfXml =
-    '<getPDF xmlns="' + SMSA_NS + '">' +
-    '<awbNo>' + escapeXml(awb) + '</awbNo>' +
-    '<passKey>' + escapeXml(process.env.SMSA_PASS_KEY) + '</passKey>' +
-    '</getPDF>';
+  // Call SMSA REST getPDF (GET with query params, raw byte response)
+  var smsaRes = await smsaRestRequest('GET', '/api/getPDF', {
+    query: { passKey: process.env.SMSA_PASS_KEY, awbno: awb },
+    rawResponse: true
+  });
 
-  var smsaRes = await soapRequest('getPDF', pdfXml);
   if (!smsaRes.success) {
     return { status: 502, body: { success: false, error: 'فشل تحميل ملف البوليصة' } };
   }
 
-  var pdfBase64 = extractTag(smsaRes.body, 'getPDFResult');
-  if (!pdfBase64) {
+  // Validate response — a valid PDF base64 is at least 100 chars
+  if (!smsaRes.data || smsaRes.data.length < 100) {
     return { status: 502, body: { success: false, error: 'لم يتم العثور على ملف البوليصة' } };
   }
 
-  return { status: 200, body: { success: true, pdfBase64: pdfBase64 } };
+  return { status: 200, body: { success: true, pdfBase64: smsaRes.data } };
 }
 
 
 // ================================================================
-// ===== ACTION: cancelShipment =====
+// ===== ACTION: cancelShipment (internal only — REST API has no cancel) =====
 // ================================================================
 async function handleCancelShipment(callerId, body) {
   var orderId = body.orderId;
@@ -381,33 +384,31 @@ async function handleCancelShipment(callerId, body) {
   if (orderRes.data.shipment_state !== 'finalized') {
     return { status: 400, body: { success: false, error: 'لا يمكن إلغاء شحنة غير مؤكدة' } };
   }
-  var awb = orderRes.data.awb_number;
 
-  // Call SMSA cancelShipment
-  var cancelXml =
-    '<cancelShipment xmlns="' + SMSA_NS + '">' +
-    '<awbNo>' + escapeXml(awb) + '</awbNo>' +
-    '<passkey>' + escapeXml(process.env.SMSA_PASS_KEY) + '</passkey>' +
-    '<reas>Seller cancelled</reas>' +
-    '</cancelShipment>';
+  // ★ Internal cancel only — SMSA REST API does not expose cancel endpoint
+  // The cancel_shipping RPC handles: finalized → cancelled + refund + shipping_refund tx
 
-  var smsaRes = await soapRequest('cancelShipment', cancelXml);
-  if (!smsaRes.success) {
-    return { status: 502, body: { success: false, error: 'فشل إلغاء الشحنة في SMSA' } };
-  }
-
-  // RPC cancel_shipping — finalized → cancelled + refund
   var cancelRes = await supabaseRpc('cancel_shipping', {
     p_order_id: orderId,
     p_caller_id: callerId
   });
 
   if (cancelRes.error || cancelRes.success === false) {
-    await logReconcile(orderId, awb, 'cancel_refund_failed: ' + (cancelRes.error || 'unknown'));
+    await logReconcile(orderId, orderRes.data.awb_number || '', 'cancel_refund_failed: ' + (cancelRes.error || 'unknown'));
     return { status: 200, body: { success: true, warning: 'تم إلغاء الشحنة لكن حدث خطأ في الاسترجاع. الإدارة ستتابع' } };
   }
 
-  return { status: 200, body: { success: true, refunded: cancelRes.refunded } };
+  // Log for manual SMSA portal cancellation follow-up
+  await logReconcile(orderId, orderRes.data.awb_number || '', 'smsa_manual_cancel_needed');
+
+  return {
+    status: 200,
+    body: {
+      success: true,
+      refunded: cancelRes.refunded,
+      note: 'يُرجى إلغاء الشحنة يدوياً من بوابة SMSA'
+    }
+  };
 }
 
 
@@ -435,19 +436,29 @@ async function handleGetTracking(callerId, body) {
     return { status: 400, body: { success: false, error: 'لا توجد بوليصة' } };
   }
 
-  var statusXml =
-    '<getStatus xmlns="' + SMSA_NS + '">' +
-    '<awbNo>' + escapeXml(awb) + '</awbNo>' +
-    '<passkey>' + escapeXml(process.env.SMSA_PASS_KEY) + '</passkey>' +
-    '</getStatus>';
+  // Call SMSA REST getTracking (GET with query params)
+  var smsaRes = await smsaRestRequest('GET', '/api/getTracking', {
+    query: { awbNo: awb, passkey: process.env.SMSA_PASS_KEY }
+  });
 
-  var smsaRes = await soapRequest('getStatus', statusXml);
   if (!smsaRes.success) {
     return { status: 502, body: { success: false, error: 'فشل جلب حالة الشحنة' } };
   }
 
-  var status = extractTag(smsaRes.body, 'getStatusResult');
-  return { status: 200, body: { success: true, trackingStatus: status || 'غير متاح' } };
+  // Extract status — REST returns JSON object (defensive extraction)
+  var trackingData = smsaRes.data;
+  var status = 'غير متاح';
+  if (trackingData) {
+    if (typeof trackingData === 'string') {
+      status = trackingData || 'غير متاح';
+    } else if (trackingData.Activity) {
+      status = trackingData.Activity;
+    } else if (trackingData.Status) {
+      status = trackingData.Status;
+    }
+  }
+
+  return { status: 200, body: { success: true, trackingStatus: status } };
 }
 
 
