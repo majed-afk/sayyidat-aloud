@@ -1175,14 +1175,14 @@
       document.getElementById('smsaResultGroup').style.display = 'block';
       document.getElementById('smsaAwbDisplay').textContent = awbNumber;
 
-      // Update local order data
+      // Update local order data — ★ respect server state (may be needs_reconcile)
       var order = currentUser.orders.find(function(o) { return o.id === orderId; });
       if (order) {
         order.awb_number = awbNumber;
         order.carrier = 'smsa';
         order.carrier_name = 'SMSA Express';
         order.waybill_generated = true;
-        order.shipment_state = 'finalized';
+        order.shipment_state = result.shipmentState || 'finalized';
         order.tracking_number = awbNumber;
       }
 

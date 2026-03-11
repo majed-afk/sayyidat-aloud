@@ -213,6 +213,10 @@ async function handleCreateShipment(callerId, body) {
   if (reserveRes.note === 'already_finalized') {
     return { status: 200, body: { success: true, awbNumber: order.awb_number, note: 'already_done' } };
   }
+  // ★ If already reserved (creating), another request is in-flight — prevent double AWB
+  if (reserveRes.note === 'already_reserved') {
+    return { status: 409, body: { success: false, error: 'يتم إنشاء بوليصة لهذا الطلب حالياً. انتظر قليلاً ثم حاول مجدداً' } };
+  }
 
   // 5. ★ Call SMSA REST addship — NO DB LOCK held
   var passKey = process.env.SMSA_PASS_KEY;
@@ -300,7 +304,13 @@ async function handleCreateShipment(callerId, body) {
   });
 
   if (commitRes.error || commitRes.success === false) {
-    // AWB was created but commit failed — needs_reconcile
+    // AWB was created but commit failed — ★ move to needs_reconcile state
+    try {
+      await supabaseQuery(
+        'orders?id=eq.' + encodeURIComponent(orderId),
+        { method: 'PATCH', body: { shipment_state: 'needs_reconcile' } }
+      );
+    } catch (e) { /* best-effort */ }
     await logReconcile(orderId, awbNumber, 'commit_failed: ' + (commitRes.error || commitRes.error_msg || 'unknown'));
     // Still return AWB since it was created in SMSA
     return {
@@ -308,6 +318,7 @@ async function handleCreateShipment(callerId, body) {
       body: {
         success: true,
         awbNumber: awbNumber,
+        shipmentState: 'needs_reconcile',
         warning: 'تم إنشاء البوليصة لكن حدث خطأ في التحديث. الإدارة ستتابع'
       }
     };

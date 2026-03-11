@@ -61,8 +61,10 @@ BEGIN
     RAISE EXCEPTION 'cannot modify created_at';
   END IF;
 
-  -- ★ حماية awb_number بعد الـ finalize
-  IF OLD.shipment_state = 'finalized' AND NEW.awb_number IS DISTINCT FROM OLD.awb_number THEN
+  -- ★ حماية awb_number بعد الـ finalize (يُستثنى الإلغاء → cancelled)
+  IF OLD.shipment_state = 'finalized'
+     AND NEW.shipment_state != 'cancelled'
+     AND NEW.awb_number IS DISTINCT FROM OLD.awb_number THEN
     RAISE EXCEPTION 'cannot modify awb_number after finalization';
   END IF;
 
@@ -109,10 +111,10 @@ CREATE POLICY admin_reconcile ON shipment_reconcile_log
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
   );
 
--- service_role يقدر يكتب (للـ API)
+-- service_role يقدر يكتب (للـ API) — ★ مقيّد بـ TO service_role
 DROP POLICY IF EXISTS service_write_reconcile ON shipment_reconcile_log;
 CREATE POLICY service_write_reconcile ON shipment_reconcile_log
-  FOR INSERT WITH CHECK (true);
+  FOR INSERT TO service_role WITH CHECK (true);
 
 
 -- ===== 5. RPC: reserve_shipping — حجز (none → creating) =====
@@ -155,12 +157,12 @@ BEGIN
     RETURN '{"success":false,"error":"invalid_state"}'::json;
   END IF;
 
-  -- تحقق الرصيد
-  IF (SELECT balance FROM profiles WHERE id = p_caller_id) < p_cost THEN
+  -- تحقق الرصيد (★ FOR UPDATE يمنع سباق الرصيد السالب)
+  IF (SELECT balance FROM profiles WHERE id = p_caller_id FOR UPDATE) < p_cost THEN
     RETURN '{"success":false,"error":"insufficient_balance"}'::json;
   END IF;
 
-  -- خصم الرصيد (حجز)
+  -- خصم الرصيد (حجز) — الصف مقفل بالفعل من FOR UPDATE أعلاه
   UPDATE profiles SET balance = balance - p_cost WHERE id = p_caller_id;
 
   -- تسجيل معاملة شحن
@@ -324,10 +326,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ===== 9. ★ صلاحيات RPCs — service_role فقط =====
 
-REVOKE EXECUTE ON FUNCTION reserve_shipping(TEXT,NUMERIC,UUID) FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION commit_shipping(TEXT,TEXT,UUID) FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION rollback_shipping(TEXT,UUID) FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION cancel_shipping(TEXT,UUID) FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION reserve_shipping(TEXT,NUMERIC,UUID) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION commit_shipping(TEXT,TEXT,UUID) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION rollback_shipping(TEXT,UUID) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION cancel_shipping(TEXT,UUID) FROM PUBLIC, anon, authenticated;
 
 GRANT EXECUTE ON FUNCTION reserve_shipping(TEXT,NUMERIC,UUID) TO service_role;
 GRANT EXECUTE ON FUNCTION commit_shipping(TEXT,TEXT,UUID) TO service_role;
