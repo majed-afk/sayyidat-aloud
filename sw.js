@@ -1,6 +1,6 @@
 // ===== Service Worker — صيدات العود =====
 
-var CACHE_NAME = 'saidat-v3';
+var CACHE_NAME = 'saidat-v4';
 
 var STATIC_ASSETS = [
   '/',
@@ -25,6 +25,12 @@ var STATIC_ASSETS = [
   '/js/auth.js',
   '/js/header.js',
   '/js/ui.js',
+  '/js/dashboard-products.js',
+  '/js/dashboard-orders.js',
+  '/js/dashboard-shipping.js',
+  '/js/dashboard-finance.js',
+  '/js/dashboard-profile.js',
+  '/js/dashboard-support.js',
   '/manifest.json'
 ];
 

@@ -1,0 +1,24 @@
+{
+  "name": "saidat-aloud",
+  "version": "1.0.0",
+  "description": "صيدات العود — منصة سعودية لبيع وشراء العود والبخور بالمزاد والسوق",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "serve": "npx serve . -p 8000",
+    "deploy": "vercel deploy --prod",
+    "smoke": "echo '=== Smoke Test ===' && curl -sf http://localhost:8000/ > /dev/null && echo '✅ index.html' || echo '❌ index.html' && curl -sf http://localhost:8000/market > /dev/null && echo '✅ market.html' || echo '❌ market.html' && curl -sf http://localhost:8000/dashboard > /dev/null && echo '✅ dashboard.html' || echo '❌ dashboard.html' && curl -sf http://localhost:8000/login > /dev/null && echo '✅ login.html' || echo '❌ login.html' && curl -sf http://localhost:8000/js/config.js > /dev/null && echo '✅ config.js' || echo '❌ config.js' && curl -sf http://localhost:8000/js/dashboard-app.js > /dev/null && echo '✅ dashboard-app.js' || echo '❌ dashboard-app.js' && echo '=== Done ==='"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "oud",
+    "bakhoor",
+    "marketplace",
+    "auction",
+    "saudi"
+  ],
+  "author": "صيدات العود",
+  "license": "UNLICENSED"
+}
