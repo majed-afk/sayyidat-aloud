@@ -677,10 +677,18 @@
     var order = currentUser.orders.find(function(o) { return o.id === orderId; });
     if (!order) return;
 
-    order.status = newStatus;
-
-    // Push to status history
     var statusNotes = { processing: 'تم قبول الطلب', completed: 'تم شحن الطلب وإتمامه', cancelled: 'تم رفض الطلب' };
+
+    // ★ Persist to Supabase أولاً — التحقق من النجاح قبل تحديث الواجهة
+    var updateOk = await SAIDAT.orders.update(orderId, { status: newStatus });
+    if (!updateOk) {
+      SAIDAT.ui.showToast('فشل تحديث حالة الطلب', 'error');
+      return;
+    }
+    await SAIDAT.orders.addHistory(orderId, newStatus, statusNotes[newStatus] || 'تم تحديث الحالة');
+
+    // DB update نجح — تحديث محلي الآن
+    order.status = newStatus;
     order.statusHistory = order.statusHistory || [];
     order.statusHistory.push({
       status: newStatus,
@@ -688,15 +696,10 @@
       note: statusNotes[newStatus] || 'تم تحديث الحالة'
     });
 
-    // Persist to Supabase (★ await لضمان اكتمال التحديث قبل RPC)
-    await SAIDAT.orders.update(orderId, { status: newStatus });
-    await SAIDAT.orders.addHistory(orderId, newStatus, statusNotes[newStatus] || 'تم تحديث الحالة');
-
     // If completed, record transaction via secure RPC
     if (newStatus === 'completed') {
       var commission = order.total * CFG.COMMISSION_RATE;
 
-      // استخدام RPC بدل الإدراج المباشر (الذي يفشل بسبب RLS admin-only)
       var sb = U.getSupabase();
       if (sb) {
         try {
@@ -707,23 +710,26 @@
           });
           if (rpcResult.error) {
             U.log('error', 'record_sale_transaction RPC error:', rpcResult.error);
+            SAIDAT.ui.showToast('تم تحديث الحالة لكن فشل تسجيل المعاملة المالية', 'error');
+          } else if (rpcResult.data && !rpcResult.data.success) {
+            U.log('error', 'record_sale_transaction failed:', rpcResult.data.error);
+            SAIDAT.ui.showToast('تم تحديث الحالة لكن فشل تسجيل المعاملة', 'error');
           } else {
             U.log('log', 'Transaction recorded:', rpcResult.data);
+            // ★ فقط عند نجاح RPC: تحديث الرصيد والمعاملات محلياً
+            currentUser.balance += (order.total - commission);
+            currentUser.totalSales += order.qty;
+            currentUser.totalRevenue += order.total;
+            currentUser.transactions.unshift(
+              { id: 't_' + Date.now(), type: 'sale', amount: order.total - commission, date: new Date().toISOString(), ref: order.id, status: 'completed', description: 'بيع: ' + (order.productName || order.product_name) },
+              { id: 't_' + (Date.now() + 1), type: 'commission', amount: -commission, date: new Date().toISOString(), ref: order.id, status: 'completed', description: 'عمولة المنصة ' + (CFG.COMMISSION_RATE * 100) + '%' }
+            );
           }
         } catch(e) {
           U.log('error', 'record_sale_transaction exception:', e);
+          SAIDAT.ui.showToast('تم تحديث الحالة لكن حدث خطأ في المعاملة', 'error');
         }
       }
-
-      // تحديث المتغيرات المحلية للعرض الفوري
-      currentUser.balance += (order.total - commission);
-      currentUser.totalSales += order.qty;
-      currentUser.totalRevenue += order.total;
-
-      currentUser.transactions.unshift(
-        { id: 't_' + Date.now(), type: 'sale', amount: order.total - commission, date: new Date().toISOString(), ref: order.id, status: 'completed', description: 'بيع: ' + (order.productName || order.product_name) },
-        { id: 't_' + (Date.now() + 1), type: 'commission', amount: -commission, date: new Date().toISOString(), ref: order.id, status: 'completed', description: 'عمولة المنصة ' + (CFG.COMMISSION_RATE * 100) + '%' }
-      );
     }
 
     renderOrders();
@@ -731,7 +737,9 @@
     renderFinance();
 
     var msgs = { processing: 'تم قبول الطلب', completed: 'تم شحن الطلب', cancelled: 'تم رفض الطلب' };
-    SAIDAT.ui.showToast(msgs[newStatus] || 'تم التحديث', 'success');
+    if (newStatus !== 'completed' || (currentUser.balance > 0)) {
+      SAIDAT.ui.showToast(msgs[newStatus] || 'تم التحديث', 'success');
+    }
   }
 
   // ===== ORDER DETAIL (Enhanced) =====

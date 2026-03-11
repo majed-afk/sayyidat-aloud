@@ -186,7 +186,7 @@
   // ===== AUCTION TYPE TOGGLE =====
   function toggleAuctionType() {
     var val = document.querySelector('input[name="auctionType"]:checked').value;
-    var isOpen = val.includes('\u0639\u0631\u0648\u0636');
+    var isOpen = val === 'until_sold';
     document.getElementById('minBidGroup').style.display = isOpen ? 'none' : 'block';
     document.getElementById('durationGroup').style.display = isOpen ? 'none' : 'block';
     document.getElementById('autoExtendRow').style.display = isOpen ? 'none' : 'flex';
@@ -315,7 +315,7 @@
       if (!desc || desc.length < 10) { SAIDAT.ui.showToast('أدخل وصف المنتج (10 أحرف على الأقل)', 'error'); if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = 'نشر المزاد'; } return; }
 
       // 4. حساب تاريخ انتهاء المزاد
-      var isOpenAuction = auctionTypeVal.includes('\u0639\u0631\u0648\u0636');
+      var isOpenAuction = auctionTypeVal === 'until_sold';
       var durationDays = parseInt(duration) || 3;
       var now = new Date();
       var endDate = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);

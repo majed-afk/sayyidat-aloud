@@ -316,7 +316,7 @@
           <label class="form-label">نوع المزاد</label>
           <div class="radio-cards">
             <label class="radio-card">
-              <input type="radio" name="auctionType" value="مزاد منتهي بالبيع" checked onchange="toggleAuctionType()">
+              <input type="radio" name="auctionType" value="timed" checked onchange="toggleAuctionType()">
               <div class="radio-card-inner">
                 <span class="radio-card-icon">🔨</span>
                 <div class="radio-card-title">مزاد منتهي بالبيع</div>
@@ -324,7 +324,7 @@
               </div>
             </label>
             <label class="radio-card">
-              <input type="radio" name="auctionType" value="مزاد مفتوح (عروض)" onchange="toggleAuctionType()">
+              <input type="radio" name="auctionType" value="until_sold" onchange="toggleAuctionType()">
               <div class="radio-card-inner">
                 <span class="radio-card-icon">📋</span>
                 <div class="radio-card-title">مزاد مفتوح (عروض)</div>
@@ -552,7 +552,7 @@
 <script src="js/ui.js?v=2"></script>
 <script src="js/image-guard.js?v=2"></script>
 <script src="js/notifications.js?v=1"></script>
-<script src="js/sell-app.js?v=5"></script>
+<script src="js/sell-app.js?v=6"></script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>
