@@ -198,6 +198,114 @@
     }
   }
 
+  // ===== نسيت كلمة المرور =====
+  function showForgotPassword() {
+    document.getElementById('tab-login').classList.remove('active');
+    document.getElementById('tab-register').classList.remove('active');
+    document.getElementById('tab-forgot').style.display = 'block';
+    document.getElementById('tab-forgot').classList.add('active');
+    document.getElementById('tab-reset').style.display = 'none';
+    document.querySelector('.auth-tabs').style.display = 'none';
+    document.getElementById('forgotError').style.display = 'none';
+    document.getElementById('forgotSuccess').style.display = 'none';
+  }
+
+  function hideForgotPassword() {
+    document.getElementById('tab-forgot').style.display = 'none';
+    document.getElementById('tab-forgot').classList.remove('active');
+    document.getElementById('tab-login').classList.add('active');
+    document.querySelector('.auth-tabs').style.display = '';
+  }
+
+  async function sendResetEmail() {
+    var errEl = document.getElementById('forgotError');
+    var sucEl = document.getElementById('forgotSuccess');
+    errEl.style.display = 'none';
+    sucEl.style.display = 'none';
+
+    var email = document.getElementById('forgotEmail').value.trim();
+    if (!email) {
+      errEl.textContent = 'يرجى إدخال البريد الإلكتروني';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    var btn = document.querySelector('#tab-forgot .btn');
+    btn.classList.add('loading');
+    btn.textContent = 'جاري الإرسال...';
+
+    try {
+      var result = await SAIDAT.auth.resetPasswordForEmail(email);
+      if (result.success) {
+        sucEl.textContent = 'تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني. تحقق من صندوق الوارد.';
+        sucEl.style.display = 'block';
+      } else {
+        errEl.textContent = result.message || 'حدث خطأ أثناء الإرسال';
+        errEl.style.display = 'block';
+      }
+    } catch(e) {
+      errEl.textContent = 'خطأ: ' + e.message;
+      errEl.style.display = 'block';
+    }
+    btn.classList.remove('loading');
+    btn.textContent = 'إرسال رابط التعيين';
+  }
+
+  // ===== إعادة تعيين كلمة المرور (بعد الضغط على الرابط في البريد) =====
+  async function submitNewPassword() {
+    var errEl = document.getElementById('resetError');
+    var sucEl = document.getElementById('resetSuccess');
+    errEl.style.display = 'none';
+    sucEl.style.display = 'none';
+
+    var pw = document.getElementById('resetPassword').value;
+    var pw2 = document.getElementById('resetPasswordConfirm').value;
+
+    if (!pw || pw.length < 6) {
+      errEl.textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (pw !== pw2) {
+      errEl.textContent = 'كلمة المرور غير متطابقة';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    var btn = document.querySelector('#tab-reset .btn');
+    btn.classList.add('loading');
+    btn.textContent = 'جاري التعيين...';
+
+    try {
+      var result = await SAIDAT.auth.updatePassword(pw);
+      if (result.success) {
+        sucEl.textContent = 'تم تعيين كلمة المرور بنجاح! جاري التوجيه...';
+        sucEl.style.display = 'block';
+        setTimeout(function() { window.location.href = 'dashboard.html'; }, 2000);
+      } else {
+        errEl.textContent = result.message || 'حدث خطأ أثناء التعيين';
+        errEl.style.display = 'block';
+      }
+    } catch(e) {
+      errEl.textContent = 'خطأ: ' + e.message;
+      errEl.style.display = 'block';
+    }
+    btn.classList.remove('loading');
+    btn.textContent = 'تعيين كلمة المرور';
+  }
+
+  // ===== كشف وضع إعادة التعيين عند العودة من رابط البريد =====
+  function checkResetMode() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('reset') === 'true' || window.location.hash === '#reset') {
+      document.getElementById('tab-login').classList.remove('active');
+      document.getElementById('tab-register').classList.remove('active');
+      document.getElementById('tab-reset').style.display = 'block';
+      document.getElementById('tab-reset').classList.add('active');
+      document.querySelector('.auth-tabs').style.display = 'none';
+    }
+  }
+
   // ===== تذكرني — تحميل الإيميل المحفوظ =====
   (function loadRememberedEmail() {
     if (localStorage.getItem('sa_remember') === '1') {
@@ -209,11 +317,18 @@
     }
   })();
 
+  // ===== التحقق من وضع إعادة التعيين عند التحميل =====
+  checkResetMode();
+
   // ===== كشف الدوال للـ onclick handlers =====
   window.switchTab = switchTab;
   window.togglePassword = togglePassword;
   window.handleLogin = handleLogin;
   window.handleRegister = handleRegister;
   window.socialLogin = socialLogin;
+  window.showForgotPassword = showForgotPassword;
+  window.hideForgotPassword = hideForgotPassword;
+  window.sendResetEmail = sendResetEmail;
+  window.submitNewPassword = submitNewPassword;
 
 })();

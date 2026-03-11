@@ -18,7 +18,7 @@
   var currentStep = 1;
   var quantity = 1;
   var shippingCost = CFG.SHIPPING.STANDARD;
-  var selectedPayment = 'card';
+  var selectedPayment = 'cod';
   var product = null;
 
   // Auction state
@@ -997,7 +997,6 @@
     // Update payment summary if going to step 4
     if (step === 4) {
       updateOrderSummary();
-      updateInstallments();
     }
 
     // Show new step
@@ -1080,11 +1079,8 @@
 
     // Show selected panel
     var panelMap = {
-      card: 'panelCard',
-      apple: 'panelApple',
-      bank: 'panelBank',
-      tabby: 'panelTabby',
-      tamara: 'panelTamara'
+      cod: 'panelCod',
+      bank: 'panelBank'
     };
     document.getElementById(panelMap[method]).classList.add('active');
   }
@@ -1103,33 +1099,7 @@
     document.getElementById('summaryTotal').textContent = U.formatCurrencyDecimal(total);
   }
 
-  function updateInstallments() {
-    var subtotal = product.price * quantity;
-    var vat = (subtotal + shippingCost) * CFG.VAT_RATE;
-    var total = subtotal + shippingCost + vat;
-
-    // Tabby: 4 installments
-    var tabbyContainer = document.getElementById('tabbyBreakdown');
-    tabbyContainer.innerHTML = '';
-    var perTabby = total / 4;
-    var tabbyLabels = ['اليوم', 'بعد شهر', 'بعد شهرين', 'بعد 3 أشهر'];
-    for (var i = 0; i < 4; i++) {
-      tabbyContainer.innerHTML += '<div class="installment-item"><div class="inst-num">' + tabbyLabels[i] + '</div><div class="inst-amount">' + U.formatCurrencyDecimal(perTabby) + '</div></div>';
-    }
-
-    // Tamara: 30 day + 3 installments
-    document.getElementById('tamara30Day').textContent = U.formatCurrencyDecimal(total);
-
-    var perTamara = total / 3;
-    document.getElementById('tamara3Inst').textContent = U.formatCurrencyDecimal(perTamara) + ' / شهر';
-
-    var tamaraContainer = document.getElementById('tamaraBreakdown');
-    tamaraContainer.innerHTML = '';
-    var tamaraLabels = ['اليوم', 'بعد شهر', 'بعد شهرين'];
-    for (var j = 0; j < 3; j++) {
-      tamaraContainer.innerHTML += '<div class="installment-item"><div class="inst-num">' + tamaraLabels[j] + '</div><div class="inst-amount">' + U.formatCurrencyDecimal(perTamara) + '</div></div>';
-    }
-  }
+  // updateInstallments — removed (Tabby/Tamara panels removed)
 
   // ===== CONFIRM ORDER =====
   async function confirmOrder() {
@@ -1171,6 +1141,7 @@
       vat: Math.round(vat * 100) / 100,
       total: Math.round(total * 100) / 100,
       shipping_method: (document.querySelector('input[name="shipping"]:checked') || {}).value || 'standard',
+      payment_method: selectedPayment,
       status: 'new'
     };
 
@@ -1196,10 +1167,18 @@
       try {
         var rpcResult = await SAIDAT.products.completeAuctionPurchase(product.id, orderNum);
         if (rpcResult && !rpcResult.success) {
-          U.log('warn', 'completeAuctionPurchase returned:', rpcResult.error);
+          U.log('error', 'completeAuctionPurchase failed:', rpcResult.error);
+          // حذف الطلب لأن المزاد لم يكتمل
+          await SAIDAT.orders.remove(orderNum);
+          SAIDAT.ui.showToast('فشل إكمال شراء المزاد: ' + (rpcResult.error || 'خطأ غير معروف'), 'error');
+          return;
         }
       } catch(e) {
-        U.log('warn', 'Could not complete auction purchase:', e);
+        U.log('error', 'Could not complete auction purchase:', e);
+        // حذف الطلب لأن المزاد لم يكتمل
+        await SAIDAT.orders.remove(orderNum);
+        SAIDAT.ui.showToast('حدث خطأ أثناء إكمال المزاد. حاول مرة أخرى.', 'error');
+        return;
       }
     }
 

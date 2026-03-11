@@ -1438,6 +1438,63 @@
   window.loadProfile = loadProfile;
   window.saveProfile = saveProfile;
   window.submitMerchantVerification = submitMerchantVerification;
+
+  // ===== حذف الحساب =====
+  function confirmDeleteAccount() {
+    document.getElementById('deleteAccountModal').style.display = 'flex';
+    document.getElementById('deleteConfirmInput').value = '';
+    document.getElementById('deleteAccountError').style.display = 'none';
+  }
+
+  async function executeDeleteAccount() {
+    var errEl = document.getElementById('deleteAccountError');
+    errEl.style.display = 'none';
+
+    var input = document.getElementById('deleteConfirmInput').value.trim();
+    if (input !== 'حذف') {
+      errEl.textContent = 'يرجى كتابة "حذف" للتأكيد';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    var btn = document.querySelector('#deleteAccountModal .btn[onclick*="executeDeleteAccount"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'جاري الحذف...'; }
+
+    try {
+      var sb = SAIDAT.utils.getSupabase();
+      if (!sb) {
+        errEl.textContent = 'خطأ في الاتصال بالخادم';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      var res = await sb.rpc('delete_own_account', { p_reason: '' });
+      if (res.error) {
+        errEl.textContent = 'خطأ: ' + res.error.message;
+        errEl.style.display = 'block';
+        if (btn) { btn.disabled = false; btn.textContent = 'نعم، احذف حسابي'; }
+        return;
+      }
+
+      var result = res.data;
+      if (result && result.success) {
+        SAIDAT.ui.showToast('تم حذف حسابك بنجاح', 'success');
+        setTimeout(function() { window.location.href = 'index.html'; }, 2000);
+      } else {
+        errEl.textContent = (result && result.message) || 'حدث خطأ أثناء حذف الحساب';
+        errEl.style.display = 'block';
+        if (btn) { btn.disabled = false; btn.textContent = 'نعم، احذف حسابي'; }
+      }
+    } catch(e) {
+      errEl.textContent = 'خطأ: ' + e.message;
+      errEl.style.display = 'block';
+      if (btn) { btn.disabled = false; btn.textContent = 'نعم، احذف حسابي'; }
+    }
+  }
+
+  window.confirmDeleteAccount = confirmDeleteAccount;
+  window.executeDeleteAccount = executeDeleteAccount;
+
   // ===== تذاكر الدعم الفني =====
   var allTickets = [];
   var currentTicketFilter = 'all';

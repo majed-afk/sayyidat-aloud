@@ -67,6 +67,24 @@
     },
 
     /**
+     * حذف طلب (يُستخدم عند فشل إكمال المزاد)
+     * @param {string} orderId
+     * @returns {Promise<boolean>}
+     */
+    remove: async function(orderId) {
+      var sb = U.getSupabase();
+      if (!sb) return false;
+
+      try {
+        var res = await sb.from('orders').delete().eq('id', orderId);
+        return !res.error;
+      } catch(e) {
+        U.log('error', 'removeOrder error:', e);
+        return false;
+      }
+    },
+
+    /**
      * تحديث طلب
      * @param {string} orderId
      * @param {object} updates

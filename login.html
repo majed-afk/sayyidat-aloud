@@ -105,7 +105,7 @@
               <input type="checkbox" id="rememberMe" checked>
               <span>تذكرني</span>
             </label>
-            <a href="javascript:void(0)" class="forgot-link" onclick="SAIDAT.ui.showToast('هذه الخاصية قريباً', 'info')">نسيت كلمة المرور؟</a>
+            <a href="javascript:void(0)" class="forgot-link" onclick="showForgotPassword()">نسيت كلمة المرور؟</a>
           </div>
 
           <button type="submit" class="btn btn-filled">تسجيل الدخول</button>
@@ -127,6 +127,52 @@
 
           <p class="form-footer">ليس لديك حساب؟ <a href="javascript:void(0)" onclick="switchTab('register')">أنشئ حساباً جديداً</a></p>
         </form>
+      </div>
+
+      <!-- Forgot Password Form -->
+      <div class="tab-content" id="tab-forgot" style="display:none;">
+        <div style="text-align:center; margin-bottom:20px;">
+          <h3 style="font-size:1.2rem; font-weight:700; color:var(--text); margin-bottom:8px;">نسيت كلمة المرور؟</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted);">أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين</p>
+        </div>
+        <div id="forgotError" class="form-error" style="display:none;"></div>
+        <div id="forgotSuccess" class="form-success" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <div class="input-icon-wrapper">
+            <span class="input-icon">📧</span>
+            <input type="email" class="form-input" id="forgotEmail" placeholder="example@email.com" required>
+          </div>
+        </div>
+        <button type="button" class="btn btn-filled" onclick="sendResetEmail()">إرسال رابط التعيين</button>
+        <p class="form-footer" style="margin-top:16px;"><a href="javascript:void(0)" onclick="hideForgotPassword()">العودة لتسجيل الدخول</a></p>
+      </div>
+
+      <!-- Reset Password Form (appears after clicking email link) -->
+      <div class="tab-content" id="tab-reset" style="display:none;">
+        <div style="text-align:center; margin-bottom:20px;">
+          <h3 style="font-size:1.2rem; font-weight:700; color:var(--text); margin-bottom:8px;">تعيين كلمة مرور جديدة</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted);">أدخل كلمة المرور الجديدة</p>
+        </div>
+        <div id="resetError" class="form-error" style="display:none;"></div>
+        <div id="resetSuccess" class="form-success" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور الجديدة</label>
+          <div class="input-icon-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" class="form-input" id="resetPassword" placeholder="6 أحرف على الأقل" style="padding-left: 44px;" required minlength="6">
+            <button type="button" class="password-toggle" onclick="togglePassword('resetPassword', this)">👁️</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">تأكيد كلمة المرور</label>
+          <div class="input-icon-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" class="form-input" id="resetPasswordConfirm" placeholder="أعد إدخال كلمة المرور" style="padding-left: 44px;" required minlength="6">
+            <button type="button" class="password-toggle" onclick="togglePassword('resetPasswordConfirm', this)">👁️</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-filled" onclick="submitNewPassword()">تعيين كلمة المرور</button>
       </div>
 
       <!-- Register Form -->
@@ -181,7 +227,7 @@
 
           <label class="terms-check">
             <input type="checkbox" id="regTerms" required>
-            <span>أوافق على <a href="javascript:void(0)" onclick="SAIDAT.ui.showToast('صفحة الشروط قريباً', 'info')">شروط الاستخدام</a> و <a href="javascript:void(0)" onclick="SAIDAT.ui.showToast('صفحة الخصوصية قريباً', 'info')">سياسة الخصوصية</a> الخاصة بمنصة صيدات العود</span>
+            <span>أوافق على <a href="/terms" target="_blank">شروط الاستخدام</a> و <a href="/privacy" target="_blank">سياسة الخصوصية</a> الخاصة بمنصة صيدات العود</span>
           </label>
 
           <button type="submit" class="btn btn-filled">إنشاء حساب</button>
@@ -222,12 +268,12 @@
 <script src="js/supabase.js?v=5"></script>
 <script src="js/config.js?v=4"></script>
 <script src="js/utils.js?v=4"></script>
-<script src="js/auth.js?v=9"></script>
-<script src="js/profiles.js?v=4"></script>
+<script src="js/auth.js?v=10"></script>
+<script src="js/profiles.js?v=5"></script>
 <script src="js/header.js?v=4"></script>
 <script src="js/ui.js?v=4"></script>
 <script src="js/notifications.js?v=2"></script>
-<script src="js/login-app.js?v=2"></script>
+<script src="js/login-app.js?v=3"></script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
 </body>
 </html>

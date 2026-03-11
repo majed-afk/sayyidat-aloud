@@ -113,6 +113,24 @@
       if (!sb) return false;
       var res = await sb.from('profiles').update({ suspended: true }).eq('id', userId);
       return !res.error;
+    },
+
+    /**
+     * جلب بيانات مستخدم عامة (بدون بيانات بنكية)
+     * يستخدم profiles_public view
+     * @param {string} userId
+     * @returns {Promise<object|null>}
+     */
+    getPublicById: async function(userId) {
+      var sb = U.getSupabase();
+      if (!sb) return null;
+      try {
+        var res = await sb.from('profiles_public').select('*').eq('id', userId).single();
+        return res.data || null;
+      } catch(e) {
+        U.log('error', 'getPublicById error:', e);
+        return null;
+      }
     }
   };
 

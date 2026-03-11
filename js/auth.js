@@ -249,6 +249,33 @@
     // ===== إعادة تحميل البروفايل =====
     reloadProfile: async function() {
       await this._loadProfile();
+    },
+
+    // ===== إعادة تعيين كلمة المرور =====
+    resetPasswordForEmail: async function(email) {
+      var sb = U.getSupabase();
+      if (!sb) return { success: false, message: 'خطأ في الاتصال بالخادم' };
+      try {
+        var res = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/login?reset=true'
+        });
+        if (res.error) return { success: false, message: res.error.message };
+        return { success: true };
+      } catch(e) {
+        return { success: false, message: 'خطأ: ' + e.message };
+      }
+    },
+
+    updatePassword: async function(newPassword) {
+      var sb = U.getSupabase();
+      if (!sb) return { success: false, message: 'خطأ في الاتصال بالخادم' };
+      try {
+        var res = await sb.auth.updateUser({ password: newPassword });
+        if (res.error) return { success: false, message: res.error.message };
+        return { success: true };
+      } catch(e) {
+        return { success: false, message: 'خطأ: ' + e.message };
+      }
     }
   };
 
