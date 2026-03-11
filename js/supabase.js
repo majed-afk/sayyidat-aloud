@@ -13,7 +13,7 @@
   function getClient() {
     if (!_supabase) {
       if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-        console.error('Supabase SDK not loaded! Make sure to include the CDN script.');
+        if (typeof console !== 'undefined') console.warn('[SAIDAT] Supabase SDK not loaded');
         return null;
       }
       _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {

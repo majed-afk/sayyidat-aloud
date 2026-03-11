@@ -115,7 +115,6 @@ SAIDAT.config = {
     bidderName: 'bidder_name',
     bidderId: 'bidder_id',
     autoExtend: 'auto_extend',
-    cancelReason: 'cancel_reason',
     cancelledBy: 'cancelled_by',
     winnerId: 'winner_id'
   }

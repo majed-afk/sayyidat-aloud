@@ -102,16 +102,22 @@
     },
 
     /**
-     * إنشاء إشعار جديد
+     * إنشاء إشعار جديد عبر RPC (يدعم الإرسال لأي مستخدم)
      * @param {object} notif - { user_id, type, title, body, link }
      */
     create: async function(notif) {
       var sb = U.getSupabase();
       if (!sb || !SAIDAT.auth.getAuthUser()) return null;
       try {
-        var res = await sb.from('notifications').insert(notif).select().single();
+        var res = await sb.rpc('send_notification', {
+          p_user_id: notif.user_id,
+          p_type: notif.type,
+          p_title: notif.title,
+          p_body: notif.body || '',
+          p_link: notif.link || ''
+        });
         if (res.error) {
-          U.log('error', 'notifications.create DB error:', res.error.message);
+          U.log('error', 'notifications.create RPC error:', res.error.message);
           return null;
         }
         return res.data;
