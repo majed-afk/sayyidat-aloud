@@ -210,8 +210,14 @@ async function handleCreateShipment(callerId, body) {
     return { status: 400, body: { success: false, error: errorMap[reserveRes.error] || 'خطأ في الحجز' } };
   }
   // If already finalized, return success immediately
+  // ★ P2 FIX: Re-fetch AWB from DB to avoid stale data race
   if (reserveRes.note === 'already_finalized') {
-    return { status: 200, body: { success: true, awbNumber: order.awb_number, note: 'already_done' } };
+    var freshOrder = await supabaseQuery(
+      'orders?id=eq.' + encodeURIComponent(orderId) + '&select=awb_number',
+      { single: true }
+    );
+    var freshAwb = (freshOrder.data && freshOrder.data.awb_number) || order.awb_number;
+    return { status: 200, body: { success: true, awbNumber: freshAwb, note: 'already_done' } };
   }
   // ★ If already reserved (creating), another request is in-flight — prevent double AWB
   if (reserveRes.note === 'already_reserved') {
@@ -287,13 +293,29 @@ async function handleCreateShipment(callerId, body) {
     awbNumber = awbNumber.slice(1, -1);
   }
 
-  if (!awbNumber || awbNumber.length < 5) {
-    // SMSA returned invalid/empty AWB — rollback
+  // ★ P0 FIX: SMSA returns error messages as plain text with 200 status
+  // e.g. "Failed :: Invalid Passkey", "Failed :: Invalid City"
+  // Valid AWB is purely numeric (typically 10-15 digits)
+  var isValidAwb = awbNumber && awbNumber.length >= 5 && /^\d+$/.test(awbNumber);
+
+  if (!isValidAwb) {
+    // SMSA returned invalid/error response — rollback
+    var smsaErrDetail = awbNumber || 'empty response';
     await supabaseRpc('rollback_shipping', {
       p_order_id: orderId,
       p_caller_id: callerId
     });
-    return { status: 502, body: { success: false, error: 'فشل إنشاء البوليصة. تأكد من صحة بيانات العنوان' } };
+    await logReconcile(orderId, '', 'smsa_addship_invalid: ' + smsaErrDetail);
+    // Map known SMSA errors to user-friendly messages
+    var userMsg = 'فشل إنشاء البوليصة. تأكد من صحة بيانات العنوان';
+    if (awbNumber.toLowerCase().indexOf('passkey') !== -1) {
+      userMsg = 'خطأ في إعدادات شركة الشحن. تواصل مع الإدارة';
+    } else if (awbNumber.toLowerCase().indexOf('city') !== -1) {
+      userMsg = 'المدينة غير صالحة. تأكد من اسم مدينة المستلم';
+    } else if (awbNumber.toLowerCase().indexOf('phone') !== -1) {
+      userMsg = 'رقم الجوال غير صالح. تأكد من رقم جوال المستلم';
+    }
+    return { status: 502, body: { success: false, error: userMsg } };
   }
 
   // 6. ★ COMMIT — creating → finalized + save AWB
@@ -504,7 +526,10 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ success: false, error: 'action غير صالح' });
   }
 
-  // Check env vars
+  // ★ P2 FIX: Check ALL required env vars
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY || !process.env.SUPABASE_ANON_KEY) {
+    return res.status(500).json({ success: false, error: 'إعدادات الخادم غير مكتملة' });
+  }
   if (!process.env.SMSA_PASS_KEY) {
     return res.status(500).json({ success: false, error: 'خدمة الشحن غير مُعدّة' });
   }

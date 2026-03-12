@@ -329,6 +329,10 @@
       if (result.warning) {
         SAIDAT.ui.showToast(result.warning, 'warning');
       }
+      // ★ P1 FIX: عرض ملاحظة الإلغاء اليدوي من SMSA
+      if (result.note) {
+        SAIDAT.ui.showToast(result.note, 'warning');
+      }
 
       // Update local
       var order = state.currentUser.orders.find(function(o) { return o.id === orderId; });
