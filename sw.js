@@ -1,6 +1,6 @@
 // ===== Service Worker — صيدات العود =====
 
-var CACHE_NAME = 'saidat-v5';
+var CACHE_NAME = 'saidat-v6';
 
 var STATIC_ASSETS = [
   '/',
@@ -67,6 +67,32 @@ self.addEventListener('fetch', function(event) {
     event.respondWith(
       fetch(event.request).catch(function() {
         return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // ★ F-06 FIX: Config files — Network-first (allow fast key rotation)
+  if (url.includes('supabase.js') || url.includes('config.js')) {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (response && response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, clone); });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // ★ F-07 FIX: Auth-required pages — Network-first, offline → login
+  if (url.includes('dashboard.html') || url.includes('admin.html') || url.includes('sell.html')) {
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        return caches.match('/login.html') || caches.match('/index.html');
       })
     );
     return;

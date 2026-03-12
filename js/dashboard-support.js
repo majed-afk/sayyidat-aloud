@@ -107,11 +107,11 @@
       try {
         var sb = U.getSupabase();
         if (sb && SAIDAT.notifications) {
-          var admins = await sb.from('profiles').select('id').eq('role', 'admin');
+          var admins = await sb.rpc('get_admin_ids');
           if (admins.data) {
             admins.data.forEach(function(a) {
               SAIDAT.notifications.create({
-                user_id: a.id,
+                user_id: a,
                 type: 'ticket_new',
                 title: 'تذكرة دعم جديدة',
                 body: result.ticket_number + ' — ' + subject,
@@ -197,11 +197,11 @@
         var ticket = await SAIDAT.support.getById(currentOpenTicketId);
         var sb = U.getSupabase();
         if (sb && SAIDAT.notifications && ticket) {
-          var admins = await sb.from('profiles').select('id').eq('role', 'admin');
+          var admins = await sb.rpc('get_admin_ids');
           if (admins.data) {
             admins.data.forEach(function(a) {
               SAIDAT.notifications.create({
-                user_id: a.id,
+                user_id: a,
                 type: 'ticket_reply',
                 title: 'رد جديد على تذكرة',
                 body: ticket.ticket_number,

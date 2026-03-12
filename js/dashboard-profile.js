@@ -76,7 +76,7 @@
   }
 
   // ===== حفظ الملف الشخصي =====
-  function saveProfile() {
+  async function saveProfile() {
     var state = SAIDAT.dashboard.state;
     var firstName = document.getElementById('profFirstName').value.trim();
     var lastName = document.getElementById('profLastName').value.trim();
@@ -92,16 +92,11 @@
     state.currentUser.bankHolder = document.getElementById('profBankHolder').value.trim();
     state.currentUser.iban = document.getElementById('profIban').value.trim();
 
-    // Password change
-    var currentPass = document.getElementById('profCurrentPass').value;
+    // ★ F-01 FIX: Password change via Supabase Auth API (not btoa)
     var newPass = document.getElementById('profNewPass').value;
     var confirmPass = document.getElementById('profConfirmPass').value;
 
-    if (currentPass || newPass || confirmPass) {
-      if (btoa(currentPass) !== state.currentUser.password) {
-        SAIDAT.ui.showToast('كلمة المرور الحالية غير صحيحة', 'error');
-        return;
-      }
+    if (newPass || confirmPass) {
       if (newPass.length < 6) {
         SAIDAT.ui.showToast('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل', 'error');
         return;
@@ -110,7 +105,12 @@
         SAIDAT.ui.showToast('كلمات المرور غير متطابقة', 'error');
         return;
       }
-      state.currentUser.password = btoa(newPass);
+      var passResult = await SAIDAT.auth.updatePassword(newPass);
+      if (!passResult.success) {
+        SAIDAT.ui.showToast(passResult.message || 'فشل تغيير كلمة المرور', 'error');
+        return;
+      }
+      SAIDAT.ui.showToast('تم تغيير كلمة المرور بنجاح', 'success');
     }
 
     SAIDAT.profiles.update({

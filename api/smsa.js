@@ -6,6 +6,30 @@
 var SMSA_REST_BASE = 'https://track.smsaexpress.com/SecomRestWebApi';
 var TIMEOUT = 45000;
 
+// ===== ★ F-04 FIX: Rate Limiting (in-memory per instance) =====
+var _rateMap = {};
+var RATE_WINDOW = 60000; // 1 minute
+var RATE_MAX = 10;       // max requests per window per user
+
+function checkRateLimit(callerId) {
+  var now = Date.now();
+  var entry = _rateMap[callerId];
+  if (!entry || now - entry.start > RATE_WINDOW) {
+    _rateMap[callerId] = { start: now, count: 1 };
+    return true;
+  }
+  entry.count++;
+  return entry.count <= RATE_MAX;
+}
+
+// Periodic cleanup — prevent memory leak (every 5 min)
+setInterval(function() {
+  var now = Date.now();
+  Object.keys(_rateMap).forEach(function(k) {
+    if (now - _rateMap[k].start > RATE_WINDOW * 2) delete _rateMap[k];
+  });
+}, 300000);
+
 // ===== Input Normalization =====
 function normalizePhone(phone) {
   var p = (phone || '').replace(/[^0-9]/g, '');
@@ -158,8 +182,9 @@ async function logReconcile(orderId, awb, reason) {
 // ================================================================
 async function handleCreateShipment(callerId, body) {
   var orderId = body.orderId;
-  if (!orderId || typeof orderId !== 'string') {
-    return { status: 400, body: { success: false, error: 'معرّف الطلب مطلوب' } };
+  // ★ F-09 FIX: validate orderId type + max length
+  if (!orderId || typeof orderId !== 'string' || orderId.length > 20) {
+    return { status: 400, body: { success: false, error: 'معرّف الطلب غير صالح' } };
   }
 
   // 1. Fetch order server-side
@@ -512,6 +537,11 @@ module.exports = async function handler(req, res) {
   var callerId = await verifyJwt(req.headers.authorization);
   if (!callerId) {
     return res.status(401).json({ success: false, error: 'غير مصرّح' });
+  }
+
+  // ★ F-04 FIX: Rate limiting
+  if (!checkRateLimit(callerId)) {
+    return res.status(429).json({ success: false, error: 'طلبات كثيرة. انتظر دقيقة ثم حاول مجدداً' });
   }
 
   // Parse body

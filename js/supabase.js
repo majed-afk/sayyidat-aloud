@@ -33,10 +33,9 @@
   }
 
   // ===== Expose globally =====
+  // ★ F-08 FIX: لا نكشف url/key على window — فقط getClient
   window.SUPA = {
-    getClient: getClient,
-    url: SUPABASE_URL,
-    key: SUPABASE_KEY
+    getClient: getClient
   };
 
 })();
