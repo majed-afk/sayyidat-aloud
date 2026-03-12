@@ -7,6 +7,8 @@
 -- المشكلة: SELECT balance بدون FOR UPDATE يسمح بطلبي سحب متزامنين
 -- الإصلاح: إضافة FOR UPDATE لقفل الصف أثناء المعاملة
 
+DROP FUNCTION IF EXISTS record_withdrawal(NUMERIC, TEXT);
+
 CREATE OR REPLACE FUNCTION record_withdrawal(
   p_amount NUMERIC,
   p_bank_name TEXT
@@ -70,6 +72,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- الصفحات العامة تستخدم profiles_public view (لا تحتوي حقول حساسة)
 
 DROP POLICY IF EXISTS "profiles_select_all" ON profiles;
+DROP POLICY IF EXISTS "profiles_select_own" ON profiles;
+DROP POLICY IF EXISTS "profiles_select_admin" ON profiles;
 
 -- صاحب الحساب: كل الحقول
 CREATE POLICY "profiles_select_own" ON profiles
@@ -100,6 +104,8 @@ GRANT EXECUTE ON FUNCTION get_admin_ids() TO authenticated;
 -- ===== [F-05] P2: إصلاح record_sale_transaction — تحقق من ملكية الطلب =====
 -- المشكلة: RPC تقبل أي p_order_id بدون التأكد من ملكية الطلب
 -- الإصلاح: التحقق من أن الطلب يخص المتصل + حالته completed + منع التكرار
+
+DROP FUNCTION IF EXISTS record_sale_transaction(TEXT, NUMERIC, NUMERIC);
 
 CREATE OR REPLACE FUNCTION record_sale_transaction(
   p_order_id TEXT,
