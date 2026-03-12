@@ -477,7 +477,7 @@
   }
 
   // ===== تصدير عبر namespace =====
-  SAIDAT.dashboard.productsModule = {
+  SAIDAT.dashboard.products = {
     render: renderProducts,
     openAddChooser: openAddChooser,
     openProductModal: openProductModal,

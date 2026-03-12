@@ -1,6 +1,6 @@
 // ===== dashboard-support.js — تذاكر الدعم الفني — صيدات العود =====
 // يعتمد على: config.js, utils.js, auth.js, support.js, notifications.js, ui.js
-// يصدّر: SAIDAT.dashboard.supportModule
+// يصدّر: SAIDAT.dashboard.support
 
 (function() {
   'use strict';
@@ -223,7 +223,7 @@
   }
 
   // ===== تصدير عبر namespace =====
-  SAIDAT.dashboard.supportModule = {
+  SAIDAT.dashboard.support = {
     render: renderSupportTickets,
     filterTickets: filterTickets,
     openNewTicketModal: openNewTicketModal,

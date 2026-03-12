@@ -7,7 +7,7 @@
     "dev": "python3 -m http.server 8000",
     "serve": "npx serve . -p 8000",
     "deploy": "vercel deploy --prod",
-    "smoke": "echo '=== Smoke Test ===' && curl -sf http://localhost:8000/ > /dev/null && echo '✅ index.html' || echo '❌ index.html' && curl -sf http://localhost:8000/market > /dev/null && echo '✅ market.html' || echo '❌ market.html' && curl -sf http://localhost:8000/dashboard > /dev/null && echo '✅ dashboard.html' || echo '❌ dashboard.html' && curl -sf http://localhost:8000/login > /dev/null && echo '✅ login.html' || echo '❌ login.html' && curl -sf http://localhost:8000/js/config.js > /dev/null && echo '✅ config.js' || echo '❌ config.js' && curl -sf http://localhost:8000/js/dashboard-app.js > /dev/null && echo '✅ dashboard-app.js' || echo '❌ dashboard-app.js' && echo '=== Done ==='"
+    "smoke": "bash -c 'FAIL=0; echo \"=== Smoke Test ===\"; for f in / /index.html /market.html /dashboard.html /login.html /sell.html /product.html /js/config.js /js/utils.js /js/dashboard-app.js /js/dashboard-products.js /js/dashboard-orders.js /js/dashboard-shipping.js; do if curl -sf http://localhost:8000$f > /dev/null; then echo \"  ✅ $f\"; else echo \"  ❌ $f\"; FAIL=1; fi; done; echo \"=== Done ===\"; exit $FAIL'"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -88,13 +88,19 @@ vercel deploy --prod
 │   ├── support.js      # تذاكر الدعم (SAIDAT.support)
 │   ├── invoice.js      # توليد الفواتير (SAIDAT.invoice)
 │   ├── image-guard.js  # حماية الصور
-│   ├── index-app.js    # تطبيق الصفحة الرئيسية
-│   ├── market-app.js   # تطبيق السوق
-│   ├── product-app.js  # تطبيق صفحة المنتج
-│   ├── sell-app.js     # تطبيق صفحة البيع
-│   ├── login-app.js    # تطبيق تسجيل الدخول
-│   ├── dashboard-app.js# تطبيق لوحة التحكم (المنسق)
-│   └── admin-app.js    # تطبيق لوحة الإدارة
+│   ├── index-app.js          # تطبيق الصفحة الرئيسية
+│   ├── market-app.js         # تطبيق السوق
+│   ├── product-app.js        # تطبيق صفحة المنتج
+│   ├── sell-app.js           # تطبيق صفحة البيع
+│   ├── login-app.js          # تطبيق تسجيل الدخول
+│   ├── dashboard-app.js      # منسق لوحة التحكم (init, sidebar, overview)
+│   ├── dashboard-products.js # المنتجات: CRUD, مزادات, عروض (SAIDAT.dashboard.products)
+│   ├── dashboard-orders.js   # الطلبات: عرض, فلترة, نزاعات (SAIDAT.dashboard.orders)
+│   ├── dashboard-shipping.js # الشحن: SMSA, بوالص يدوية (SAIDAT.dashboard.shipping)
+│   ├── dashboard-finance.js  # المالية: رصيد, سحب (SAIDAT.dashboard.finance)
+│   ├── dashboard-profile.js  # الملف الشخصي, توثيق (SAIDAT.dashboard.profile)
+│   ├── dashboard-support.js  # تذاكر الدعم الفني (SAIDAT.dashboard.support)
+│   └── admin-app.js          # تطبيق لوحة الإدارة
 │
 ├── css/                # Stylesheets
 │   ├── variables.css   # CSS custom properties (ألوان، خطوط)

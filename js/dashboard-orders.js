@@ -426,7 +426,7 @@
   }
 
   // ===== تصدير عبر namespace =====
-  SAIDAT.dashboard.ordersModule = {
+  SAIDAT.dashboard.orders = {
     render: renderOrders,
     filter: filterOrders,
     updateStatus: updateOrderStatus,
